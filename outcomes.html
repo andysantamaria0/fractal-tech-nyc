@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Stories | Fractal Bootcamp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ca0a5a;
+            --background: #1a1a1a;
+            --card-bg: #252525;
+            --light: #FFFFFF;
+            --gray-text: #a0a0a0;
+            --border: #333333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--light);
+            background: var(--background);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--background);
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--gray-text);
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--gray-text);
+            margin-bottom: 32px;
+        }
+
+        /* Stats Section */
+        .metrics {
+            background: var(--card-bg);
+            padding: 60px 0;
+        }
+
+        .metrics h2 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 40px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .metric {
+            padding: 32px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .metric h3 {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .metric p {
+            color: var(--gray-text);
+            font-size: 16px;
+        }
+
+        .metric small {
+            display: block;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--gray-text);
+            opacity: 0.7;
+        }
+
+        /* Alumni Profiles */
+        .alumni-section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .alumni-grid {
+            display: grid;
+            gap: 60px;
+        }
+
+        .alumni-profile {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 48px;
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .alumni-profile:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .alumni-profile:nth-child(even) .profile-photo {
+            background: var(--background);
+            border: 3px solid var(--primary);
+        }
+
+        .profile-info h3 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .profile-subtitle {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .profile-company {
+            font-size: 16px;
+            color: var(--gray-text);
+            margin-bottom: 16px;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            padding: 8px 16px;
+            background: rgba(202, 10, 90, 0.1);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .stat-item span {
+            color: var(--primary);
+        }
+
+        .profile-background {
+            margin-bottom: 24px;
+        }
+
+        .profile-background h4 {
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-background p {
+            color: var(--gray-text);
+            line-height: 1.8;
+        }
+
+        .profile-quote {
+            font-size: 24px;
+            font-style: italic;
+            line-height: 1.5;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            margin: 24px 0;
+        }
+
+        /* Compact Alumni Grid */
+        .compact-alumni {
+            background: var(--card-bg);
+            padding: 80px 0;
+        }
+
+        .compact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 32px;
+        }
+
+        .compact-profile {
+            background: var(--background);
+            padding: 32px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .compact-profile h4 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .compact-profile .role {
+            color: var(--primary);
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .compact-profile p {
+            color: var(--gray-text);
+            margin-bottom: 8px;
+        }
+
+        /* Employment Destinations */
+        .destinations {
+            padding: 80px 0;
+        }
+
+        .company-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .company-badge {
+            padding: 16px 24px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .company-badge:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Methodology */
+        .methodology {
+            background: var(--card-bg);
+            padding: 60px 0;
+        }
+
+        .methodology h3 {
+            font-size: 28px;
+            margin-bottom: 24px;
+        }
+
+        .methodology p {
+            color: var(--gray-text);
+            margin-bottom: 16px;
+            line-height: 1.8;
+        }
+
+        .methodology ul {
+            color: var(--gray-text);
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        .methodology li {
+            margin-bottom: 8px;
+        }
+
+        /* CTA */
+        .cta-section {
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .btn-primary:hover {
+            background: #a00848;
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--card-bg);
+            color: var(--light);
+            padding: 60px 0 30px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 16px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray-text);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 12px;
+        }
+
+        .footer-section a {
+            color: var(--light);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            color: var(--gray-text);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .compact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <img src="assets/Fractal_Asset_magentia.svg" alt="Fractal">
+                    Fractal Bootcamp
+                </a>
+                <ul class="nav-links">
+                    <li><a href="index.html#how-it-works">How It Works</a></li>
+                    <li><a href="outcomes.html">Alumni Stories</a></li>
+                    <li><a href="team.html">Team</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                    <li><a href="apply.html">Apply Now</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Our Graduates Are Thriving</h1>
+                <p>100% of graduates pursuing software engineering roles secured positions</p>
+            </div>
+        </section>
+
+        <section class="metrics">
+            <div class="container">
+                <h2>SPRING 2025 COHORT METRICS</h2>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <h3>100%</h3>
+                        <p>Placement Rate</p>
+                        <small>CIRR Standards</small>
+                    </div>
+                    <div class="metric">
+                        <h3>$104.5K</h3>
+                        <p>Avg Starting Salary</p>
+                    </div>
+                    <div class="metric">
+                        <h3>8 Weeks</h3>
+                        <p>Avg Time to Offer</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="alumni-section">
+            <div class="container">
+                <h2 class="section-title">FEATURED ALUMNI</h2>
+
+                <div class="alumni-grid">
+                    <div class="alumni-profile">
+                        <div class="profile-header">
+                            <div class="profile-photo">D</div>
+                            <div class="profile-info">
+                                <h3>DOROTHY</h3>
+                                <p class="profile-subtitle">Product Manager → Engineer</p>
+                                <p class="profile-company">Engineer at Ellis (Immigration Tech)</p>
+                                <div class="profile-stats">
+                                    <div class="stat-item">Salary: <span>$110,000</span></div>
+                                    <div class="stat-item">Placement: <span>6 weeks</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="profile-background">
+                            <h4>Background</h4>
+                            <p>5-year tech analyst and product manager who wanted to build, not just plan. Completed Spring 2025 bootcamp with weeks 4-12 internship at a NYC AI startup.</p>
+                        </div>
+                        <blockquote class="profile-quote">
+                            "I went from managing projects to building them. Now I'm a hacker-in-residence at Every.to."
+                        </blockquote>
+                    </div>
+
+                    <div class="alumni-profile">
+                        <div class="profile-header">
+                            <div class="profile-photo">P</div>
+                            <div class="profile-info">
+                                <h3>PARTH</h3>
+                                <p class="profile-subtitle">VFA Fellow → Freelance AI Engineer</p>
+                                <p class="profile-company">Building for Multiple NYC Startups</p>
+                                <div class="profile-stats">
+                                    <div class="stat-item">Rate: <span>$125/hour</span></div>
+                                    <div class="stat-item">Client Acquisition: <span>4 weeks</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="profile-background">
+                            <h4>Background</h4>
+                            <p>VFA fellow who worked in COVID emergency PPE and health-tech PM roles. Completed Winter 2024 cohort, built 8 projects, interned at VC-backed startup.</p>
+                        </div>
+                        <blockquote class="profile-quote">
+                            "I bill $125/hour after 12 weeks at Fractal. The AI-first curriculum was perfect timing."
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="compact-alumni">
+            <div class="container">
+                <h2 class="section-title">MORE SUCCESS STORIES</h2>
+                <div class="compact-grid">
+                    <div class="compact-profile">
+                        <h4>Sarah K.</h4>
+                        <p class="role">Teacher → Startup Engineer</p>
+                        <p>Starting salary: $95,000</p>
+                        <p>Now building education tech at a Series A startup</p>
+                    </div>
+
+                    <div class="compact-profile">
+                        <h4>Marcus L.</h4>
+                        <p class="role">Consultant → Founding Engineer</p>
+                        <p>Package: $150,000+ (equity included)</p>
+                        <p>Joined YC-backed startup as employee #3</p>
+                    </div>
+
+                    <div class="compact-profile">
+                        <h4>Alex T.</h4>
+                        <p class="role">Sales → Full-Stack Engineer</p>
+                        <p>Starting salary: $105,000</p>
+                        <p>Building SaaS products at B2B company</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="destinations">
+            <div class="container">
+                <h2 class="section-title">WHERE OUR GRADUATES WORK</h2>
+                <p style="text-align: center; color: var(--gray-text); margin-bottom: 40px;">40+ Partner Startups</p>
+                <div class="company-grid">
+                    <div class="company-badge">PromptLayer</div>
+                    <div class="company-badge">Ellis</div>
+                    <div class="company-badge">Plastic Labs</div>
+                    <div class="company-badge">Rotabull</div>
+                    <div class="company-badge">HDR</div>
+                    <div class="company-badge">Drumkit</div>
+                    <div class="company-badge">Genie AI</div>
+                    <div class="company-badge">RubieHQ</div>
+                    <div class="company-badge">Redistrictr</div>
+                    <div class="company-badge">Every.to</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="methodology">
+            <div class="container">
+                <h3>METHODOLOGY & CIRR COMPLIANCE</h3>
+                <p>Our placement statistics follow CIRR (Council on Integrity in Results Reporting) standards for transparency and accuracy.</p>
+
+                <h4 style="margin-top: 24px; margin-bottom: 12px; color: var(--primary);">How We Calculate Placement Rate:</h4>
+                <ul>
+                    <li>Reporting period: 180 days after graduation</li>
+                    <li>Only includes graduates actively seeking employment</li>
+                    <li>Excludes students who opt out of job search or continue education</li>
+                    <li>All salaries independently verified</li>
+                </ul>
+
+                <p style="margin-top: 24px;">We believe in radical transparency about outcomes. Questions about our methodology? <a href="mailto:hello@fractalbootcamp.com" style="color: var(--primary);">Email us</a>.</p>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2 style="margin-bottom: 24px;">READY TO START YOUR JOURNEY?</h2>
+                <p style="font-size: 18px; color: var(--gray-text); margin-bottom: 32px;">Spring 2026 cohort opens February 2. Only 15 spots available.</p>
+                <a href="apply.html" class="btn btn-primary">Apply Now →</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>Bootcamp</h4>
+                    <ul>
+                        <li><a href="index.html#how-it-works">How It Works</a></li>
+                        <li><a href="outcomes.html">Alumni Stories</a></li>
+                        <li><a href="team.html">Team</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="curriculum.html">Curriculum</a></li>
+                        <li><a href="roadmap.html">Free Roadmap</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="https://twitter.com/fractaltechnyc">Twitter/X</a></li>
+                        <li><a href="https://discord.gg/PNWh6Xd26X">Discord</a></li>
+                        <li><a href="https://instagram.com/fractaltechnyc">Instagram</a></li>
+                        <li><a href="mailto:hello@fractalbootcamp.com">Email Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>More</h4>
+                    <ul>
+                        <li><a href="https://fractaltechhub.com">Coworking →</a></li>
+                        <li><a href="scholarship.html">Scholarships</a></li>
+                        <li><a href="externship.html">Become a Hiring Partner</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© 2025 Fractal Bootcamp. NYC.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

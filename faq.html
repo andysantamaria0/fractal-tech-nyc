@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ | Fractal Bootcamp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ca0a5a;
+            --background: #1a1a1a;
+            --card-bg: #252525;
+            --light: #FFFFFF;
+            --gray-text: #a0a0a0;
+            --border: #333333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--light);
+            background: var(--background);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--background);
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--gray-text);
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--gray-text);
+        }
+
+        /* FAQ Sections */
+        .faq-section {
+            padding: 40px 0;
+        }
+
+        .faq-category {
+            margin-bottom: 60px;
+        }
+
+        .category-title {
+            font-size: 32px;
+            margin-bottom: 32px;
+            color: var(--primary);
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .faq-item {
+            margin-bottom: 32px;
+            padding: 32px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            border-color: var(--primary);
+        }
+
+        .faq-question {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--light);
+        }
+
+        .faq-answer {
+            color: var(--gray-text);
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .faq-answer p {
+            margin-bottom: 12px;
+        }
+
+        .faq-answer ul {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+
+        .faq-answer li {
+            margin-bottom: 8px;
+        }
+
+        .faq-answer strong {
+            color: var(--light);
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* CTA */
+        .cta-section {
+            padding: 80px 0;
+            text-align: center;
+            background: var(--card-bg);
+            margin-top: 60px;
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+            margin-bottom: 24px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: var(--gray-text);
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .btn-primary:hover {
+            background: #a00848;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--light);
+            border: 2px solid var(--light);
+            margin-left: 16px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--light);
+            color: var(--background);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--card-bg);
+            color: var(--light);
+            padding: 60px 0 30px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 16px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray-text);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 12px;
+        }
+
+        .footer-section a {
+            color: var(--light);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            color: var(--gray-text);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .faq-question {
+                font-size: 18px;
+            }
+
+            .category-title {
+                font-size: 24px;
+            }
+
+            .btn-secondary {
+                margin-left: 0;
+                margin-top: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">
+                <img src="assets/Fractal_Asset_magentia.svg" alt="Fractal">
+                Fractal Bootcamp
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#how-it-works">How It Works</a></li>
+                <li><a href="outcomes.html">Alumni Stories</a></li>
+                <li><a href="team.html">Team</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="apply.html">Apply Now</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Frequently Asked Questions</h1>
+                <p>Everything you need to know about Fractal Bootcamp</p>
+            </div>
+        </section>
+
+        <section class="faq-section">
+            <div class="container">
+                <!-- Program Details -->
+                <div class="faq-category">
+                    <h2 class="category-title">Program Details</h2>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">What's the schedule like?</h3>
+                        <div class="faq-answer">
+                            <p>The bootcamp is <strong>60 hours per week for 12 weeks</strong>:</p>
+                            <ul>
+                                <li><strong>Monday-Friday:</strong> 9am - 7pm</li>
+                                <li><strong>Saturday:</strong> 10am - 4pm</li>
+                                <li><strong>Sunday:</strong> Off</li>
+                            </ul>
+                            <p>This is a full-time, immersive program. You cannot work another job while enrolled.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">What will I learn?</h3>
+                        <div class="faq-answer">
+                            <p><strong>Languages:</strong> TypeScript and JavaScript (primary), with exposure to Python and Go</p>
+                            <p><strong>Tech Stack:</strong></p>
+                            <ul>
+                                <li>Frontend: React, Next.js, TailwindCSS</li>
+                                <li>Backend: Node.js, Express</li>
+                                <li>Database: Postgres, Redis</li>
+                                <li>Infrastructure: AWS (Lambda, S3, RDS)</li>
+                            </ul>
+                            <p><strong>AI Modules:</strong> RAG systems, Model Context Protocol (MCP), streaming, and generative interfaces</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">How big is each cohort?</h3>
+                        <div class="faq-answer">
+                            <p><span class="highlight">15 students maximum.</span></p>
+                            <p>Small cohorts ensure you get direct access to instructors and build deep relationships with your peers. No fighting for attention in a class of 30+.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">Can I really get a job without a CS degree?</h3>
+                        <div class="faq-answer">
+                            <p>Yes. <span class="highlight">100% of our graduates who pursued SWE roles got hired.</span></p>
+                            <p>You don't need a degree. You need real experience on real projects. That's what our internship program gives you—actual work you can point to in interviews.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">What about AI replacing developers?</h3>
+                        <div class="faq-answer">
+                            <p>AI makes engineers MORE valuable, not less. The demand for engineers who can effectively use AI tools is skyrocketing.</p>
+                            <p>You'll master AI tools from Day 1 (Cursor, Claude Code, v0, etc.) to work 10x faster than engineers who don't use them. This is your competitive advantage.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admissions -->
+                <div class="faq-category">
+                    <h2 class="category-title">Admissions Requirements</h2>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">What prior experience do I need?</h3>
+                        <div class="faq-answer">
+                            <p>You should have basic familiarity with:</p>
+                            <ul>
+                                <li>JavaScript or TypeScript basics</li>
+                                <li>Git and command line</li>
+                                <li>HTML/CSS fundamentals</li>
+                                <li>React (at least basic understanding)</li>
+                            </ul>
+                            <p>We'll send pre-course materials 4-6 weeks before the cohort starts to help you prepare.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">Do I need a computer science degree?</h3>
+                        <div class="faq-answer">
+                            <p><strong>No.</strong> A CS degree is not required. What matters is your ability to learn quickly, solve problems, and ship code.</p>
+                            <p>Our graduates come from diverse backgrounds: teachers, PMs, consultants, sales professionals. They all got hired.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">What equipment do I need?</h3>
+                        <div class="faq-answer">
+                            <p><strong>macOS is required.</strong> We standardize on Mac to ensure environmental consistency across the cohort and match most startup development environments.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial -->
+                <div class="faq-category">
+                    <h2 class="category-title">Financial Information</h2>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">How much does it cost?</h3>
+                        <div class="faq-answer">
+                            <p><span class="highlight">$18,000 total</span></p>
+                            <p><strong>Early bird discount:</strong> $1,000 off (until November 1st)</p>
+                            <p>Payment plans available on a first-come, first-served basis.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">Are scholarships available?</h3>
+                        <div class="faq-answer">
+                            <p>Yes. We offer <span class="highlight">2 full scholarships per cohort</span> based on:</p>
+                            <ul>
+                                <li>Financial need</li>
+                                <li>Technical aptitude</li>
+                                <li>Commitment to the program</li>
+                                <li>Contribution to cohort diversity</li>
+                            </ul>
+                            <p><a href="scholarship.html" style="color: var(--primary); text-decoration: underline;">Learn more about scholarships →</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Career Outcomes -->
+                <div class="faq-category">
+                    <h2 class="category-title">Career Outcomes</h2>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">What's your placement rate?</h3>
+                        <div class="faq-answer">
+                            <p><span class="highlight">100% placement rate</span> for graduates actively seeking software engineering roles.</p>
+                            <p><strong>Average starting salary:</strong> $104,500</p>
+                            <p><strong>Average time to offer:</strong> 8 weeks</p>
+                            <p><strong>Salary range:</strong> $95K - $150K+ (including equity)</p>
+                            <p>All statistics follow CIRR standards. <a href="outcomes.html" style="color: var(--primary); text-decoration: underline;">See full outcomes data →</a></p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">What career support do you provide?</h3>
+                        <div class="faq-answer">
+                            <p>We support you <strong>until you're hired</strong>:</p>
+                            <ul>
+                                <li>Resume review and portfolio guidance</li>
+                                <li>Interview preparation (technical & behavioral)</li>
+                                <li>Direct introductions to hiring managers</li>
+                                <li>Salary negotiation coaching</li>
+                                <li>Access to our network of 40+ partner startups</li>
+                            </ul>
+                            <p>Career coaching doesn't end at graduation. We're invested in your success.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">Where do graduates work?</h3>
+                        <div class="faq-answer">
+                            <p>Our graduates work at 40+ startups including:</p>
+                            <p>PromptLayer, Ellis, Plastic Labs, Rotabull, HDR, Drumkit, Genie AI, RubieHQ, Redistrictr, and more.</p>
+                            <p>Most are venture-backed startups in NYC where you'll have real impact from day one.</p>
+                            <p><a href="outcomes.html" style="color: var(--primary); text-decoration: underline;">See all alumni stories →</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Still Have Questions -->
+                <div class="faq-item" style="background: var(--dark-bg); border: 2px solid var(--primary);">
+                    <h3 class="faq-question">Still have questions?</h3>
+                    <div class="faq-answer">
+                        <p>Book a free call with our team. We'll assess your background and map out your exact path to a $100K job.</p>
+                        <p>No pressure, just honest advice.</p>
+                        <p style="margin-top: 16px;"><a href="mailto:hello@fractalbootcamp.com" style="color: var(--primary); text-decoration: underline;">Email us: hello@fractalbootcamp.com</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2>READY TO START?</h2>
+                <p>Spring 2026 cohort starts February 2. Only 15 spots available.</p>
+                <a href="apply.html" class="btn btn-primary">Apply Now →</a>
+                <a href="roadmap.html" class="btn btn-secondary">Download Free Roadmap</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-section">
+                <h4>Bootcamp</h4>
+                <ul>
+                    <li><a href="index.html#how-it-works">How It Works</a></li>
+                    <li><a href="outcomes.html">Alumni Stories</a></li>
+                    <li><a href="team.html">Team</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="curriculum.html">Curriculum</a></li>
+                    <li><a href="roadmap.html">Free Roadmap</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <ul>
+                    <li><a href="https://twitter.com/fractaltechnyc">Twitter/X</a></li>
+                    <li><a href="https://discord.gg/PNWh6Xd26X">Discord</a></li>
+                    <li><a href="https://instagram.com/fractaltechnyc">Instagram</a></li>
+                    <li><a href="mailto:hello@fractalbootcamp.com">Email Us</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>More</h4>
+                <ul>
+                    <li><a href="https://fractaltechhub.com">Coworking →</a></li>
+                    <li><a href="scholarship.html">Scholarships</a></li>
+                    <li><a href="externship.html">Become a Hiring Partner</a></li>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2025 Fractal Bootcamp. NYC.</p>
+        </div>
+    </footer>
+</body>
+</html>

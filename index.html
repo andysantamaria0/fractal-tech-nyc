@@ -12,18 +12,19 @@
         }
 
         :root {
-            --primary: #0066FF;
-            --dark: #0A0A0A;
+            --primary: #ca0a5a;
+            --background: #1a1a1a;
+            --card-bg: #252525;
             --light: #FFFFFF;
-            --gray: #666666;
-            --light-gray: #F5F5F5;
+            --gray-text: #a0a0a0;
+            --border: #333333;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
-            color: var(--dark);
-            background: var(--light);
+            color: var(--light);
+            background: var(--background);
         }
 
         .container {
@@ -35,10 +36,10 @@
         /* Header */
         header {
             padding: 20px 0;
-            border-bottom: 1px solid #E5E5E5;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
-            background: var(--light);
+            background: var(--background);
             z-index: 100;
         }
 
@@ -51,8 +52,16 @@
         .logo {
             font-size: 24px;
             font-weight: 700;
-            color: var(--dark);
+            color: var(--light);
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            height: 32px;
+            width: auto;
         }
 
         .nav-links {
@@ -62,7 +71,7 @@
         }
 
         .nav-links a {
-            color: var(--dark);
+            color: var(--gray-text);
             text-decoration: none;
             font-size: 15px;
             transition: color 0.2s;
@@ -76,6 +85,14 @@
         .hero {
             padding: 80px 0;
             text-align: center;
+            position: relative;
+        }
+
+        .hero-icon {
+            width: 120px;
+            height: auto;
+            margin: 0 auto 32px;
+            opacity: 0.9;
         }
 
         .hero h1 {
@@ -87,7 +104,7 @@
 
         .hero p {
             font-size: 20px;
-            color: var(--gray);
+            color: var(--gray-text);
             margin-bottom: 32px;
         }
 
@@ -114,19 +131,19 @@
         }
 
         .btn-primary:hover {
-            background: #0052CC;
+            background: #a00848;
             transform: translateY(-2px);
         }
 
         .btn-secondary {
-            background: var(--light);
-            color: var(--dark);
-            border: 2px solid var(--dark);
+            background: transparent;
+            color: var(--light);
+            border: 2px solid var(--light);
         }
 
         .btn-secondary:hover {
-            background: var(--dark);
-            color: var(--light);
+            background: var(--light);
+            color: var(--background);
         }
 
         /* Stats */
@@ -146,13 +163,13 @@
         }
 
         .stat p {
-            color: var(--gray);
+            color: var(--gray-text);
             font-size: 16px;
         }
 
         /* Partner Logos */
         .partners {
-            background: var(--light-gray);
+            background: var(--card-bg);
             padding: 60px 0;
         }
 
@@ -167,15 +184,16 @@
         .partner-logo {
             font-size: 18px;
             font-weight: 600;
-            color: var(--gray);
+            color: var(--gray-text);
             padding: 20px 30px;
-            background: white;
+            background: var(--background);
             border-radius: 8px;
+            border: 1px solid var(--border);
         }
 
         /* Cohort Info */
         .cohort-info {
-            background: var(--dark);
+            background: var(--card-bg);
             color: var(--light);
             padding: 80px 0;
         }
@@ -201,7 +219,7 @@
 
         .cohort-detail h4 {
             font-size: 14px;
-            color: var(--gray);
+            color: var(--gray-text);
             margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -271,13 +289,22 @@
         .feature {
             padding: 32px;
             border-radius: 12px;
-            border: 2px solid #E5E5E5;
+            border: 2px solid var(--border);
+            background: var(--card-bg);
             transition: all 0.2s;
+            position: relative;
         }
 
         .feature:hover {
             border-color: var(--primary);
             transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: auto;
+            margin-bottom: 16px;
+            opacity: 0.8;
         }
 
         .feature h3 {
@@ -293,7 +320,7 @@
         }
 
         .feature p {
-            color: var(--gray);
+            color: var(--gray-text);
             margin-bottom: 12px;
         }
 
@@ -305,7 +332,7 @@
 
         /* Testimonials */
         .testimonials {
-            background: var(--light-gray);
+            background: var(--card-bg);
             padding: 80px 0;
         }
 
@@ -316,9 +343,10 @@
         }
 
         .testimonial {
-            background: white;
+            background: var(--background);
             padding: 40px;
             border-radius: 12px;
+            border: 1px solid var(--border);
         }
 
         .testimonial-header {
@@ -341,13 +369,18 @@
             color: white;
         }
 
+        .testimonial:nth-child(2) .testimonial-photo {
+            background: var(--background);
+            border: 3px solid var(--primary);
+        }
+
         .testimonial h3 {
             font-size: 20px;
             margin-bottom: 4px;
         }
 
         .testimonial .role {
-            color: var(--gray);
+            color: var(--gray-text);
             font-size: 14px;
         }
 
@@ -369,7 +402,7 @@
         }
 
         .faq-item {
-            border-bottom: 1px solid #E5E5E5;
+            border-bottom: 1px solid var(--border);
             padding: 24px 0;
         }
 
@@ -384,7 +417,7 @@
         }
 
         .faq-answer {
-            color: var(--gray);
+            color: var(--gray-text);
             margin-bottom: 8px;
         }
 
@@ -396,7 +429,7 @@
 
         /* Final CTA */
         .final-cta {
-            background: var(--dark);
+            background: var(--card-bg);
             color: var(--light);
             padding: 80px 0;
             text-align: center;
@@ -414,9 +447,10 @@
 
         /* Footer */
         footer {
-            background: var(--dark);
+            background: var(--card-bg);
             color: var(--light);
             padding: 60px 0 30px;
+            border-top: 1px solid var(--border);
         }
 
         .footer-grid {
@@ -431,7 +465,7 @@
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--gray);
+            color: var(--gray-text);
         }
 
         .footer-section ul {
@@ -455,8 +489,8 @@
         .footer-bottom {
             text-align: center;
             padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--gray);
+            border-top: 1px solid var(--border);
+            color: var(--gray-text);
         }
 
         /* Responsive */
@@ -483,7 +517,10 @@
     <header>
         <div class="container">
             <nav>
-                <a href="/" class="logo">Fractal Bootcamp</a>
+                <a href="/" class="logo">
+                    <img src="assets/Fractal_Asset_magentia.svg" alt="Fractal">
+                    Fractal Bootcamp
+                </a>
                 <ul class="nav-links">
                     <li><a href="#how-it-works">How It Works</a></li>
                     <li><a href="outcomes.html">Alumni Stories</a></li>
@@ -498,6 +535,7 @@
     <main>
         <section class="hero">
             <div class="container">
+                <img src="assets/Fractal_Asset_code_slash.svg" alt="" class="hero-icon">
                 <h1>Land a $100K+ AI Engineering Job in 12 Weeks</h1>
                 <p>No CS Degree Required. Real Internships at NYC Startups.<br>100% Job Placement Rate.</p>
                 <div class="cta-buttons">
@@ -587,6 +625,7 @@
                 
                 <div class="features-grid">
                     <div class="feature">
+                        <img src="assets/Fractal_Asset_magentia.svg" alt="" class="feature-icon">
                         <h3>REAL EXPERIENCE</h3>
                         <h4>Weeks 1-3: Intensive Training</h4>
                         <p>Build your foundation fast</p>
@@ -598,6 +637,7 @@
                     </div>
 
                     <div class="feature">
+                        <img src="assets/Fractal_Asset_magentia.svg" alt="" class="feature-icon">
                         <h3>ELITE INSTRUCTION</h3>
                         <p>Taught by ex-Netflix, ex-Google, ex-Stripe engineers.</p>
                         <p>Not TAs. Not junior developers. Staff-level engineers.</p>
@@ -607,6 +647,7 @@
                     </div>
 
                     <div class="feature">
+                        <img src="assets/Fractal_Asset_magentia.svg" alt="" class="feature-icon">
                         <h3>AI-FIRST CURRICULUM</h3>
                         <p>Master Cursor, Claude Code, v0 from Day 1.</p>
                         <p>Work 10x faster than other engineers.</p>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply Now | Fractal Bootcamp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ca0a5a;
+            --background: #1a1a1a;
+            --card-bg: #252525;
+            --light: #FFFFFF;
+            --gray-text: #a0a0a0;
+            --border: #333333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--light);
+            background: var(--background);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--background);
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--gray-text);
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        main {
+            padding: 80px 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 48px;
+            border: 1px solid var(--border);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h1 {
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+
+        .form-header p {
+            color: var(--gray-text);
+            font-size: 18px;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--border);
+            color: var(--gray-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .step.active .step-number {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .step-label {
+            font-size: 14px;
+            color: var(--gray-text);
+        }
+
+        .step.active .step-label {
+            color: var(--light);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .optional {
+            color: var(--gray-text);
+            font-weight: 400;
+            font-size: 13px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="url"] {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--light);
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(202, 10, 90, 0.1);
+        }
+
+        input::placeholder {
+            color: var(--gray-text);
+        }
+
+        .error-message {
+            color: var(--primary);
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .form-group.error input {
+            border-color: var(--primary);
+        }
+
+        .form-group.error .error-message {
+            display: block;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            background: var(--primary);
+            color: var(--light);
+            margin-top: 16px;
+        }
+
+        .btn:hover {
+            background: #a00848;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: var(--border);
+            color: var(--gray-text);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Booking Section */
+        .booking-container {
+            display: none;
+        }
+
+        .booking-container.active {
+            display: block;
+        }
+
+        .booking-iframe {
+            width: 100%;
+            height: 700px;
+            border: none;
+            border-radius: 12px;
+            background: var(--light);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray-text);
+            text-decoration: none;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--light);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--card-bg);
+            color: var(--light);
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .footer-text {
+            color: var(--gray-text);
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 32px 24px;
+            }
+
+            .form-header h1 {
+                font-size: 28px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .step-label {
+                display: none;
+            }
+
+            .booking-iframe {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">
+                <img src="assets/Fractal_Asset_magentia.svg" alt="Fractal">
+                Fractal Bootcamp
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#how-it-works">How It Works</a></li>
+                <li><a href="outcomes.html">Alumni Stories</a></li>
+                <li><a href="team.html">Team</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="apply.html">Apply Now</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Application Form -->
+            <div id="formSection" class="form-container">
+                <div class="form-header">
+                    <h1>Apply to Fractal Bootcamp</h1>
+                    <p>Start your journey to a $100K+ AI engineering career</p>
+                </div>
+
+                <div class="progress-steps">
+                    <div class="step active">
+                        <div class="step-number">1</div>
+                        <span class="step-label">Your Info</span>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <span class="step-label">Book Call</span>
+                    </div>
+                </div>
+
+                <form id="applicationForm">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input
+                            type="text"
+                            id="fullName"
+                            name="fullName"
+                            placeholder="John Doe"
+                            required
+                        >
+                        <div class="error-message">Please enter your full name</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="john@example.com"
+                            required
+                        >
+                        <div class="error-message">Please enter a valid email address</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="+1 (555) 123-4567"
+                            required
+                        >
+                        <div class="error-message">Please enter your phone number</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn Profile <span class="optional">(Optional)</span></label>
+                        <input
+                            type="url"
+                            id="linkedin"
+                            name="linkedin"
+                            placeholder="https://linkedin.com/in/yourprofile"
+                        >
+                        <div class="error-message">Please enter a valid URL</div>
+                    </div>
+
+                    <button type="submit" class="btn">Next: Book Your Call →</button>
+                </form>
+            </div>
+
+            <!-- Booking Section -->
+            <div id="bookingSection" class="booking-container">
+                <a href="#" class="back-link" onclick="showForm(); return false;">
+                    ← Back to form
+                </a>
+                <div class="form-container">
+                    <div class="form-header">
+                        <h1>Schedule Your Intro Call</h1>
+                        <p>Pick a time that works for you</p>
+                    </div>
+
+                    <div class="progress-steps">
+                        <div class="step">
+                            <div class="step-number">✓</div>
+                            <span class="step-label">Your Info</span>
+                        </div>
+                        <div class="step active">
+                            <div class="step-number">2</div>
+                            <span class="step-label">Book Call</span>
+                        </div>
+                    </div>
+
+                    <iframe
+                        src="https://cal.com/shanthis/intro"
+                        class="booking-iframe"
+                        frameborder="0"
+                    ></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-text">
+            <p>© 2025 Fractal Bootcamp. NYC.</p>
+            <p style="margin-top: 8px;">Questions? <a href="mailto:hello@fractalbootcamp.com" style="color: var(--primary); text-decoration: none;">hello@fractalbootcamp.com</a></p>
+        </div>
+    </footer>
+
+    <script>
+        const form = document.getElementById('applicationForm');
+        const formSection = document.getElementById('formSection');
+        const bookingSection = document.getElementById('bookingSection');
+
+        // Form validation and submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let isValid = true;
+            const formGroups = form.querySelectorAll('.form-group');
+
+            // Clear previous errors
+            formGroups.forEach(group => group.classList.remove('error'));
+
+            // Validate required fields
+            const fullName = document.getElementById('fullName');
+            const email = document.getElementById('email');
+            const phone = document.getElementById('phone');
+            const linkedin = document.getElementById('linkedin');
+
+            if (!fullName.value.trim()) {
+                fullName.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            if (!email.value.trim() || !email.validity.valid) {
+                email.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            if (!phone.value.trim()) {
+                phone.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Validate LinkedIn URL if provided
+            if (linkedin.value.trim() && !linkedin.validity.valid) {
+                linkedin.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Store form data (you could send this to a backend here)
+                const formData = {
+                    fullName: fullName.value,
+                    email: email.value,
+                    phone: phone.value,
+                    linkedin: linkedin.value,
+                    timestamp: new Date().toISOString()
+                };
+
+                console.log('Application data:', formData);
+                // In production, you'd send this to your backend
+
+                // Show booking section
+                showBooking();
+            }
+        });
+
+        function showBooking() {
+            formSection.style.display = 'none';
+            bookingSection.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showForm() {
+            bookingSection.classList.remove('active');
+            formSection.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Real-time validation feedback
+        document.querySelectorAll('input[required]').forEach(input => {
+            input.addEventListener('blur', function() {
+                if (!this.value.trim() || !this.validity.valid) {
+                    this.closest('.form-group').classList.add('error');
+                } else {
+                    this.closest('.form-group').classList.remove('error');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                if (this.value.trim() && this.validity.valid) {
+                    this.closest('.form-group').classList.remove('error');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
