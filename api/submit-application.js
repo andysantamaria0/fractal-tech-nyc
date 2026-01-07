@@ -115,9 +115,7 @@ module.exports = async function handler(req, res) {
           dealname: dealName,
           pipeline: pipelineId,
           dealstage: stageId,
-          amount: '0',
-          // Store additional application data as custom properties if needed
-          application_date: new Date().toISOString()
+          amount: '0'
         },
         associations: [
           {
