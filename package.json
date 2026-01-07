@@ -1,0 +1,16 @@
+{
+  "name": "fractal-bootcamp",
+  "version": "1.0.0",
+  "description": "Fractal Bootcamp landing page with HubSpot integration",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@hubspot/api-client": "^11.0.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}

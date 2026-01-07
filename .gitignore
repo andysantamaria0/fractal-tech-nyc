@@ -36,5 +36,12 @@ Desktop.ini
 *~
 
 # Local env files
+.env
 .env.local
 .env.*.local
+
+# Node.js
+node_modules/
+
+# Vercel
+.vercel/
