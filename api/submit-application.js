@@ -45,9 +45,9 @@ module.exports = async function handler(req, res) {
     }
 
     // Initialize HubSpot client
-    // Developer API Key uses 'apiKey' instead of 'accessToken'
+    // Private App uses 'accessToken'
     const hubspotClient = new hubspot.Client({
-      apiKey: process.env.HUBSPOT_API_KEY
+      accessToken: process.env.HUBSPOT_API_KEY
     });
 
     // Parse full name into first and last name
