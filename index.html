@@ -621,6 +621,162 @@
             border-top: 2px solid var(--color-charcoal);
         }
 
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-6);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-window {
+            background: var(--color-white);
+            border: 3px solid var(--color-charcoal);
+            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-title-bar {
+            background: var(--color-platinum);
+            padding: var(--space-3) var(--space-4);
+            border-bottom: 3px solid var(--color-charcoal);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title-text {
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .modal-title-text::before {
+            content: "◾ ◾ ◾";
+            font-size: var(--text-xs);
+            letter-spacing: 2px;
+        }
+
+        .modal-close {
+            background: var(--color-charcoal);
+            color: var(--color-white);
+            border: 2px solid var(--color-charcoal);
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: var(--text-sm);
+            box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-close:active {
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+            transform: translate(1px, 1px);
+        }
+
+        .modal-content {
+            padding: var(--space-7);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: var(--space-6);
+        }
+
+        .modal-header h2 {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            margin-bottom: var(--space-3);
+            color: var(--color-charcoal);
+        }
+
+        .modal-header p {
+            font-size: var(--text-base);
+            color: var(--color-slate);
+        }
+
+        .modal-form-group {
+            margin-bottom: var(--space-5);
+        }
+
+        .modal-form-group label {
+            display: block;
+            margin-bottom: var(--space-2);
+            font-weight: 700;
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .modal-form-group input {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-white);
+            border: 2px solid var(--color-charcoal);
+            color: var(--color-charcoal);
+            font-size: var(--text-base);
+            font-family: var(--font-primary);
+        }
+
+        .modal-form-group input:focus {
+            outline: none;
+            box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-form-group input::placeholder {
+            color: var(--color-slate);
+        }
+
+        .modal-submit {
+            width: 100%;
+            padding: var(--space-4) var(--space-5);
+            border: 2px solid var(--color-charcoal);
+            background: var(--color-charcoal);
+            color: var(--color-white);
+            font-weight: 700;
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+            font-family: var(--font-primary);
+            margin-top: var(--space-4);
+        }
+
+        .modal-submit:active {
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+            transform: translate(1px, 1px);
+        }
+
+        .modal-submit:disabled {
+            background: var(--color-platinum);
+            color: var(--color-slate);
+            border-color: var(--color-slate);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero h1 {
@@ -643,6 +799,10 @@
             .nav-links {
                 flex-direction: column;
                 gap: var(--space-2);
+            }
+
+            .modal-content {
+                padding: var(--space-6) var(--space-5);
             }
         }
     </style>
@@ -673,7 +833,7 @@
                         <p class="hero-subtitle">No CS Degree Required. Real Internships at NYC Startups.<br>100% Job Placement Rate.</p>
                         <div class="hero-ctas">
                             <a href="apply.html" class="btn-primary">Apply Now →</a>
-                            <a href="roadmap.html" class="btn-secondary">Download for your career hack:<br>Spear Phishing Guide →</a>
+                            <a href="#" onclick="openModal(); return false;" class="btn-secondary">Download for your career hack:<br>Spear Phishing Guide →</a>
                         </div>
                     </div>
                 </div>
@@ -887,7 +1047,7 @@
                 </div>
                 <div class="final-cta-note">
                     <p>Not ready to apply?<br>
-                    <a href="roadmap.html">Download for your career hack:<br>Spear Phishing Guide →</a></p>
+                    <a href="#" onclick="openModal(); return false;">Download for your career hack:<br>Spear Phishing Guide →</a></p>
                 </div>
             </div>
         </section>
@@ -941,5 +1101,92 @@
             </div>
         </div>
     </footer>
+
+    <!-- Career Hack Modal -->
+    <div id="careerHackModal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-title-bar">
+                <span class="modal-title-text">CAREER HACK DOWNLOAD</span>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Get Your Free Career Hack</h2>
+                    <p>Download the Spear Phishing Guide now</p>
+                </div>
+                <form id="careerHackForm">
+                    <div class="modal-form-group">
+                        <label for="modal-firstName">First Name</label>
+                        <input type="text" id="modal-firstName" name="firstName" placeholder="John" required>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="modal-lastName">Last Name</label>
+                        <input type="text" id="modal-lastName" name="lastName" placeholder="Doe" required>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="modal-email">Email</label>
+                        <input type="email" id="modal-email" name="email" placeholder="john@example.com" required>
+                    </div>
+                    <button type="submit" class="modal-submit">Claim Your Free Career Hack →</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('careerHackModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('careerHackModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('careerHackModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('careerHackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const firstName = document.getElementById('modal-firstName').value;
+            const lastName = document.getElementById('modal-lastName').value;
+            const email = document.getElementById('modal-email').value;
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            // Here you can add API call to save the lead
+            // For now, we'll just log it and redirect to the PDF
+            console.log('Career Hack Form Submitted:', { firstName, lastName, email });
+
+            // Simulate API call
+            setTimeout(() => {
+                // Redirect to the career hack PDF/page
+                window.location.href = 'roadmap.html';
+
+                // Reset form
+                this.reset();
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                closeModal();
+            }, 500);
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
 </body>
 </html>
