@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hire Fractal Engineers | AI Engineering Talent</title>
+    <style>
+        /* VARIATION 5: CLASSIC MACINTOSH */
+        /* Design System: Early 90s Apple, Snow White language, platinum aesthetic */
+
+        :root {
+            /* Color Palette - Snow White Era */
+            --color-platinum: #E8E8E8;
+            --color-fog: #F5F5F0;
+            --color-charcoal: #2C2C2C;
+            --color-slate: #5A5A5A;
+            --color-white: #FFFFFF;
+            --color-line: #D0D0D0;
+
+            /* Typography */
+            --font-primary: "Geneva", "Chicago", -apple-system, BlinkMacSystemFont, sans-serif;
+
+            /* Font Sizes */
+            --text-xs: 9px;
+            --text-sm: 11px;
+            --text-base: 12px;
+            --text-lg: 14px;
+            --text-xl: 18px;
+            --text-2xl: 24px;
+            --text-3xl: 36px;
+            --text-4xl: 48px;
+
+            /* Spacing Scale */
+            --space-1: 2px;
+            --space-2: 4px;
+            --space-3: 8px;
+            --space-4: 12px;
+            --space-5: 16px;
+            --space-6: 24px;
+            --space-7: 32px;
+            --space-8: 48px;
+            --space-9: 64px;
+
+            /* Layout */
+            --max-width: 960px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            font-size: var(--text-base);
+            line-height: 1.4;
+            color: var(--color-charcoal);
+            background: var(--color-fog);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        header {
+            background: var(--color-platinum);
+            border-bottom: 3px solid var(--color-charcoal);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: var(--space-5) var(--space-6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: var(--text-xl);
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--color-charcoal);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--space-4);
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--color-charcoal);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Classic Mac Button Style */
+        .btn-primary {
+            background: var(--color-charcoal);
+            color: var(--color-white);
+            padding: var(--space-3) var(--space-5);
+            border: 2px solid var(--color-charcoal);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-block;
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:active {
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+            transform: translate(1px, 1px);
+        }
+
+        /* Container */
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--space-6);
+        }
+
+        /* Window Frame Style */
+        .window {
+            background: var(--color-white);
+            border: 2px solid var(--color-charcoal);
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.15);
+            margin-bottom: var(--space-7);
+        }
+
+        .window-title {
+            background: var(--color-platinum);
+            padding: var(--space-3) var(--space-4);
+            border-bottom: 2px solid var(--color-charcoal);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .window-content {
+            padding: var(--space-6);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: var(--space-9) 0 var(--space-8);
+        }
+
+        .hero-window {
+            background: var(--color-white);
+            border: 3px solid var(--color-charcoal);
+            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-title-bar {
+            background: var(--color-platinum);
+            padding: var(--space-3);
+            border-bottom: 3px solid var(--color-charcoal);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .hero-title-bar::before {
+            content: "◾ ◾ ◾";
+            font-size: var(--text-xs);
+            letter-spacing: 2px;
+        }
+
+        .hero-content {
+            padding: var(--space-7);
+            background: var(--color-white);
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: var(--text-4xl);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: var(--space-6);
+            color: var(--color-charcoal);
+        }
+
+        .hero-subtitle {
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-7);
+            line-height: 1.5;
+            color: var(--color-slate);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Content Section */
+        section {
+            padding: var(--space-8) 0;
+        }
+
+        .section-label {
+            font-size: var(--text-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: var(--space-4);
+            font-weight: 700;
+            color: var(--color-slate);
+        }
+
+        .section-title {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            margin-bottom: var(--space-7);
+            color: var(--color-charcoal);
+        }
+
+        .content-text {
+            font-size: var(--text-base);
+            line-height: 1.5;
+            margin-bottom: var(--space-5);
+        }
+
+        .benefits-list {
+            list-style: none;
+            margin-bottom: var(--space-6);
+        }
+
+        .benefits-list li {
+            padding-left: var(--space-5);
+            margin-bottom: var(--space-3);
+            position: relative;
+            font-size: var(--text-base);
+            line-height: 1.5;
+        }
+
+        .benefits-list li:before {
+            content: "▪";
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+        }
+
+        /* Partners */
+        .partners {
+            padding: var(--space-7) 0;
+            background: var(--color-platinum);
+            border-top: 2px solid var(--color-line);
+            border-bottom: 2px solid var(--color-line);
+        }
+
+        .partners-label {
+            font-size: var(--text-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-align: center;
+            margin-bottom: var(--space-5);
+            font-weight: 700;
+        }
+
+        .partners-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .partner-logo {
+            padding: var(--space-3);
+            background: var(--color-white);
+            border: 1px solid var(--color-charcoal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+            min-width: 120px;
+        }
+
+        .partner-logo img {
+            height: 30px;
+            width: auto;
+            max-width: 100px;
+            object-fit: contain;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            background: var(--color-charcoal);
+            color: var(--color-white);
+            padding: var(--space-9) 0;
+            border-top: 4px solid var(--color-charcoal);
+            border-bottom: 4px solid var(--color-charcoal);
+        }
+
+        .cta-section h2 {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            margin-bottom: var(--space-5);
+        }
+
+        .cta-section p {
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-7);
+        }
+
+        .cta-section .btn-primary {
+            background: var(--color-white);
+            color: var(--color-charcoal);
+            border-color: var(--color-white);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--color-platinum);
+            padding: var(--space-7) 0 var(--space-6);
+            border-top: 3px solid var(--color-charcoal);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            font-size: var(--text-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding-top: var(--space-5);
+            border-top: 2px solid var(--color-charcoal);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: var(--text-2xl);
+            }
+
+            .partners-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: var(--space-2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">FRACTAL</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="apply.html">Apply Now</a></li>
+                    <li><a href="hire.html">Hire Fractal Engineers</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-window">
+                    <div class="hero-title-bar">
+                        <span style="font-size: 11px; font-weight: 700;">HIRING PARTNERS</span>
+                    </div>
+                    <div class="hero-content">
+                        <h1>Hire Elite AI Engineers from Fractal</h1>
+                        <p class="hero-subtitle">Access a pipeline of vetted, production-ready engineers trained by ex-Netflix, ex-Google, and ex-Stripe leads. Our graduates ship real code at NYC startups from day one.</p>
+                        <a href="mailto:hello@fractalbootcamp.com" class="btn-primary">Get in Touch →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="container">
+                <p class="section-label">WHY FRACTAL ENGINEERS</p>
+                <h2 class="section-title">Why Hire Fractal Engineers?</h2>
+
+                <div class="window">
+                    <div class="window-title">◾ WHAT MAKES THEM DIFFERENT</div>
+                    <div class="window-content">
+                        <p class="content-text">Our graduates aren't typical bootcamp grads. They've completed a 12-week intensive program that includes guaranteed internships at real NYC startups.</p>
+
+                        <ul class="benefits-list">
+                            <li>Real production experience - not just portfolio projects</li>
+                            <li>AI-first skillset - proficient with Cursor, Claude Code, and modern AI tools</li>
+                            <li>Full-stack TypeScript and NextJS expertise</li>
+                            <li>Vetted by senior engineers from top tech companies</li>
+                            <li>100% job placement rate - proven track record</li>
+                            <li>Ready to contribute from day one</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="container">
+                <p class="section-label">PARTNER COMPANIES</p>
+                <h2 class="section-title">Our Partner Companies</h2>
+                <p class="content-text" style="margin-bottom: var(--space-7);">We work with 40+ NYC startups who trust Fractal engineers to ship production code.</p>
+            </div>
+        </section>
+
+        <section class="partners">
+            <div class="container">
+                <div class="partners-label">TRUSTED BY TOP NYC STARTUPS</div>
+                <div class="partners-grid">
+                    <div class="partner-logo"><img src="assets/partners/promptlayer.png" alt="PromptLayer"></div>
+                    <div class="partner-logo"><img src="assets/partners/rotabull.png" alt="Rotabull"></div>
+                    <div class="partner-logo"><img src="assets/partners/plastic-labs.png" alt="Plastic Labs"></div>
+                    <div class="partner-logo"><img src="assets/partners/hdr.png" alt="HDR"></div>
+                    <div class="partner-logo"><img src="assets/partners/drumkit.png" alt="Drumkit"></div>
+                    <div class="partner-logo"><img src="assets/partners/genie-ai.png" alt="Genie AI"></div>
+                    <div class="partner-logo"><img src="assets/partners/redistrictr.png" alt="Redistrictr"></div>
+                    <div class="partner-logo"><img src="assets/partners/rubiehq.png" alt="RubieHQ"></div>
+                    <div class="partner-logo"><img src="assets/partners/prodex-labs-logo.png" alt="Prodex Labs"></div>
+                    <div class="partner-logo"><img src="assets/partners/raise-robotics.png" alt="Raise Robotics"></div>
+                    <div class="partner-logo"><img src="assets/partners/tru-identity-logo.png" alt="Tru Identity"></div>
+                    <div class="partner-logo"><img src="assets/partners/ellis-logo.png" alt="Ellis"></div>
+                    <div class="partner-logo"><img src="assets/partners/flowgld.png" alt="FlowGLD"></div>
+                    <div class="partner-logo"><img src="assets/partners/supplyco.png" alt="SupplyCo"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2>Ready to Hire?</h2>
+                <p>Get access to our talent pipeline and find your next AI engineer.</p>
+                <a href="mailto:hello@fractalbootcamp.com" class="btn-primary">Contact Us →</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2025 FRACTAL BOOTCAMP. NYC.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
