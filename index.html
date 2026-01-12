@@ -833,7 +833,7 @@
                         <p class="hero-subtitle">No CS Degree Required. Real Internships at NYC Startups.<br>100% Job Placement Rate.</p>
                         <div class="hero-ctas">
                             <a href="apply.html" class="btn-primary">Apply Now →</a>
-                            <a href="#" onclick="openModal(); return false;" class="btn-secondary">Download for your career hack:<br>Spear Phishing Guide →</a>
+                            <a href="#" onclick="openModal(); return false;" class="btn-secondary">Get Fractal's Engineering Action Plan →</a>
                         </div>
                     </div>
                 </div>
@@ -1047,7 +1047,7 @@
                 </div>
                 <div class="final-cta-note">
                     <p>Not ready to apply?<br>
-                    <a href="#" onclick="openModal(); return false;">Download for your career hack:<br>Spear Phishing Guide →</a></p>
+                    <a href="#" onclick="openModal(); return false;">Get Fractal's Engineering Action Plan →</a></p>
                 </div>
             </div>
         </section>
@@ -1111,8 +1111,8 @@
             </div>
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Get Your Free Career Hack</h2>
-                    <p>Download the Spear Phishing Guide now</p>
+                    <h2>Get Fractal's Engineering Action Plan</h2>
+                    <p>We'll email you our no-nonsense guide to leveling up your engineering skills</p>
                 </div>
                 <form id="careerHackForm">
                     <div class="modal-form-group">
@@ -1127,7 +1127,7 @@
                         <label for="modal-email">Email</label>
                         <input type="email" id="modal-email" name="email" placeholder="john@example.com" required>
                     </div>
-                    <button type="submit" class="modal-submit">Claim Your Free Career Hack →</button>
+                    <button type="submit" class="modal-submit">Send Me The Action Plan →</button>
                 </form>
             </div>
         </div>
@@ -1162,23 +1162,41 @@
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.textContent;
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
+            submitBtn.textContent = 'Sending...';
 
-            // Here you can add API call to save the lead
-            // For now, we'll just log it and redirect to the PDF
-            console.log('Career Hack Form Submitted:', { firstName, lastName, email });
-
-            // Simulate API call
-            setTimeout(() => {
-                // Redirect to the career hack PDF/page
-                window.location.href = 'roadmap.html';
-
-                // Reset form
-                this.reset();
+            // Submit to serverless function to send email
+            fetch('/api/send-action-plan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ firstName, lastName, email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const modalContent = document.querySelector('.modal-content');
+                    modalContent.innerHTML = `
+                        <div style="padding: var(--space-7); text-align: center;">
+                            <h2 style="font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-5);">Check Your Email!</h2>
+                            <p style="font-size: var(--text-base); line-height: 1.6; margin-bottom: var(--space-6);">
+                                We've sent Fractal's Engineering Action Plan to <strong>${email}</strong>.
+                                Check your inbox (and spam folder just in case).
+                            </p>
+                            <button onclick="closeModal()" class="modal-submit">Close</button>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.error || 'Failed to send email');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending action plan:', error);
+                alert('There was an issue sending the action plan. Please try again or email us at hello@fractalbootcamp.com');
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
-                closeModal();
-            }, 500);
+            });
         });
 
         // Close modal with Escape key
