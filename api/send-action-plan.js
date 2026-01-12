@@ -1,10 +1,11 @@
 const { Resend } = require('resend');
+const hubspot = require('@hubspot/api-client');
 const fs = require('fs');
 const path = require('path');
 
 /**
  * Vercel serverless function to send Engineering Action Plan PDF via email
- * Uses Resend API for reliable email delivery
+ * Also creates HubSpot contact, deal, and adds to list
  */
 module.exports = async function handler(req, res) {
   // Set CORS headers
@@ -46,7 +47,103 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Initialize Resend client
+    // Initialize HubSpot client
+    const hubspotClient = new hubspot.Client({
+      accessToken: process.env.HUBSPOT_API_KEY
+    });
+
+    // Step 1: Create/Update Contact in HubSpot
+    let contactId;
+    try {
+      // Search for existing contact by email
+      const searchResponse = await hubspotClient.crm.contacts.searchApi.doSearch({
+        filterGroups: [{
+          filters: [{
+            propertyName: 'email',
+            operator: 'EQ',
+            value: email
+          }]
+        }],
+        limit: 1
+      });
+
+      const contactProperties = {
+        email: email,
+        firstname: firstName,
+        lastname: lastName || ''
+      };
+
+      if (searchResponse.results && searchResponse.results.length > 0) {
+        // Contact exists - update it
+        contactId = searchResponse.results[0].id;
+        await hubspotClient.crm.contacts.basicApi.update(contactId, {
+          properties: contactProperties
+        });
+        console.log(`Updated existing contact: ${contactId}`);
+      } else {
+        // Contact doesn't exist - create new
+        const contactResponse = await hubspotClient.crm.contacts.basicApi.create({
+          properties: contactProperties
+        });
+        contactId = contactResponse.id;
+        console.log(`Created new contact: ${contactId}`);
+      }
+    } catch (contactError) {
+      console.error('Error creating/updating contact in HubSpot:', contactError);
+      // Continue with email even if HubSpot fails
+    }
+
+    // Step 2: Create Deal in Pipeline
+    if (contactId) {
+      try {
+        const dealName = `Action Plan Download - ${firstName} ${lastName || ''}`.trim();
+        const pipelineId = process.env.HUBSPOT_PIPELINE_ID || 'default';
+        const stageId = process.env.HUBSPOT_STAGE_ID || 'appointmentscheduled';
+
+        await hubspotClient.crm.deals.basicApi.create({
+          properties: {
+            dealname: dealName,
+            pipeline: pipelineId,
+            dealstage: stageId,
+            amount: '0'
+          },
+          associations: [
+            {
+              to: { id: contactId },
+              types: [
+                {
+                  associationCategory: 'HUBSPOT_DEFINED',
+                  associationTypeId: 3 // Contact to Deal association
+                }
+              ]
+            }
+          ]
+        });
+        console.log(`Created deal for contact: ${contactId}`);
+      } catch (dealError) {
+        console.error('Error creating deal in HubSpot:', dealError);
+        // Continue with email even if deal creation fails
+      }
+    }
+
+    // Step 3: Add Contact to List (if list ID is configured)
+    if (contactId && process.env.HUBSPOT_ACTION_PLAN_LIST_ID) {
+      try {
+        await hubspotClient.apiRequest({
+          method: 'PUT',
+          path: `/contacts/v1/lists/${process.env.HUBSPOT_ACTION_PLAN_LIST_ID}/add`,
+          body: {
+            vids: [contactId]
+          }
+        });
+        console.log(`Added contact ${contactId} to list ${process.env.HUBSPOT_ACTION_PLAN_LIST_ID}`);
+      } catch (listError) {
+        console.error('Error adding contact to HubSpot list:', listError);
+        // Continue with email even if list addition fails
+      }
+    }
+
+    // Step 4: Initialize Resend client
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     // Read the PDF file
@@ -54,7 +151,7 @@ module.exports = async function handler(req, res) {
     const pdfBuffer = fs.readFileSync(pdfPath);
     const pdfBase64 = pdfBuffer.toString('base64');
 
-    // Send email with Action Plan PDF attached
+    // Step 5: Send email with Action Plan PDF attached
     const emailResult = await resend.emails.send({
       from: 'Fractal Team <hello@fractalbootcamp.com>',
       to: email,
@@ -167,6 +264,7 @@ Questions? Reply to this email or visit fractalbootcamp.com`
     return res.status(200).json({
       success: true,
       emailId: emailResult.id,
+      contactId: contactId,
       message: 'Engineering Action Plan sent successfully!'
     });
 
