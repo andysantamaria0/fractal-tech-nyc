@@ -4,5 +4,9 @@
       "memory": 1024,
       "maxDuration": 10
     }
-  }
+  },
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "cleanUrls": true,
+  "trailingSlash": false
 }
