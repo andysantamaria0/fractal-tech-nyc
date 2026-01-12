@@ -1,4 +1,6 @@
 const { Resend } = require('resend');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * Vercel serverless function to send Engineering Action Plan PDF via email
@@ -47,11 +49,22 @@ module.exports = async function handler(req, res) {
     // Initialize Resend client
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // Send email with Action Plan
+    // Read the PDF file
+    const pdfPath = path.join(process.cwd(), 'public', 'action-plan.pdf');
+    const pdfBuffer = fs.readFileSync(pdfPath);
+    const pdfBase64 = pdfBuffer.toString('base64');
+
+    // Send email with Action Plan PDF attached
     const emailResult = await resend.emails.send({
       from: 'Fractal Team <hello@fractalbootcamp.com>',
       to: email,
       subject: "Fractal's Engineering Action Plan",
+      attachments: [
+        {
+          filename: 'Your-Software-Engineering-Action-Plan.pdf',
+          content: pdfBase64,
+        }
+      ],
       html: `
         <!DOCTYPE html>
         <html>
@@ -119,9 +132,9 @@ module.exports = async function handler(req, res) {
 
             <p>Here is our no-nonsense plan to level up your engineering skills.</p>
 
-            <p>Feel free to reach out to us anytime if you have questions.</p>
+            <p><strong>Your Software Engineering Action Plan is attached to this email.</strong></p>
 
-            <a href="https://fractalbootcamp.com/roadmap.html" class="button">VIEW ACTION PLAN →</a>
+            <p>Feel free to reach out to us anytime if you have questions.</p>
 
             <p style="margin-top: 20px;">Best,<br><strong>Fractal Team</strong></p>
           </div>
@@ -136,9 +149,9 @@ module.exports = async function handler(req, res) {
 
 Here is our no-nonsense plan to level up your engineering skills.
 
-Feel free to reach out to us anytime if you have questions.
+Your Software Engineering Action Plan is attached to this email.
 
-View the Action Plan: https://fractalbootcamp.com/roadmap.html
+Feel free to reach out to us anytime if you have questions.
 
 Best,
 Fractal Team
