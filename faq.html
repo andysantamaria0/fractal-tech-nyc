@@ -5,243 +5,355 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ | Fractal Accelerator</title>
     <style>
+        /* CLASSIC MACINTOSH DESIGN SYSTEM */
+        /* Design System: Early 90s Apple, Snow White language, platinum aesthetic */
+
+        :root {
+            /* Color Palette - Snow White Era */
+            --color-platinum: #E8E8E8;
+            --color-fog: #F5F5F0;
+            --color-charcoal: #2C2C2C;
+            --color-slate: #5A5A5A;
+            --color-white: #FFFFFF;
+            --color-line: #D0D0D0;
+
+            /* Typography */
+            --font-primary: "Geneva", "Chicago", -apple-system, BlinkMacSystemFont, sans-serif;
+
+            /* Font Sizes */
+            --text-xs: 9px;
+            --text-sm: 11px;
+            --text-base: 12px;
+            --text-lg: 14px;
+            --text-xl: 18px;
+            --text-2xl: 24px;
+            --text-3xl: 36px;
+            --text-4xl: 48px;
+
+            /* Spacing Scale */
+            --space-1: 2px;
+            --space-2: 4px;
+            --space-3: 8px;
+            --space-4: 12px;
+            --space-5: 16px;
+            --space-6: 24px;
+            --space-7: 32px;
+            --space-8: 48px;
+            --space-9: 64px;
+
+            /* Layout */
+            --max-width: 960px;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --primary: #ca0a5a;
-            --background: #1a1a1a;
-            --card-bg: #252525;
-            --light: #FFFFFF;
-            --gray-text: #a0a0a0;
-            --border: #333333;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: var(--light);
-            background: var(--background);
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 20px;
+            font-family: var(--font-primary);
+            font-size: var(--text-base);
+            line-height: 1.4;
+            color: var(--color-charcoal);
+            background: var(--color-fog);
+            -webkit-font-smoothing: antialiased;
         }
 
         /* Header */
         header {
-            padding: 20px 0;
-            border-bottom: 1px solid var(--border);
+            background: var(--color-platinum);
+            border-bottom: 3px solid var(--color-charcoal);
             position: sticky;
             top: 0;
-            background: var(--background);
             z-index: 100;
         }
 
-        nav {
+        .header-content {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: var(--space-5) var(--space-6);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
         }
 
         .logo {
-            font-size: 24px;
+            font-size: var(--text-xl);
             font-weight: 700;
-            color: var(--light);
             text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo img {
-            height: 32px;
-            width: auto;
+            color: var(--color-charcoal);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
         .nav-links {
             display: flex;
-            gap: 32px;
+            gap: var(--space-4);
             list-style: none;
+            align-items: center;
         }
 
         .nav-links a {
-            color: var(--gray-text);
             text-decoration: none;
-            font-size: 15px;
-            transition: color 0.2s;
+            color: var(--color-charcoal);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .nav-links a:hover {
-            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        /* Classic Mac Button Style */
+        .btn-primary {
+            background: var(--color-charcoal);
+            color: var(--color-white);
+            padding: var(--space-3) var(--space-5);
+            border: 2px solid var(--color-charcoal);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-block;
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:active {
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+            transform: translate(1px, 1px);
+        }
+
+        .btn-secondary {
+            background: var(--color-white);
+            color: var(--color-charcoal);
+            padding: var(--space-3) var(--space-5);
+            border: 2px solid var(--color-charcoal);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-block;
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+            margin-left: var(--space-5);
+        }
+
+        .btn-secondary:active {
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+            transform: translate(1px, 1px);
+        }
+
+        /* Container */
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--space-6);
         }
 
         /* Hero Section */
         .hero {
-            padding: 80px 0 60px;
+            padding: var(--space-9) 0 var(--space-8);
+        }
+
+        .hero-window {
+            background: var(--color-white);
+            border: 3px solid var(--color-charcoal);
+            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-title-bar {
+            background: var(--color-platinum);
+            padding: var(--space-3) var(--space-5);
+            border-bottom: 3px solid var(--color-charcoal);
+            font-size: var(--text-xs);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        .hero-content {
+            padding: var(--space-8);
             text-align: center;
         }
 
         .hero h1 {
-            font-size: 56px;
+            font-size: var(--text-4xl);
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-4);
             line-height: 1.2;
-            margin-bottom: 24px;
         }
 
-        .hero p {
-            font-size: 20px;
-            color: var(--gray-text);
+        .hero-subtitle {
+            font-size: var(--text-lg);
+            line-height: 1.6;
+            color: var(--color-slate);
         }
 
-        /* FAQ Sections */
+        /* FAQ Section */
         .faq-section {
-            padding: 40px 0;
+            padding: var(--space-8) 0;
         }
 
         .faq-category {
-            margin-bottom: 60px;
+            background: var(--color-white);
+            border: 2px solid var(--color-charcoal);
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.15);
+            margin-bottom: var(--space-7);
         }
 
-        .category-title {
-            font-size: 32px;
-            margin-bottom: 32px;
-            color: var(--primary);
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--border);
+        .category-title-bar {
+            background: var(--color-platinum);
+            padding: var(--space-3) var(--space-5);
+            border-bottom: 2px solid var(--color-charcoal);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .category-content {
+            padding: var(--space-6);
         }
 
         .faq-item {
-            margin-bottom: 32px;
-            padding: 32px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            transition: all 0.3s;
+            padding-bottom: var(--space-6);
+            margin-bottom: var(--space-6);
+            border-bottom: 2px solid var(--color-line);
         }
 
-        .faq-item:hover {
-            border-color: var(--primary);
+        .faq-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
         .faq-question {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: var(--light);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
         .faq-answer {
-            color: var(--gray-text);
-            line-height: 1.8;
-            font-size: 16px;
+            font-size: var(--text-base);
+            line-height: 1.6;
+            color: var(--color-slate);
         }
 
         .faq-answer p {
-            margin-bottom: 12px;
+            margin-bottom: var(--space-3);
         }
 
         .faq-answer ul {
-            margin: 16px 0;
-            padding-left: 24px;
+            margin: var(--space-4) 0;
+            padding-left: var(--space-6);
         }
 
         .faq-answer li {
-            margin-bottom: 8px;
+            margin-bottom: var(--space-2);
         }
 
         .faq-answer strong {
-            color: var(--light);
+            color: var(--color-charcoal);
+            font-weight: 700;
+        }
+
+        .faq-answer a {
+            color: var(--color-charcoal);
+            text-decoration: underline;
+            font-weight: 700;
+        }
+
+        .faq-answer a:hover {
+            color: var(--color-slate);
         }
 
         .highlight {
-            color: var(--primary);
-            font-weight: 600;
+            background: var(--color-platinum);
+            padding: var(--space-1) var(--space-2);
+            border: 1px solid var(--color-charcoal);
+            font-weight: 700;
+            color: var(--color-charcoal);
         }
 
-        /* CTA */
+        /* Special CTA FAQ */
+        .faq-cta {
+            background: var(--color-white);
+            border: 3px solid var(--color-charcoal);
+            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+            margin-bottom: var(--space-7);
+        }
+
+        .faq-cta .category-title-bar {
+            border-bottom: 3px solid var(--color-charcoal);
+        }
+
+        /* CTA Section */
         .cta-section {
-            padding: 80px 0;
+            padding: var(--space-8) 0 var(--space-9);
+        }
+
+        .cta-window {
+            background: var(--color-white);
+            border: 3px solid var(--color-charcoal);
+            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-title-bar {
+            background: var(--color-platinum);
+            padding: var(--space-3) var(--space-5);
+            border-bottom: 3px solid var(--color-charcoal);
+            font-size: var(--text-xs);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        .cta-content {
+            padding: var(--space-8);
             text-align: center;
-            background: var(--card-bg);
-            margin-top: 60px;
         }
 
-        .cta-section h2 {
-            font-size: 36px;
-            margin-bottom: 24px;
+        .cta-content h2 {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-4);
         }
 
-        .cta-section p {
-            font-size: 18px;
-            color: var(--gray-text);
-            margin-bottom: 32px;
-        }
-
-        .btn {
-            padding: 16px 32px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: var(--light);
-        }
-
-        .btn-primary:hover {
-            background: #a00848;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--light);
-            border: 2px solid var(--light);
-            margin-left: 16px;
-        }
-
-        .btn-secondary:hover {
-            background: var(--light);
-            color: var(--background);
+        .cta-content p {
+            font-size: var(--text-lg);
+            color: var(--color-slate);
+            margin-bottom: var(--space-6);
+            line-height: 1.6;
         }
 
         /* Footer */
         footer {
-            background: var(--card-bg);
-            color: var(--light);
-            padding: 60px 0 30px;
-            border-top: 1px solid var(--border);
+            background: var(--color-platinum);
+            border-top: 3px solid var(--color-charcoal);
+            padding: var(--space-8) 0 var(--space-6);
         }
 
         .footer-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
-            max-width: 1200px;
-            margin: 0 auto 40px;
-            padding: 0 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-7);
+            margin-bottom: var(--space-7);
         }
 
         .footer-section h4 {
-            margin-bottom: 16px;
-            font-size: 14px;
+            font-size: var(--text-sm);
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--gray-text);
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-4);
         }
 
         .footer-section ul {
@@ -249,76 +361,78 @@
         }
 
         .footer-section li {
-            margin-bottom: 12px;
+            margin-bottom: var(--space-3);
         }
 
         .footer-section a {
-            color: var(--light);
+            color: var(--color-charcoal);
             text-decoration: none;
-            transition: color 0.2s;
+            font-size: var(--text-sm);
         }
 
         .footer-section a:hover {
-            color: var(--primary);
+            text-decoration: underline;
         }
 
         .footer-bottom {
             text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid var(--border);
-            color: var(--gray-text);
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px 0;
+            padding-top: var(--space-6);
+            border-top: 2px solid var(--color-charcoal);
+            font-size: var(--text-sm);
+            color: var(--color-slate);
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 36px;
-            }
-
             .nav-links {
                 display: none;
             }
 
-            .faq-question {
-                font-size: 18px;
+            .hero h1 {
+                font-size: var(--text-3xl);
             }
 
-            .category-title {
-                font-size: 24px;
+            .faq-question {
+                font-size: var(--text-base);
             }
 
             .btn-secondary {
                 margin-left: 0;
-                margin-top: 16px;
+                margin-top: var(--space-5);
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 <body>
     <header>
-        <nav>
-            <a href="index.html" class="logo">
-                <img src="assets/Fractal_Asset_magentia.svg" alt="Fractal">
-                AI Engineering Accelerator
-            </a>
-            <ul class="nav-links">
-                <li><a href="index.html#how-it-works">How It Works</a></li>
-                <li><a href="outcomes.html">Alumni Stories</a></li>
-                <li><a href="team.html">Team</a></li>
-                <li><a href="faq.html">FAQ</a></li>
-                <li><a href="apply.html">Apply Now</a></li>
-            </ul>
-        </nav>
+        <div class="header-content">
+            <a href="index.html" class="logo">◾ FRACTAL</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html#how-it-works">How It Works</a></li>
+                    <li><a href="outcomes.html">Alumni</a></li>
+                    <li><a href="team.html">Team</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                    <li><a href="apply.html" class="btn-primary">Apply Now</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <main>
         <section class="hero">
             <div class="container">
-                <h1>Frequently Asked Questions</h1>
-                <p>Everything you need to know about Fractal Accelerator</p>
+                <div class="hero-window">
+                    <div class="hero-title-bar">◾ ◾ ◾ FAQ.DOC</div>
+                    <div class="hero-content">
+                        <h1>Frequently Asked<br>Questions</h1>
+                        <p class="hero-subtitle">Everything you need to know about Fractal Accelerator</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -326,171 +440,177 @@
             <div class="container">
                 <!-- Program Details -->
                 <div class="faq-category">
-                    <h2 class="category-title">Program Details</h2>
-
-                    <div class="faq-item">
-                        <h3 class="faq-question">What's the schedule like?</h3>
-                        <div class="faq-answer">
-                            <p>The accelerator is <strong>60 hours per week for 12 weeks</strong>:</p>
-                            <ul>
-                                <li><strong>Monday-Friday:</strong> 9am - 7pm</li>
-                                <li><strong>Saturday:</strong> 10am - 4pm</li>
-                                <li><strong>Sunday:</strong> Off</li>
-                            </ul>
-                            <p>This is a full-time, immersive program. You cannot work another job while enrolled.</p>
+                    <div class="category-title-bar">◾ Program Details</div>
+                    <div class="category-content">
+                        <div class="faq-item">
+                            <h3 class="faq-question">What's the schedule like?</h3>
+                            <div class="faq-answer">
+                                <p>The accelerator is <strong>60 hours per week for 12 weeks</strong>:</p>
+                                <ul>
+                                    <li><strong>Monday-Friday:</strong> 9am - 7pm</li>
+                                    <li><strong>Saturday:</strong> 10am - 4pm</li>
+                                    <li><strong>Sunday:</strong> Off</li>
+                                </ul>
+                                <p>This is a full-time, immersive program. You cannot work another job while enrolled.</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="faq-item">
-                        <h3 class="faq-question">What will I learn?</h3>
-                        <div class="faq-answer">
-                            <p><strong>Languages:</strong> TypeScript and JavaScript (primary), with exposure to Python and Go</p>
-                            <p><strong>Tech Stack:</strong></p>
-                            <ul>
-                                <li>Frontend: React, Next.js, TailwindCSS</li>
-                                <li>Backend: Node.js, Express</li>
-                                <li>Database: Postgres, Redis</li>
-                                <li>Infrastructure: AWS (Lambda, S3, RDS)</li>
-                            </ul>
-                            <p><strong>AI Modules:</strong> RAG systems, Model Context Protocol (MCP), streaming, and generative interfaces</p>
+                        <div class="faq-item">
+                            <h3 class="faq-question">What will I learn?</h3>
+                            <div class="faq-answer">
+                                <p><strong>Languages:</strong> TypeScript and JavaScript (primary), with exposure to Python and Go</p>
+                                <p><strong>Tech Stack:</strong></p>
+                                <ul>
+                                    <li>Frontend: React, Next.js, TailwindCSS</li>
+                                    <li>Backend: Node.js, Express</li>
+                                    <li>Database: Postgres, Redis</li>
+                                    <li>Infrastructure: AWS (Lambda, S3, RDS)</li>
+                                </ul>
+                                <p><strong>AI Modules:</strong> RAG systems, Model Context Protocol (MCP), streaming, and generative interfaces</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="faq-item">
-                        <h3 class="faq-question">How big is each cohort?</h3>
-                        <div class="faq-answer">
-                            <p><span class="highlight">15 students maximum.</span></p>
-                            <p>Small cohorts ensure you get direct access to instructors and build deep relationships with your peers. No fighting for attention in a class of 30+.</p>
+                        <div class="faq-item">
+                            <h3 class="faq-question">How big is each cohort?</h3>
+                            <div class="faq-answer">
+                                <p><span class="highlight">15 students maximum.</span></p>
+                                <p>Small cohorts ensure you get direct access to instructors and build deep relationships with your peers. No fighting for attention in a class of 30+.</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="faq-item">
-                        <h3 class="faq-question">Can I really get a job without a CS degree?</h3>
-                        <div class="faq-answer">
-                            <p>Yes. <span class="highlight">100% of our graduates who pursued SWE roles got hired.</span></p>
-                            <p>You don't need a degree. You need real experience on real projects. That's what our internship program gives you—actual work you can point to in interviews.</p>
+                        <div class="faq-item">
+                            <h3 class="faq-question">Can I really get a job without a CS degree?</h3>
+                            <div class="faq-answer">
+                                <p>Yes. <span class="highlight">100% of our graduates who pursued SWE roles got hired.</span></p>
+                                <p>You don't need a degree. You need real experience on real projects. That's what our internship program gives you—actual work you can point to in interviews.</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="faq-item">
-                        <h3 class="faq-question">What about AI replacing developers?</h3>
-                        <div class="faq-answer">
-                            <p>AI makes engineers MORE valuable, not less. The demand for engineers who can effectively use AI tools is skyrocketing.</p>
-                            <p>You'll master AI tools from Day 1 (Cursor, Claude Code, v0, etc.) to work 10x faster than engineers who don't use them. This is your competitive advantage.</p>
+                        <div class="faq-item">
+                            <h3 class="faq-question">What about AI replacing developers?</h3>
+                            <div class="faq-answer">
+                                <p>AI makes engineers MORE valuable, not less. The demand for engineers who can effectively use AI tools is skyrocketing.</p>
+                                <p>You'll master AI tools from Day 1 (Cursor, Claude Code, v0, etc.) to work 10x faster than engineers who don't use them. This is your competitive advantage.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Admissions -->
                 <div class="faq-category">
-                    <h2 class="category-title">Admissions Requirements</h2>
-
-                    <div class="faq-item">
-                        <h3 class="faq-question">What prior experience do I need?</h3>
-                        <div class="faq-answer">
-                            <p>You should have basic familiarity with:</p>
-                            <ul>
-                                <li>JavaScript or TypeScript basics</li>
-                                <li>Git and command line</li>
-                                <li>HTML/CSS fundamentals</li>
-                                <li>React (at least basic understanding)</li>
-                            </ul>
-                            <p>We'll send pre-course materials 4-6 weeks before the cohort starts to help you prepare.</p>
+                    <div class="category-title-bar">◾ Admissions Requirements</div>
+                    <div class="category-content">
+                        <div class="faq-item">
+                            <h3 class="faq-question">What prior experience do I need?</h3>
+                            <div class="faq-answer">
+                                <p>You should have basic familiarity with:</p>
+                                <ul>
+                                    <li>JavaScript or TypeScript basics</li>
+                                    <li>Git and command line</li>
+                                    <li>HTML/CSS fundamentals</li>
+                                    <li>React (at least basic understanding)</li>
+                                </ul>
+                                <p>We'll send pre-course materials 4-6 weeks before the cohort starts to help you prepare.</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="faq-item">
-                        <h3 class="faq-question">Do I need a computer science degree?</h3>
-                        <div class="faq-answer">
-                            <p><strong>No.</strong> A CS degree is not required. What matters is your ability to learn quickly, solve problems, and ship code.</p>
-                            <p>Our graduates come from diverse backgrounds: teachers, PMs, consultants, sales professionals. They all got hired.</p>
+                        <div class="faq-item">
+                            <h3 class="faq-question">Do I need a computer science degree?</h3>
+                            <div class="faq-answer">
+                                <p><strong>No.</strong> A CS degree is not required. What matters is your ability to learn quickly, solve problems, and ship code.</p>
+                                <p>Our graduates come from diverse backgrounds: teachers, PMs, consultants, sales professionals. They all got hired.</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="faq-item">
-                        <h3 class="faq-question">What equipment do I need?</h3>
-                        <div class="faq-answer">
-                            <p><strong>macOS is required.</strong> We standardize on Mac to ensure environmental consistency across the cohort and match most startup development environments.</p>
+                        <div class="faq-item">
+                            <h3 class="faq-question">What equipment do I need?</h3>
+                            <div class="faq-answer">
+                                <p><strong>macOS is required.</strong> We standardize on Mac to ensure environmental consistency across the cohort and match most startup development environments.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Financial -->
                 <div class="faq-category">
-                    <h2 class="category-title">Financial Information</h2>
-
-                    <div class="faq-item">
-                        <h3 class="faq-question">How much does it cost?</h3>
-                        <div class="faq-answer">
-                            <p><span class="highlight">$18,000 total</span></p>
-                            <p><strong>Early bird discount:</strong> $1,000 off (until November 1st)</p>
-                            <p>Payment plans available on a first-come, first-served basis.</p>
+                    <div class="category-title-bar">◾ Financial Information</div>
+                    <div class="category-content">
+                        <div class="faq-item">
+                            <h3 class="faq-question">How much does it cost?</h3>
+                            <div class="faq-answer">
+                                <p><span class="highlight">$18,000 total</span></p>
+                                <p><strong>Early bird discount:</strong> $1,000 off (until November 1st)</p>
+                                <p>Payment plans available on a first-come, first-served basis.</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="faq-item">
-                        <h3 class="faq-question">Are scholarships available?</h3>
-                        <div class="faq-answer">
-                            <p>Yes. We offer <span class="highlight">2 full scholarships per cohort</span> based on:</p>
-                            <ul>
-                                <li>Financial need</li>
-                                <li>Technical aptitude</li>
-                                <li>Commitment to the program</li>
-                                <li>Contribution to cohort diversity</li>
-                            </ul>
-                            <p><a href="scholarship.html" style="color: var(--primary); text-decoration: underline;">Learn more about scholarships →</a></p>
+                        <div class="faq-item">
+                            <h3 class="faq-question">Are scholarships available?</h3>
+                            <div class="faq-answer">
+                                <p>Yes. We offer <span class="highlight">2 full scholarships per cohort</span> based on:</p>
+                                <ul>
+                                    <li>Financial need</li>
+                                    <li>Technical aptitude</li>
+                                    <li>Commitment to the program</li>
+                                    <li>Contribution to cohort diversity</li>
+                                </ul>
+                                <p><a href="scholarship.html">Learn more about scholarships →</a></p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Career Outcomes -->
                 <div class="faq-category">
-                    <h2 class="category-title">Career Outcomes</h2>
-
-                    <div class="faq-item">
-                        <h3 class="faq-question">What's your placement rate?</h3>
-                        <div class="faq-answer">
-                            <p><span class="highlight">100% placement rate</span> for graduates actively seeking software engineering roles.</p>
-                            <p><strong>Average starting salary:</strong> $104,500</p>
-                            <p><strong>Average time to offer:</strong> 8 weeks</p>
-                            <p><strong>Salary range:</strong> $95K - $150K+ (including equity)</p>
-                            <p>All statistics follow CIRR standards. <a href="outcomes.html" style="color: var(--primary); text-decoration: underline;">See full outcomes data →</a></p>
+                    <div class="category-title-bar">◾ Career Outcomes</div>
+                    <div class="category-content">
+                        <div class="faq-item">
+                            <h3 class="faq-question">What's your placement rate?</h3>
+                            <div class="faq-answer">
+                                <p><span class="highlight">100% placement rate</span> for graduates actively seeking software engineering roles.</p>
+                                <p><strong>Average starting salary:</strong> $104,500</p>
+                                <p><strong>Average time to offer:</strong> 8 weeks</p>
+                                <p><strong>Salary range:</strong> $95K - $150K+ (including equity)</p>
+                                <p>All statistics follow CIRR standards. <a href="outcomes.html">See full outcomes data →</a></p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="faq-item">
-                        <h3 class="faq-question">What career support do you provide?</h3>
-                        <div class="faq-answer">
-                            <p>We support you <strong>until you're hired</strong>:</p>
-                            <ul>
-                                <li>Resume review and portfolio guidance</li>
-                                <li>Interview preparation (technical & behavioral)</li>
-                                <li>Direct introductions to hiring managers</li>
-                                <li>Salary negotiation coaching</li>
-                                <li>Access to our network of 40+ partner startups</li>
-                            </ul>
-                            <p>Career coaching doesn't end at graduation. We're invested in your success.</p>
+                        <div class="faq-item">
+                            <h3 class="faq-question">What career support do you provide?</h3>
+                            <div class="faq-answer">
+                                <p>We support you <strong>until you're hired</strong>:</p>
+                                <ul>
+                                    <li>Resume review and portfolio guidance</li>
+                                    <li>Interview preparation (technical & behavioral)</li>
+                                    <li>Direct introductions to hiring managers</li>
+                                    <li>Salary negotiation coaching</li>
+                                    <li>Access to our network of 40+ partner startups</li>
+                                </ul>
+                                <p>Career coaching doesn't end at graduation. We're invested in your success.</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="faq-item">
-                        <h3 class="faq-question">Where do graduates work?</h3>
-                        <div class="faq-answer">
-                            <p>Our graduates work at 40+ startups including:</p>
-                            <p>PromptLayer, Ellis, Plastic Labs, Rotabull, HDR, Drumkit, Genie AI, RubieHQ, Redistrictr, and more.</p>
-                            <p>Most are venture-backed startups in NYC where you'll have real impact from day one.</p>
-                            <p><a href="outcomes.html" style="color: var(--primary); text-decoration: underline;">See all alumni stories →</a></p>
+                        <div class="faq-item">
+                            <h3 class="faq-question">Where do graduates work?</h3>
+                            <div class="faq-answer">
+                                <p>Our graduates work at 40+ startups including:</p>
+                                <p>PromptLayer, Ellis, Plastic Labs, Rotabull, HDR, Drumkit, Genie AI, RubieHQ, Redistrictr, and more.</p>
+                                <p>Most are venture-backed startups in NYC where you'll have real impact from day one.</p>
+                                <p><a href="outcomes.html">See all alumni stories →</a></p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Still Have Questions -->
-                <div class="faq-item" style="background: var(--dark-bg); border: 2px solid var(--primary);">
-                    <h3 class="faq-question">Still have questions?</h3>
-                    <div class="faq-answer">
-                        <p>Book a free call with our team. We'll assess your background and map out your exact path to a $100K job.</p>
-                        <p>No pressure, just honest advice.</p>
-                        <p style="margin-top: 16px;"><a href="mailto:hello@fractalbootcamp.com" style="color: var(--primary); text-decoration: underline;">Email us: hello@fractalbootcamp.com</a></p>
+                <div class="faq-cta">
+                    <div class="category-title-bar">◾ Still Have Questions?</div>
+                    <div class="category-content">
+                        <div class="faq-answer">
+                            <p>Book a free call with our team. We'll assess your background and map out your exact path to a $100K job.</p>
+                            <p>No pressure, just honest advice.</p>
+                            <p style="margin-top: var(--space-5);"><a href="mailto:hello@fractalbootcamp.com">Email us: hello@fractalbootcamp.com</a></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -498,58 +618,65 @@
 
         <section class="cta-section">
             <div class="container">
-                <h2>READY TO START?</h2>
-                <p>Spring 2026 cohort starts February 2. Only 15 spots available.</p>
-                <a href="apply.html" class="btn btn-primary">Apply Now →</a>
-                <a href="roadmap.html" class="btn btn-secondary">Download Free Roadmap</a>
+                <div class="cta-window">
+                    <div class="cta-title-bar">◾ ◾ ◾ APPLY_NOW.EXE</div>
+                    <div class="cta-content">
+                        <h2>Ready To Start?</h2>
+                        <p>Spring 2026 cohort starts February 2. Only 15 spots available.</p>
+                        <a href="apply.html" class="btn-primary">Apply Now →</a>
+                        <a href="roadmap.html" class="btn-secondary">Download Free Roadmap</a>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
 
     <footer>
-        <div class="footer-grid">
-            <div class="footer-section">
-                <h4>Accelerator</h4>
-                <ul>
-                    <li><a href="index.html#how-it-works">How It Works</a></li>
-                    <li><a href="outcomes.html">Alumni Stories</a></li>
-                    <li><a href="team.html">Team</a></li>
-                    <li><a href="faq.html">FAQ</a></li>
-                </ul>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>Accelerator</h4>
+                    <ul>
+                        <li><a href="index.html#how-it-works">How It Works</a></li>
+                        <li><a href="outcomes.html">Alumni Stories</a></li>
+                        <li><a href="team.html">Team</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="curriculum.html">Curriculum</a></li>
+                        <li><a href="roadmap.html">Free Roadmap</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="https://twitter.com/fractaltechnyc">Twitter/X</a></li>
+                        <li><a href="https://discord.gg/PNWh6Xd26X">Discord</a></li>
+                        <li><a href="https://instagram.com/fractaltechnyc">Instagram</a></li>
+                        <li><a href="mailto:hello@fractalbootcamp.com">Email Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>More</h4>
+                    <ul>
+                        <li><a href="https://fractaltechhub.com">Coworking →</a></li>
+                        <li><a href="scholarship.html">Scholarships</a></li>
+                        <li><a href="externship.html">Become a Partner</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
             </div>
 
-            <div class="footer-section">
-                <h4>Resources</h4>
-                <ul>
-                    <li><a href="curriculum.html">Curriculum</a></li>
-                    <li><a href="roadmap.html">Free Roadmap</a></li>
-                    <li><a href="blog.html">Blog</a></li>
-                </ul>
+            <div class="footer-bottom">
+                <p>© 2025 Fractal Accelerator. NYC.</p>
             </div>
-
-            <div class="footer-section">
-                <h4>Connect</h4>
-                <ul>
-                    <li><a href="https://twitter.com/fractaltechnyc">Twitter/X</a></li>
-                    <li><a href="https://discord.gg/PNWh6Xd26X">Discord</a></li>
-                    <li><a href="https://instagram.com/fractaltechnyc">Instagram</a></li>
-                    <li><a href="mailto:hello@fractalbootcamp.com">Email Us</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section">
-                <h4>More</h4>
-                <ul>
-                    <li><a href="https://fractaltechhub.com">Coworking →</a></li>
-                    <li><a href="scholarship.html">Scholarships</a></li>
-                    <li><a href="externship.html">Become a Hiring Partner</a></li>
-                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>© 2025 Fractal Accelerator. NYC.</p>
         </div>
     </footer>
 </body>
