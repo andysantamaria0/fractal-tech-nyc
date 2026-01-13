@@ -129,18 +129,18 @@ module.exports = async function handler(req, res) {
     // Step 3: Add Contact to List (if list ID is configured)
     if (contactId && process.env.HUBSPOT_ACTION_PLAN_LIST_ID) {
       try {
-        // Use the v1 API to add contact to list by contact ID
+        // Use the v3 Lists API to add contact to list
         await hubspotClient.apiRequest({
-          method: 'POST',
-          path: `/contacts/v1/lists/${process.env.HUBSPOT_ACTION_PLAN_LIST_ID}/add`,
+          method: 'PUT',
+          path: `/crm/v3/lists/${process.env.HUBSPOT_ACTION_PLAN_LIST_ID}/memberships/add`,
           body: {
-            vids: [parseInt(contactId)]
+            recordIds: [contactId.toString()]
           }
         });
-        console.log(`Added contact ${contactId} (${email}) to list ${process.env.HUBSPOT_ACTION_PLAN_LIST_ID}`);
+        console.log(`Added contact ${contactId} (${email}) to list ${process.env.HUBSPOT_ACTION_PLAN_LIST_ID} via v3 API`);
       } catch (listError) {
         console.error('Error adding contact to HubSpot list:', listError);
-        console.error('List error details:', listError.response?.data || listError.message);
+        console.error('List error details:', JSON.stringify(listError.response?.data || listError.message));
         // Continue with email even if list addition fails
       }
     }
