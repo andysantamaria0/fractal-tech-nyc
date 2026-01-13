@@ -580,10 +580,13 @@
         }
 
         .footer-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            display: flex;
+            justify-content: space-between;
             gap: var(--space-7);
             margin-bottom: var(--space-6);
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .footer-section h4 {
@@ -778,6 +781,21 @@
         }
 
         /* Responsive */
+        /* Tablet */
+        @media (max-width: 1024px) {
+            .footer-grid {
+                flex-wrap: wrap;
+                justify-content: space-around;
+                gap: var(--space-6);
+            }
+
+            .footer-section {
+                flex: 0 1 45%;
+                min-width: 200px;
+            }
+        }
+
+        /* Mobile */
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: var(--text-2xl);
@@ -786,9 +804,21 @@
             .stats-grid,
             .partners-grid,
             .cohort-details,
-            .footer-grid,
             .testimonials {
                 grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: var(--space-6);
+            }
+
+            .footer-section {
+                flex: none;
+                width: 100%;
+                max-width: 300px;
             }
 
             .hero-ctas,
