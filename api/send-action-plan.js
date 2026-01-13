@@ -157,7 +157,7 @@ module.exports = async function handler(req, res) {
 
     // Step 5: Send email with Action Plan PDF attached
     const emailResult = await resend.emails.send({
-      from: 'Fractal Team <onboarding@resend.dev>',
+      from: 'Fractal Team <hello@fractaltech.nyc>',
       to: email,
       subject: "Fractal's Engineering Action Plan",
       attachments: [
