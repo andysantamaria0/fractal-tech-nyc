@@ -130,7 +130,7 @@ module.exports = async function handler(req, res) {
     if (contactId && process.env.HUBSPOT_ACTION_PLAN_LIST_ID) {
       try {
         // Use the v3 Lists API to add contact to list
-        await hubspotClient.apiRequest({
+        const listResponse = await hubspotClient.apiRequest({
           method: 'PUT',
           path: `/crm/v3/lists/${process.env.HUBSPOT_ACTION_PLAN_LIST_ID}/memberships/add`,
           body: {
@@ -138,9 +138,11 @@ module.exports = async function handler(req, res) {
           }
         });
         console.log(`Added contact ${contactId} (${email}) to list ${process.env.HUBSPOT_ACTION_PLAN_LIST_ID} via v3 API`);
+        console.log('List API Response:', JSON.stringify(listResponse));
       } catch (listError) {
         console.error('Error adding contact to HubSpot list:', listError);
         console.error('List error details:', JSON.stringify(listError.response?.data || listError.message));
+        console.error('Full error object:', JSON.stringify(listError, null, 2));
         // Continue with email even if list addition fails
       }
     }
