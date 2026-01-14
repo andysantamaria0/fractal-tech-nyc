@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply Now | Fractal Accelerator</title>
+    <style>
+        /* VARIATION 5: CLASSIC MACINTOSH */
+        /* Design System: Early 90s Apple, Snow White language, platinum aesthetic */
+
+        :root {
+            /* Color Palette - Snow White Era */
+            --color-platinum: #E8E8E8;
+            --color-fog: #F5F5F0;
+            --color-charcoal: #2C2C2C;
+            --color-slate: #5A5A5A;
+            --color-white: #FFFFFF;
+            --color-line: #D0D0D0;
+            --color-error: #8B0000;
+
+            /* Typography */
+            --font-primary: "Geneva", "Chicago", -apple-system, BlinkMacSystemFont, sans-serif;
+
+            /* Font Sizes */
+            --text-xs: 9px;
+            --text-sm: 11px;
+            --text-base: 12px;
+            --text-lg: 14px;
+            --text-xl: 18px;
+            --text-2xl: 24px;
+            --text-3xl: 36px;
+            --text-4xl: 48px;
+
+            /* Spacing Scale */
+            --space-1: 2px;
+            --space-2: 4px;
+            --space-3: 8px;
+            --space-4: 12px;
+            --space-5: 16px;
+            --space-6: 24px;
+            --space-7: 32px;
+            --space-8: 48px;
+            --space-9: 64px;
+
+            /* Layout */
+            --max-width: 960px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            font-size: var(--text-base);
+            line-height: 1.4;
+            color: var(--color-charcoal);
+            background: var(--color-fog);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        header {
+            background: var(--color-platinum);
+            border-bottom: 3px solid var(--color-charcoal);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: var(--space-5) var(--space-6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: var(--text-xl);
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--color-charcoal);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--space-4);
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--color-charcoal);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 var(--space-6);
+        }
+
+        /* Main Content */
+        main {
+            padding: var(--space-9) 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Window Frame Style */
+        .window {
+            background: var(--color-white);
+            border: 3px solid var(--color-charcoal);
+            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+            margin-bottom: var(--space-7);
+        }
+
+        .window-title {
+            background: var(--color-platinum);
+            padding: var(--space-3) var(--space-4);
+            border-bottom: 3px solid var(--color-charcoal);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .window-title::before {
+            content: "◾ ◾ ◾";
+            font-size: var(--text-xs);
+            letter-spacing: 2px;
+        }
+
+        .window-content {
+            padding: var(--space-7);
+        }
+
+        /* Form Header */
+        .form-header {
+            text-align: center;
+            margin-bottom: var(--space-7);
+        }
+
+        .form-header h1 {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+            color: var(--color-charcoal);
+        }
+
+        .form-header p {
+            font-size: var(--text-lg);
+            color: var(--color-slate);
+        }
+
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-6);
+            margin-bottom: var(--space-7);
+            padding-bottom: var(--space-6);
+            border-bottom: 2px solid var(--color-line);
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            background: var(--color-platinum);
+            border: 2px solid var(--color-charcoal);
+            color: var(--color-slate);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: var(--text-sm);
+        }
+
+        .step.active .step-number {
+            background: var(--color-charcoal);
+            color: var(--color-white);
+        }
+
+        .step-label {
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-slate);
+        }
+
+        .step.active .step-label {
+            color: var(--color-charcoal);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: var(--space-6);
+        }
+
+        label {
+            display: block;
+            margin-bottom: var(--space-3);
+            font-weight: 700;
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .optional {
+            color: var(--color-slate);
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="url"] {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-white);
+            border: 2px solid var(--color-charcoal);
+            color: var(--color-charcoal);
+            font-size: var(--text-base);
+            font-family: var(--font-primary);
+            transition: none;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--color-charcoal);
+            box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        input::placeholder {
+            color: var(--color-slate);
+        }
+
+        .error-message {
+            color: var(--color-error);
+            font-size: var(--text-xs);
+            margin-top: var(--space-2);
+            display: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group.error input {
+            border-color: var(--color-error);
+            background: #FFF5F5;
+        }
+
+        .form-group.error .error-message {
+            display: block;
+        }
+
+        /* Classic Mac Button Style */
+        .btn {
+            width: 100%;
+            padding: var(--space-4) var(--space-5);
+            border: 2px solid var(--color-charcoal);
+            background: var(--color-charcoal);
+            color: var(--color-white);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+            font-family: var(--font-primary);
+            margin-top: var(--space-5);
+        }
+
+        .btn:active {
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+            transform: translate(1px, 1px);
+        }
+
+        .btn:disabled {
+            background: var(--color-platinum);
+            color: var(--color-slate);
+            border-color: var(--color-slate);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Booking Section */
+        .booking-container {
+            display: none;
+        }
+
+        .booking-container.active {
+            display: block;
+        }
+
+        .booking-iframe {
+            width: 100%;
+            height: 700px;
+            border: 2px solid var(--color-charcoal);
+            background: var(--color-white);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--color-charcoal);
+            text-decoration: none;
+            margin-bottom: var(--space-6);
+            font-weight: 700;
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--color-platinum);
+            padding: var(--space-7) 0 var(--space-6);
+            border-top: 3px solid var(--color-charcoal);
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: var(--text-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .footer-text p {
+            margin-bottom: var(--space-2);
+        }
+
+        .footer-text a {
+            color: var(--color-charcoal);
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-header h1 {
+                font-size: var(--text-2xl);
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: var(--space-2);
+            }
+
+            .step-label {
+                display: none;
+            }
+
+            .booking-iframe {
+                height: 600px;
+            }
+
+            .window-content {
+                padding: var(--space-6) var(--space-5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">FRACTAL</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="apply.html">Apply Now</a></li>
+                    <li><a href="hire.html">Hire Fractal Engineers</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Application Form -->
+            <div id="formSection">
+                <div class="window">
+                    <div class="window-title">APPLICATION FORM</div>
+                    <div class="window-content">
+                        <div class="form-header">
+                            <h1>Apply to Fractal Accelerator</h1>
+                            <p>Start your journey to a $100K+ AI engineering career</p>
+                        </div>
+
+                        <div class="progress-steps">
+                            <div class="step active">
+                                <div class="step-number">1</div>
+                                <span class="step-label">Your Info</span>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <span class="step-label">Book Call</span>
+                            </div>
+                        </div>
+
+                        <form id="applicationForm">
+                            <div class="form-group">
+                                <label for="fullName">Full Name</label>
+                                <input
+                                    type="text"
+                                    id="fullName"
+                                    name="fullName"
+                                    placeholder="John Doe"
+                                    required
+                                >
+                                <div class="error-message">Please enter your full name</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="john@example.com"
+                                    required
+                                >
+                                <div class="error-message">Please enter a valid email address</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="+1 (555) 123-4567"
+                                    required
+                                >
+                                <div class="error-message">Please enter your phone number</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="linkedin">LinkedIn Profile <span class="optional">(Optional)</span></label>
+                                <input
+                                    type="url"
+                                    id="linkedin"
+                                    name="linkedin"
+                                    placeholder="https://linkedin.com/in/yourprofile"
+                                >
+                                <div class="error-message">Please enter a valid URL</div>
+                            </div>
+
+                            <button type="submit" class="btn">Next: Book Your Call →</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Section -->
+            <div id="bookingSection" class="booking-container">
+                <a href="#" class="back-link" onclick="showForm(); return false;">
+                    ← Back to form
+                </a>
+                <div class="window">
+                    <div class="window-title">SCHEDULE INTRO CALL</div>
+                    <div class="window-content">
+                        <div class="form-header">
+                            <h1>Schedule Your Intro Call</h1>
+                            <p>Pick a time that works for you</p>
+                        </div>
+
+                        <div class="progress-steps">
+                            <div class="step">
+                                <div class="step-number">✓</div>
+                                <span class="step-label">Your Info</span>
+                            </div>
+                            <div class="step active">
+                                <div class="step-number">2</div>
+                                <span class="step-label">Book Call</span>
+                            </div>
+                        </div>
+
+                        <iframe
+                            src="https://cal.com/shanthis/intro"
+                            class="booking-iframe"
+                            frameborder="0"
+                        ></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-text">
+            <p>© 2025 FRACTAL ACCELERATOR. NYC.</p>
+            <p>Questions? <a href="mailto:hello@fractalbootcamp.com">hello@fractalbootcamp.com</a></p>
+        </div>
+    </footer>
+
+    <script>
+        const form = document.getElementById('applicationForm');
+        const formSection = document.getElementById('formSection');
+        const bookingSection = document.getElementById('bookingSection');
+
+        // Form validation and submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let isValid = true;
+            const formGroups = form.querySelectorAll('.form-group');
+
+            // Clear previous errors
+            formGroups.forEach(group => group.classList.remove('error'));
+
+            // Validate required fields
+            const fullName = document.getElementById('fullName');
+            const email = document.getElementById('email');
+            const phone = document.getElementById('phone');
+            const linkedin = document.getElementById('linkedin');
+
+            if (!fullName.value.trim()) {
+                fullName.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            if (!email.value.trim() || !email.validity.valid) {
+                email.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            if (!phone.value.trim()) {
+                phone.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            // Validate LinkedIn URL if provided
+            if (linkedin.value.trim() && !linkedin.validity.valid) {
+                linkedin.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Prepare form data
+                const formData = {
+                    fullName: fullName.value,
+                    email: email.value,
+                    phone: phone.value,
+                    linkedin: linkedin.value,
+                    timestamp: new Date().toISOString()
+                };
+
+                // Disable submit button and show loading state
+                const submitBtn = applicationForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+
+                // Submit to HubSpot via serverless function
+                fetch('/api/submit-application', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Application submitted to HubSpot:', data);
+                        // Show booking section on success
+                        showBooking();
+                    } else {
+                        throw new Error(data.error || 'Submission failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting application:', error);
+                    alert('There was an issue submitting your application. Please try again or email us directly at hello@fractalbootcamp.com');
+
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                });
+            }
+        });
+
+        function showBooking() {
+            formSection.style.display = 'none';
+            bookingSection.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showForm() {
+            bookingSection.classList.remove('active');
+            formSection.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Real-time validation feedback
+        document.querySelectorAll('input[required]').forEach(input => {
+            input.addEventListener('blur', function() {
+                if (!this.value.trim() || !this.validity.valid) {
+                    this.closest('.form-group').classList.add('error');
+                } else {
+                    this.closest('.form-group').classList.remove('error');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                if (this.value.trim() && this.validity.valid) {
+                    this.closest('.form-group').classList.remove('error');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

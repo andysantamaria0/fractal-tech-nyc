@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:derekrazo.github.io)",
+      "WebFetch(domain:fractalbootcamp.com)"
+    ]
+  }
+}
