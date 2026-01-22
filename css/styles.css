@@ -22,7 +22,7 @@
     /* Font Sizes */
     --text-xs: 9px;
     --text-sm: 11px;
-    --text-base: 12px;
+    --text-base: 16px;
     --text-lg: 14px;
     --text-xl: 18px;
     --text-2xl: 24px;
@@ -56,7 +56,7 @@
 body {
     font-family: var(--font-primary);
     font-size: var(--text-base);
-    line-height: 1.4;
+    line-height: 1.6;
     color: var(--color-charcoal);
     background: var(--color-fog);
     -webkit-font-smoothing: antialiased;
@@ -115,19 +115,24 @@ header {
    4. BUTTONS
    ======================================== */
 .btn-primary {
-    background: var(--color-charcoal);
-    color: var(--color-white);
-    padding: var(--space-3) var(--space-5);
-    border: 2px solid var(--color-charcoal);
-    text-decoration: none;
+    background-color: white;
+    color: #C7547C;
+    border: 3px solid #C7547C;
+    padding: 16px 32px;
+    font-size: 18px;
     font-weight: 700;
-    font-size: var(--text-sm);
+    box-shadow: 4px 4px 0 #C7547C;
+    text-decoration: none;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     display: inline-block;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
     cursor: pointer;
     font-family: var(--font-primary);
+}
+
+.btn-primary:hover {
+    background-color: #C7547C;
+    color: white;
 }
 
 .btn-primary:active {
@@ -136,19 +141,24 @@ header {
 }
 
 .btn-secondary {
-    background: var(--color-white);
-    color: var(--color-charcoal);
-    padding: var(--space-3) var(--space-5);
-    border: 2px solid var(--color-charcoal);
-    text-decoration: none;
+    background-color: white;
+    color: #C7547C;
+    border: 3px solid #C7547C;
+    padding: 16px 32px;
+    font-size: 18px;
     font-weight: 700;
-    font-size: var(--text-sm);
+    box-shadow: 4px 4px 0 #C7547C;
+    text-decoration: none;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     display: inline-block;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
     cursor: pointer;
     font-family: var(--font-primary);
+}
+
+.btn-secondary:hover {
+    background-color: #C7547C;
+    color: white;
 }
 
 .btn-secondary:active {
@@ -717,15 +727,14 @@ section {
 }
 
 .final-cta .btn-primary {
-    background: var(--color-white);
-    color: var(--color-charcoal);
-    border-color: var(--color-white);
+    background-color: white;
+    color: #C7547C;
+    border-color: #C7547C;
 }
 
-.final-cta .btn-secondary {
-    background: var(--color-charcoal);
-    color: var(--color-white);
-    border-color: var(--color-white);
+.final-cta .btn-primary:hover {
+    background-color: #C7547C;
+    color: white;
 }
 
 .final-cta-note {
@@ -979,18 +988,23 @@ footer {
 
 .modal-submit {
     width: 100%;
-    padding: var(--space-4) var(--space-5);
-    border: 2px solid var(--color-charcoal);
-    background: var(--color-charcoal);
-    color: var(--color-white);
+    background-color: white;
+    color: #C7547C;
+    border: 3px solid #C7547C;
+    padding: 16px 32px;
+    font-size: 18px;
     font-weight: 700;
-    font-size: var(--text-sm);
+    box-shadow: 4px 4px 0 #C7547C;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     cursor: pointer;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
     font-family: var(--font-primary);
     margin-top: var(--space-4);
+}
+
+.modal-submit:hover {
+    background-color: #C7547C;
+    color: white;
 }
 
 .modal-submit:active {
@@ -1136,19 +1150,24 @@ input::placeholder {
 
 .btn {
     width: 100%;
-    padding: var(--space-4) var(--space-5);
-    border: 2px solid var(--color-charcoal);
-    background: var(--color-charcoal);
-    color: var(--color-white);
-    text-decoration: none;
+    background-color: white;
+    color: #C7547C;
+    border: 3px solid #C7547C;
+    padding: 16px 32px;
+    font-size: 18px;
     font-weight: 700;
-    font-size: var(--text-sm);
+    box-shadow: 4px 4px 0 #C7547C;
+    text-decoration: none;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     cursor: pointer;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
     font-family: var(--font-primary);
     margin-top: var(--space-5);
+}
+
+.btn:hover {
+    background-color: #C7547C;
+    color: white;
 }
 
 .btn:active {
@@ -1596,6 +1615,15 @@ input::placeholder {
     .btn-secondary {
         margin-left: 0;
         margin-top: var(--space-5);
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 14px 24px;
+        font-size: 16px;
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
     }
 
     .member-header {
