@@ -504,7 +504,8 @@ section {
    ======================================== */
 .value-props {
     display: grid;
-    gap: var(--space-7);
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
 }
 
 .value-prop h3 {
@@ -1543,7 +1544,8 @@ input::placeholder {
     .stats-grid,
     .partners-grid,
     .cohort-details,
-    .testimonials {
+    .testimonials,
+    .value-props {
         grid-template-columns: 1fr;
     }
 
