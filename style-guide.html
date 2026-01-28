@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractal Style Guide</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Style guide-specific styles */
+        .sg-section {
+            padding: var(--space-8) 0;
+            border-bottom: 3px solid var(--color-charcoal);
+        }
+        .sg-section:last-child {
+            border-bottom: none;
+        }
+        .sg-label {
+            font-size: var(--text-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: var(--color-slate);
+            margin-bottom: var(--space-3);
+        }
+        .sg-heading {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            margin-bottom: var(--space-6);
+            color: var(--color-charcoal);
+        }
+        .sg-subheading {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            margin-bottom: var(--space-5);
+            margin-top: var(--space-7);
+            color: var(--color-charcoal);
+            border-bottom: 2px solid var(--color-charcoal);
+            padding-bottom: var(--space-3);
+        }
+        .sg-description {
+            font-size: var(--text-base);
+            line-height: 1.6;
+            margin-bottom: var(--space-6);
+            color: var(--color-slate);
+            max-width: 720px;
+        }
+        .sg-note {
+            font-size: var(--text-sm);
+            line-height: 1.6;
+            color: var(--color-slate);
+            margin-bottom: var(--space-4);
+        }
+        .sg-note code {
+            background: var(--color-platinum);
+            padding: 1px 4px;
+            border: 1px solid var(--color-line);
+            font-family: monospace;
+            font-size: var(--text-xs);
+        }
+
+        /* Color swatches */
+        .sg-colors {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: var(--space-5);
+        }
+        .sg-swatch {
+            border: 2px solid var(--color-charcoal);
+        }
+        .sg-swatch-color {
+            height: 80px;
+            border-bottom: 2px solid var(--color-charcoal);
+        }
+        .sg-swatch-info {
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-white);
+        }
+        .sg-swatch-name {
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sg-swatch-value {
+            font-size: var(--text-xs);
+            color: var(--color-slate);
+            font-family: monospace;
+            margin-top: 2px;
+        }
+        .sg-swatch-var {
+            font-size: var(--text-xs);
+            color: var(--color-slate);
+            font-family: monospace;
+        }
+
+        /* Type specimens */
+        .sg-type-row {
+            display: flex;
+            align-items: baseline;
+            gap: var(--space-6);
+            padding: var(--space-4) 0;
+            border-bottom: 1px solid var(--color-line);
+        }
+        .sg-type-meta {
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+        .sg-type-var {
+            font-size: var(--text-xs);
+            font-family: monospace;
+            color: var(--color-slate);
+        }
+        .sg-type-px {
+            font-size: var(--text-xs);
+            color: var(--color-slate);
+        }
+
+        /* Spacing scale */
+        .sg-space-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-5);
+            margin-bottom: var(--space-3);
+        }
+        .sg-space-bar {
+            background: var(--color-charcoal);
+            height: 16px;
+            flex-shrink: 0;
+        }
+        .sg-space-meta {
+            font-size: var(--text-xs);
+            font-family: monospace;
+            color: var(--color-slate);
+            min-width: 160px;
+            flex-shrink: 0;
+        }
+
+        /* Component examples */
+        .sg-example {
+            background: var(--color-fog);
+            border: 2px solid var(--color-line);
+            padding: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+        .sg-example-dark {
+            background: var(--color-charcoal);
+        }
+        .sg-example-label {
+            font-size: var(--text-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: var(--color-slate);
+            margin-bottom: var(--space-4);
+        }
+
+        /* Do / Don't boxes */
+        .sg-dos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-5);
+            margin-bottom: var(--space-6);
+        }
+        .sg-do, .sg-dont {
+            border: 2px solid var(--color-charcoal);
+            background: var(--color-white);
+        }
+        .sg-do-header, .sg-dont-header {
+            padding: var(--space-3) var(--space-4);
+            border-bottom: 2px solid var(--color-charcoal);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sg-do-header {
+            background: var(--color-platinum);
+        }
+        .sg-dont-header {
+            background: #F5E6E6;
+        }
+        .sg-do-content, .sg-dont-content {
+            padding: var(--space-4);
+            font-size: var(--text-base);
+            line-height: 1.6;
+        }
+
+        /* Layout diagram */
+        .sg-layout-diagram {
+            background: var(--color-white);
+            border: 2px solid var(--color-charcoal);
+            padding: var(--space-6);
+            text-align: center;
+            margin-bottom: var(--space-4);
+            position: relative;
+        }
+        .sg-layout-inner {
+            border: 2px dashed var(--color-line);
+            padding: var(--space-5);
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        /* Grid pattern examples */
+        .sg-grid-example {
+            display: grid;
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+        .sg-grid-cell {
+            background: var(--color-platinum);
+            border: 2px solid var(--color-charcoal);
+            padding: var(--space-4);
+            text-align: center;
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Voice & tone table */
+        .sg-voice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: var(--space-6);
+        }
+        .sg-voice-table th {
+            background: var(--color-platinum);
+            border: 2px solid var(--color-charcoal);
+            padding: var(--space-3) var(--space-4);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: left;
+        }
+        .sg-voice-table td {
+            border: 2px solid var(--color-line);
+            padding: var(--space-3) var(--space-4);
+            font-size: var(--text-base);
+            line-height: 1.5;
+            vertical-align: top;
+        }
+
+        /* TOC */
+        .sg-toc {
+            list-style: none;
+            columns: 2;
+            column-gap: var(--space-6);
+        }
+        .sg-toc li {
+            margin-bottom: var(--space-3);
+        }
+        .sg-toc a {
+            text-decoration: none;
+            color: var(--color-charcoal);
+            font-weight: 700;
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sg-toc a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .sg-dos { grid-template-columns: 1fr; }
+            .sg-colors { grid-template-columns: 1fr 1fr; }
+            .sg-type-row { flex-direction: column; gap: var(--space-2); }
+            .sg-toc { columns: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">FRACTAL</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Back to Site</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main style="padding-top: 0;">
+
+        <!-- ================================
+             INTRO
+             ================================ -->
+        <section class="sg-section" id="intro">
+            <div class="container">
+                <p class="sg-label">Fractal Brand & Design System</p>
+                <h1 class="sg-heading">Style Guide</h1>
+                <p class="sg-description">
+                    This is the definitive reference for anyone building pages, marketing materials, or communications for Fractal. It covers the visual design system, component patterns, voice and tone, and usage guidelines. Everything here is drawn from the live site and its CSS design tokens.
+                </p>
+                <p class="sg-description">
+                    <strong>Design philosophy:</strong> Fractal's visual identity is inspired by the <strong>Classic Macintosh "Snow White" era</strong> &mdash; geometric borders, crisp drop shadows, monochromatic surfaces with a single accent color, and clean typographic hierarchy. The overall effect is precise, confident, and deliberately retro in a way that signals craftsmanship.
+                </p>
+
+                <h3 class="sg-subheading">Contents</h3>
+                <ul class="sg-toc">
+                    <li><a href="#colors">1. Color Palette</a></li>
+                    <li><a href="#typography">2. Typography</a></li>
+                    <li><a href="#spacing">3. Spacing Scale</a></li>
+                    <li><a href="#layout">4. Layout & Grid</a></li>
+                    <li><a href="#buttons">5. Buttons</a></li>
+                    <li><a href="#windows">6. Window Components</a></li>
+                    <li><a href="#sections">7. Section Patterns</a></li>
+                    <li><a href="#forms">8. Forms & Inputs</a></li>
+                    <li><a href="#modals">9. Modals</a></li>
+                    <li><a href="#navigation">10. Navigation & Footer</a></li>
+                    <li><a href="#imagery">11. Imagery & Assets</a></li>
+                    <li><a href="#responsive">12. Responsive Behavior</a></li>
+                    <li><a href="#voice">13. Voice & Tone</a></li>
+                    <li><a href="#ctas">14. CTA Patterns</a></li>
+                    <li><a href="#writing">15. Writing Do's & Don'ts</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ================================
+             1. COLOR PALETTE
+             ================================ -->
+        <section class="sg-section" id="colors">
+            <div class="container">
+                <p class="sg-label">Section 1</p>
+                <h2 class="sg-heading">Color Palette</h2>
+                <p class="sg-description">
+                    The palette is deliberately restrained &mdash; monochromatic grays with a single accent color. This reflects the Classic Mac aesthetic and keeps the focus on content. The accent pink/mauve is used exclusively for interactive elements (buttons, CTAs) to draw attention to actions.
+                </p>
+
+                <h3 class="sg-subheading">Core Colors</h3>
+                <div class="sg-colors">
+                    <div class="sg-swatch">
+                        <div class="sg-swatch-color" style="background: #F5F5F0;"></div>
+                        <div class="sg-swatch-info">
+                            <div class="sg-swatch-name">Fog</div>
+                            <div class="sg-swatch-value">#F5F5F0</div>
+                            <div class="sg-swatch-var">--color-fog</div>
+                        </div>
+                    </div>
+                    <div class="sg-swatch">
+                        <div class="sg-swatch-color" style="background: #E8E8E8;"></div>
+                        <div class="sg-swatch-info">
+                            <div class="sg-swatch-name">Platinum</div>
+                            <div class="sg-swatch-value">#E8E8E8</div>
+                            <div class="sg-swatch-var">--color-platinum</div>
+                        </div>
+                    </div>
+                    <div class="sg-swatch">
+                        <div class="sg-swatch-color" style="background: #D0D0D0;"></div>
+                        <div class="sg-swatch-info">
+                            <div class="sg-swatch-name">Line</div>
+                            <div class="sg-swatch-value">#D0D0D0</div>
+                            <div class="sg-swatch-var">--color-line</div>
+                        </div>
+                    </div>
+                    <div class="sg-swatch">
+                        <div class="sg-swatch-color" style="background: #5A5A5A;"></div>
+                        <div class="sg-swatch-info">
+                            <div class="sg-swatch-name">Slate</div>
+                            <div class="sg-swatch-value">#5A5A5A</div>
+                            <div class="sg-swatch-var">--color-slate</div>
+                        </div>
+                    </div>
+                    <div class="sg-swatch">
+                        <div class="sg-swatch-color" style="background: #2C2C2C;"></div>
+                        <div class="sg-swatch-info">
+                            <div class="sg-swatch-name">Charcoal</div>
+                            <div class="sg-swatch-value">#2C2C2C</div>
+                            <div class="sg-swatch-var">--color-charcoal</div>
+                        </div>
+                    </div>
+                    <div class="sg-swatch">
+                        <div class="sg-swatch-color" style="background: #FFFFFF; border-bottom-color: #D0D0D0;"></div>
+                        <div class="sg-swatch-info">
+                            <div class="sg-swatch-name">White</div>
+                            <div class="sg-swatch-value">#FFFFFF</div>
+                            <div class="sg-swatch-var">--color-white</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">Accent Color</h3>
+                <div class="sg-colors" style="max-width: 400px;">
+                    <div class="sg-swatch">
+                        <div class="sg-swatch-color" style="background: #C7547C;"></div>
+                        <div class="sg-swatch-info">
+                            <div class="sg-swatch-name">Mauve / Pink</div>
+                            <div class="sg-swatch-value">#C7547C</div>
+                            <div class="sg-swatch-var">Buttons, CTAs only</div>
+                        </div>
+                    </div>
+                    <div class="sg-swatch">
+                        <div class="sg-swatch-color" style="background: #8B0000;"></div>
+                        <div class="sg-swatch-info">
+                            <div class="sg-swatch-name">Error</div>
+                            <div class="sg-swatch-value">#8B0000</div>
+                            <div class="sg-swatch-var">--color-error</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">Usage Rules</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Color</th>
+                        <th>Use For</th>
+                        <th>Never Use For</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Fog</strong> (#F5F5F0)</td>
+                        <td>Page background (body)</td>
+                        <td>Component backgrounds, text</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Platinum</strong> (#E8E8E8)</td>
+                        <td>Header/footer background, window title bars, stat boxes, highlighted areas</td>
+                        <td>Body background, text</td>
+                    </tr>
+                    <tr>
+                        <td><strong>White</strong> (#FFFFFF)</td>
+                        <td>Window/card content areas, button default background, form inputs</td>
+                        <td>Body background</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Charcoal</strong> (#2C2C2C)</td>
+                        <td>Primary text, borders, headings, final CTA background</td>
+                        <td>Large background fills (except final CTA section)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Slate</strong> (#5A5A5A)</td>
+                        <td>Secondary text, subtitles, labels, descriptions</td>
+                        <td>Headings, borders, backgrounds</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mauve</strong> (#C7547C)</td>
+                        <td>Button borders, button shadows, button hover fills, CTAs</td>
+                        <td>Text (except button text), backgrounds (except button hover), decorative elements</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- ================================
+             2. TYPOGRAPHY
+             ================================ -->
+        <section class="sg-section" id="typography">
+            <div class="container">
+                <p class="sg-label">Section 2</p>
+                <h2 class="sg-heading">Typography</h2>
+
+                <h3 class="sg-subheading">Font Family</h3>
+                <p class="sg-description">
+                    The primary (and only) typeface is <strong>Geneva</strong>, falling back through Chicago and system sans-serif fonts. This references the original Macintosh system fonts. Do not introduce additional typefaces.
+                </p>
+                <div class="sg-example">
+                    <p style="font-size: 24px; margin-bottom: var(--space-3);">
+                        <code style="font-size: var(--text-xs); background: var(--color-platinum); padding: 2px 6px; border: 1px solid var(--color-line);">--font-primary</code>
+                    </p>
+                    <p style="font-size: 24px;">
+                        "Geneva", "Chicago", -apple-system, BlinkMacSystemFont, sans-serif
+                    </p>
+                </div>
+
+                <h3 class="sg-subheading">Type Scale</h3>
+                <div class="sg-type-row">
+                    <div class="sg-type-meta">
+                        <div class="sg-type-var">--text-4xl</div>
+                        <div class="sg-type-px">48px</div>
+                    </div>
+                    <div style="font-size: 48px; font-weight: 700; line-height: 1.2;">Hero Headlines</div>
+                </div>
+                <div class="sg-type-row">
+                    <div class="sg-type-meta">
+                        <div class="sg-type-var">--text-3xl</div>
+                        <div class="sg-type-px">36px</div>
+                    </div>
+                    <div style="font-size: 36px; font-weight: 700; line-height: 1.2;">Section Titles</div>
+                </div>
+                <div class="sg-type-row">
+                    <div class="sg-type-meta">
+                        <div class="sg-type-var">--text-2xl</div>
+                        <div class="sg-type-px">24px</div>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 700; line-height: 1.3;">Card Headings, Modal Titles</div>
+                </div>
+                <div class="sg-type-row">
+                    <div class="sg-type-meta">
+                        <div class="sg-type-var">--text-xl</div>
+                        <div class="sg-type-px">18px</div>
+                    </div>
+                    <div style="font-size: 18px; font-weight: 700; line-height: 1.4;">Subheadings, FAQ Questions, Buttons</div>
+                </div>
+                <div class="sg-type-row">
+                    <div class="sg-type-meta">
+                        <div class="sg-type-var">--text-base</div>
+                        <div class="sg-type-px">16px</div>
+                    </div>
+                    <div style="font-size: 16px; line-height: 1.6;">Body text, paragraphs, form inputs, descriptions. This is the default reading size used across the site.</div>
+                </div>
+                <div class="sg-type-row">
+                    <div class="sg-type-meta">
+                        <div class="sg-type-var">--text-lg</div>
+                        <div class="sg-type-px">14px</div>
+                    </div>
+                    <div style="font-size: 14px; font-weight: 700; line-height: 1.5;">Subtitles, Testimonial Names, Bold Labels</div>
+                </div>
+                <div class="sg-type-row">
+                    <div class="sg-type-meta">
+                        <div class="sg-type-var">--text-sm</div>
+                        <div class="sg-type-px">11px</div>
+                    </div>
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Navigation links, form labels, footer links, window title bars</div>
+                </div>
+                <div class="sg-type-row">
+                    <div class="sg-type-meta">
+                        <div class="sg-type-var">--text-xs</div>
+                        <div class="sg-type-px">9px</div>
+                    </div>
+                    <div style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">Section labels, meta info, error messages</div>
+                </div>
+
+                <h3 class="sg-subheading">Typographic Patterns</h3>
+                <p class="sg-description">These recurring treatments create the visual rhythm of the brand. Apply them consistently.</p>
+
+                <div class="sg-example">
+                    <p class="sg-example-label">Section Label Pattern</p>
+                    <p style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--color-slate);">WHY FRACTAL WORKS</p>
+                    <p class="sg-note" style="margin-top: var(--space-3);">9px, uppercase, 0.1em letter-spacing, bold, slate color. Used above every section title.</p>
+                </div>
+
+                <div class="sg-example">
+                    <p class="sg-example-label">Section Title Pattern</p>
+                    <p style="font-size: 36px; font-weight: 700; color: var(--color-charcoal);">WHY FRACTAL ENGINEERS GET HIRED</p>
+                    <p class="sg-note" style="margin-top: var(--space-3);">36px, bold, charcoal. Section titles are typically uppercase on the site.</p>
+                </div>
+
+                <div class="sg-example">
+                    <p class="sg-example-label">Uppercase Nav/Link Pattern</p>
+                    <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Apply Now &rarr;</p>
+                    <p class="sg-note" style="margin-top: var(--space-3);">11px, bold, uppercase, 0.05em letter-spacing. Used for nav links, footer links, section links, and inline CTAs.</p>
+                </div>
+
+                <div class="sg-example">
+                    <p class="sg-example-label">Inline Highlight</p>
+                    <p>We've placed <span class="highlight">100% of our grads</span> into engineering jobs.</p>
+                    <p class="sg-note" style="margin-top: var(--space-3);">Platinum background, 1px charcoal border, bold. Use sparingly for key stats or claims.</p>
+                </div>
+
+                <h3 class="sg-subheading">Rules</h3>
+                <ul style="list-style: none; margin-bottom: var(--space-5);">
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Body text line-height is always <strong>1.6</strong>. Headlines use <strong>1.2</strong>.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Labels and small UI text are always <strong>bold, uppercase, with letter-spacing</strong>.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Never use font weights below 400. The system uses <strong>400 (normal)</strong> and <strong>700 (bold)</strong> only.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Italics are reserved for <strong>testimonial quotes only</strong>.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Do not use colored text except slate for secondary content and error red for validation.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ================================
+             3. SPACING SCALE
+             ================================ -->
+        <section class="sg-section" id="spacing">
+            <div class="container">
+                <p class="sg-label">Section 3</p>
+                <h2 class="sg-heading">Spacing Scale</h2>
+                <p class="sg-description">
+                    All spacing is defined on a fixed scale. Use these tokens &mdash; don't use arbitrary pixel values. The scale is intentionally non-linear; it compresses at small sizes and expands at large sizes.
+                </p>
+
+                <div class="sg-space-row">
+                    <div class="sg-space-meta">--space-1 &nbsp; 2px</div>
+                    <div class="sg-space-bar" style="width: 2px;"></div>
+                </div>
+                <div class="sg-space-row">
+                    <div class="sg-space-meta">--space-2 &nbsp; 4px</div>
+                    <div class="sg-space-bar" style="width: 4px;"></div>
+                </div>
+                <div class="sg-space-row">
+                    <div class="sg-space-meta">--space-3 &nbsp; 8px</div>
+                    <div class="sg-space-bar" style="width: 8px;"></div>
+                </div>
+                <div class="sg-space-row">
+                    <div class="sg-space-meta">--space-4 &nbsp; 12px</div>
+                    <div class="sg-space-bar" style="width: 12px;"></div>
+                </div>
+                <div class="sg-space-row">
+                    <div class="sg-space-meta">--space-5 &nbsp; 16px</div>
+                    <div class="sg-space-bar" style="width: 16px;"></div>
+                </div>
+                <div class="sg-space-row">
+                    <div class="sg-space-meta">--space-6 &nbsp; 24px</div>
+                    <div class="sg-space-bar" style="width: 24px;"></div>
+                </div>
+                <div class="sg-space-row">
+                    <div class="sg-space-meta">--space-7 &nbsp; 32px</div>
+                    <div class="sg-space-bar" style="width: 32px;"></div>
+                </div>
+                <div class="sg-space-row">
+                    <div class="sg-space-meta">--space-8 &nbsp; 48px</div>
+                    <div class="sg-space-bar" style="width: 48px;"></div>
+                </div>
+                <div class="sg-space-row">
+                    <div class="sg-space-meta">--space-9 &nbsp; 64px</div>
+                    <div class="sg-space-bar" style="width: 64px;"></div>
+                </div>
+
+                <h3 class="sg-subheading">Common Usage</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Context</th>
+                        <th>Token</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Gap between small inline elements</td>
+                        <td><code>--space-2</code> to <code>--space-3</code></td>
+                        <td>4&ndash;8px</td>
+                    </tr>
+                    <tr>
+                        <td>Padding inside window title bars</td>
+                        <td><code>--space-3</code> / <code>--space-4</code></td>
+                        <td>8 / 12px</td>
+                    </tr>
+                    <tr>
+                        <td>Grid gaps and card gaps</td>
+                        <td><code>--space-4</code> to <code>--space-6</code></td>
+                        <td>12&ndash;24px</td>
+                    </tr>
+                    <tr>
+                        <td>Window content padding</td>
+                        <td><code>--space-6</code></td>
+                        <td>24px</td>
+                    </tr>
+                    <tr>
+                        <td>Between major elements within a section</td>
+                        <td><code>--space-7</code></td>
+                        <td>32px</td>
+                    </tr>
+                    <tr>
+                        <td>Section vertical padding</td>
+                        <td><code>--space-8</code></td>
+                        <td>48px</td>
+                    </tr>
+                    <tr>
+                        <td>Hero and final CTA section padding</td>
+                        <td><code>--space-9</code></td>
+                        <td>64px</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- ================================
+             4. LAYOUT & GRID
+             ================================ -->
+        <section class="sg-section" id="layout">
+            <div class="container">
+                <p class="sg-label">Section 4</p>
+                <h2 class="sg-heading">Layout & Grid</h2>
+
+                <h3 class="sg-subheading">Container Widths</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Class</th>
+                        <th>Max Width</th>
+                        <th>Use For</th>
+                    </tr>
+                    <tr>
+                        <td><code>.container</code></td>
+                        <td>960px</td>
+                        <td>All standard page content. Centered with <code>--space-6</code> (24px) side padding.</td>
+                    </tr>
+                    <tr>
+                        <td><code>.container-narrow</code></td>
+                        <td>600px</td>
+                        <td>Forms, single-column text content</td>
+                    </tr>
+                </table>
+
+                <h3 class="sg-subheading">Grid Patterns</h3>
+                <p class="sg-note">The site uses CSS Grid for all multi-column layouts. Below are the standard column counts.</p>
+
+                <p class="sg-example-label" style="margin-top: var(--space-5);">4-Column &mdash; Stats (team page)</p>
+                <div class="sg-grid-example" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="sg-grid-cell">Stat</div>
+                    <div class="sg-grid-cell">Stat</div>
+                    <div class="sg-grid-cell">Stat</div>
+                    <div class="sg-grid-cell">Stat</div>
+                </div>
+
+                <p class="sg-example-label">3-Column &mdash; Stats (homepage), Cohort Details</p>
+                <div class="sg-grid-example" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="sg-grid-cell">Cell</div>
+                    <div class="sg-grid-cell">Cell</div>
+                    <div class="sg-grid-cell">Cell</div>
+                </div>
+
+                <p class="sg-example-label">2-Column &mdash; Value Props, Testimonials, Differentiators, Timeline</p>
+                <div class="sg-grid-example" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="sg-grid-cell">Cell</div>
+                    <div class="sg-grid-cell">Cell</div>
+                </div>
+
+                <p class="sg-example-label">1-Column &mdash; FAQ list, Forms, Content text</p>
+                <div class="sg-grid-example" style="grid-template-columns: 1fr;">
+                    <div class="sg-grid-cell">Full Width</div>
+                </div>
+
+                <p class="sg-example-label">Flex Wrap &mdash; Partners grid, CTA buttons</p>
+                <div style="display: flex; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-6);">
+                    <div class="sg-grid-cell" style="min-width: 120px; flex: 0 1 auto;">Item</div>
+                    <div class="sg-grid-cell" style="min-width: 120px; flex: 0 1 auto;">Item</div>
+                    <div class="sg-grid-cell" style="min-width: 120px; flex: 0 1 auto;">Item</div>
+                    <div class="sg-grid-cell" style="min-width: 120px; flex: 0 1 auto;">Item</div>
+                    <div class="sg-grid-cell" style="min-width: 120px; flex: 0 1 auto;">Item</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================
+             5. BUTTONS
+             ================================ -->
+        <section class="sg-section" id="buttons">
+            <div class="container">
+                <p class="sg-label">Section 5</p>
+                <h2 class="sg-heading">Buttons</h2>
+                <p class="sg-description">
+                    Buttons are the only place the accent color (#C7547C) appears. They follow the "Snow White" aesthetic with thick borders and offset drop shadows. Currently, primary and secondary share the same visual style &mdash; the distinction exists in the HTML class names to allow future differentiation (e.g., secondary could become outline-only or ghost).
+                </p>
+
+                <h3 class="sg-subheading">Primary Button</h3>
+                <p class="sg-note">Use for the highest-priority action on any page or section. Usually "Apply Now" or the main CTA.</p>
+                <div class="sg-example">
+                    <p class="sg-example-label">Default</p>
+                    <a href="#" class="btn-primary" onclick="return false;">Apply Now &rarr;</a>
+                </div>
+                <div class="sg-example">
+                    <p class="sg-example-label">Hover (fill with accent color)</p>
+                    <a href="#" class="btn-primary" style="background-color: #C7547C; color: white;" onclick="return false;">Apply Now &rarr;</a>
+                </div>
+                <div class="sg-example">
+                    <p class="sg-example-label">Active / Pressed</p>
+                    <a href="#" class="btn-primary" style="box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3); transform: translate(1px,1px);" onclick="return false;">Apply Now &rarr;</a>
+                </div>
+
+                <h3 class="sg-subheading">Secondary Button</h3>
+                <p class="sg-note">Use for the secondary action alongside a primary button. Visually identical to primary for now &mdash; reserved for future differentiation.</p>
+                <div class="sg-example">
+                    <a href="#" class="btn-secondary" onclick="return false;">Get Our Action Plan</a>
+                </div>
+
+                <h3 class="sg-subheading">Full-Width Button (Forms)</h3>
+                <p class="sg-note">Used in forms and modals. Same styling as primary but <code>width: 100%</code>.</p>
+                <div class="sg-example" style="max-width: 400px;">
+                    <button class="btn" type="button">Submit Application &rarr;</button>
+                </div>
+
+                <h3 class="sg-subheading">Disabled State</h3>
+                <div class="sg-example" style="max-width: 400px;">
+                    <button class="btn" disabled>Submitting...</button>
+                </div>
+
+                <h3 class="sg-subheading">Button Anatomy</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Background</td>
+                        <td>White (default), #C7547C (hover)</td>
+                    </tr>
+                    <tr>
+                        <td>Text Color</td>
+                        <td>#C7547C (default), White (hover)</td>
+                    </tr>
+                    <tr>
+                        <td>Border</td>
+                        <td>3px solid #C7547C</td>
+                    </tr>
+                    <tr>
+                        <td>Box Shadow</td>
+                        <td>4px 4px 0 #C7547C</td>
+                    </tr>
+                    <tr>
+                        <td>Padding</td>
+                        <td>16px 32px</td>
+                    </tr>
+                    <tr>
+                        <td>Font</td>
+                        <td>18px, bold, uppercase, 0.05em letter-spacing</td>
+                    </tr>
+                    <tr>
+                        <td>Active</td>
+                        <td>Inset shadow, 1px translate (pressed effect)</td>
+                    </tr>
+                    <tr>
+                        <td>Disabled</td>
+                        <td>Platinum bg, slate text, slate border, no shadow</td>
+                    </tr>
+                </table>
+
+                <h3 class="sg-subheading">Text Links (Inline CTAs)</h3>
+                <p class="sg-note">Used for secondary navigation within sections ("Read her story", "See all FAQs", "Meet the team").</p>
+                <div class="sg-example">
+                    <a href="#" class="value-link" onclick="return false;">&rarr; Meet the team</a>
+                </div>
+                <p class="sg-note">
+                    <code>font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;</code><br>
+                    Charcoal color. Underline on hover. Always prefixed with an arrow (&rarr;).
+                </p>
+            </div>
+        </section>
+
+        <!-- ================================
+             6. WINDOW COMPONENTS
+             ================================ -->
+        <section class="sg-section" id="windows">
+            <div class="container">
+                <p class="sg-label">Section 6</p>
+                <h2 class="sg-heading">Window Components</h2>
+                <p class="sg-description">
+                    The signature visual element of the brand. Modeled after Classic Macintosh window chrome: a gray title bar with dots, a solid border, and an offset drop shadow. Every card, FAQ category, team member, and content block on the site is a "window."
+                </p>
+
+                <h3 class="sg-subheading">Standard Window</h3>
+                <div class="sg-example">
+                    <div class="window" style="max-width: 500px;">
+                        <div class="window-title window-title-with-dots">Window Title</div>
+                        <div class="window-content">
+                            <p>Content goes here. This is the standard card/container used across the site for FAQ items, testimonials, value props, and all content blocks.</p>
+                        </div>
+                    </div>
+                </div>
+                <table class="sg-voice-table" style="max-width: 500px;">
+                    <tr><th>Property</th><th>Value</th></tr>
+                    <tr><td>Border</td><td>2px solid charcoal</td></tr>
+                    <tr><td>Shadow</td><td>4px 4px 0 rgba(0,0,0,0.15)</td></tr>
+                    <tr><td>Title bar bg</td><td>Platinum</td></tr>
+                    <tr><td>Title bar border</td><td>2px solid charcoal (bottom)</td></tr>
+                    <tr><td>Title bar text</td><td>11px, bold, uppercase, 0.05em spacing</td></tr>
+                    <tr><td>Content padding</td><td>24px (--space-6)</td></tr>
+                    <tr><td>Dots prefix</td><td>&#9726; &#9726; &#9726; (Unicode \25FE)</td></tr>
+                </table>
+
+                <h3 class="sg-subheading">Hero Window</h3>
+                <p class="sg-note">Larger, more prominent version used for the main hero and CTA sections.</p>
+                <div class="sg-example">
+                    <div class="hero-window" style="max-width: 500px;">
+                        <div class="hero-title-bar">
+                            <span style="font-size: 11px; font-weight: 700;">FRACTAL ACCELERATOR</span>
+                        </div>
+                        <div class="hero-content">
+                            <h2 style="font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-4);">Hero Content</h2>
+                            <p style="font-size: var(--text-lg); color: var(--color-slate);">Subtitle text goes here.</p>
+                        </div>
+                    </div>
+                </div>
+                <table class="sg-voice-table" style="max-width: 500px;">
+                    <tr><th>Property</th><th>Standard vs Hero</th></tr>
+                    <tr><td>Border</td><td>2px &rarr; <strong>3px</strong></td></tr>
+                    <tr><td>Shadow</td><td>4px 4px &rarr; <strong>6px 6px</strong></td></tr>
+                    <tr><td>Shadow opacity</td><td>0.15 &rarr; <strong>0.2</strong></td></tr>
+                </table>
+
+                <h3 class="sg-subheading">Title Bar Variants</h3>
+                <p class="sg-note">Window title bars can be plain text or include the three-dot prefix. Both are used on the site.</p>
+                <div class="sg-example">
+                    <p class="sg-example-label">With dots (::before pseudo-element)</p>
+                    <div style="background: var(--color-platinum); padding: var(--space-3) var(--space-4); border: 2px solid var(--color-charcoal); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: var(--space-2); max-width: 400px;">
+                        <span style="font-size: var(--text-xs); letter-spacing: 2px;">&#9726; &#9726; &#9726;</span> Window Title
+                    </div>
+                </div>
+                <div class="sg-example">
+                    <p class="sg-example-label">With bullet prefix (text content)</p>
+                    <div style="background: var(--color-platinum); padding: var(--space-3) var(--space-4); border: 2px solid var(--color-charcoal); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; max-width: 400px;">
+                        &#9724; ELITE INSTRUCTION
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================
+             7. SECTION PATTERNS
+             ================================ -->
+        <section class="sg-section" id="sections">
+            <div class="container">
+                <p class="sg-label">Section 7</p>
+                <h2 class="sg-heading">Section Patterns</h2>
+                <p class="sg-description">
+                    Every page section follows a consistent structure: label &rarr; title &rarr; content. These patterns are reusable across all pages and marketing materials.
+                </p>
+
+                <h3 class="sg-subheading">Standard Section</h3>
+                <div class="sg-example">
+                    <p class="section-label">SECTION LABEL</p>
+                    <h2 class="section-title">SECTION TITLE IN ALL CAPS</h2>
+                    <div class="section-content">
+                        <p>Body content follows. The label provides context (like a category), the title makes the main claim, and the content elaborates.</p>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">Stats Section</h3>
+                <div class="sg-example">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); max-width: 600px;">
+                        <div class="stat-box">
+                            <div class="stat-value">$100K+</div>
+                            <div class="stat-label">Avg Salary</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">40+</div>
+                            <div class="stat-label">Partner Startups</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">100%</div>
+                            <div class="stat-label">Job Placement</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="sg-note">Platinum background, 2px charcoal border, 3px offset shadow. Value is 36px bold, label is 11px uppercase.</p>
+
+                <h3 class="sg-subheading">Partners Bar</h3>
+                <p class="sg-note">Full-width platinum background strip with top/bottom line borders. Logo containers are white boxes with 1px charcoal border, flex-wrapped and centered.</p>
+                <div class="sg-example" style="background: var(--color-platinum); border-top: 2px solid var(--color-line); border-bottom: 2px solid var(--color-line);">
+                    <p style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; margin-bottom: var(--space-4); font-weight: 700;">OUR PARTNER COMPANIES</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: var(--space-4); justify-content: center;">
+                        <div class="partner-logo" style="min-width: 100px; min-height: 50px;">Logo</div>
+                        <div class="partner-logo" style="min-width: 100px; min-height: 50px;">Logo</div>
+                        <div class="partner-logo" style="min-width: 100px; min-height: 50px;">Logo</div>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">Final CTA Section</h3>
+                <p class="sg-note">The only section with a dark (charcoal) background. White text. Centered. Used as the closing call-to-action on most pages.</p>
+                <div class="sg-example sg-example-dark" style="text-align: center; padding: var(--space-8);">
+                    <h2 style="font-size: var(--text-3xl); font-weight: 700; color: white; margin-bottom: var(--space-5);">READY TO START?</h2>
+                    <p style="font-size: var(--text-lg); color: white; margin-bottom: var(--space-6);">15 spots available. Spring 2026 cohort starts Feb 2.</p>
+                    <a href="#" class="btn-primary" onclick="return false;">Apply Now &rarr;</a>
+                    <p style="font-size: var(--text-sm); margin-top: var(--space-5); color: var(--color-platinum);">Not ready to apply? <a href="#" style="color: var(--color-platinum); font-weight: 700;" onclick="return false;">Get our action plan</a></p>
+                </div>
+
+                <h3 class="sg-subheading">Testimonial Card</h3>
+                <div class="sg-example">
+                    <div class="window" style="max-width: 400px;">
+                        <div class="window-title">&#9724; DOROTHY</div>
+                        <div class="window-content">
+                            <p class="testimonial-role">PM &rarr; Engineer at Ellis (Immigration Tech)</p>
+                            <p class="testimonial-quote">"I went from managing projects to building them."</p>
+                            <a href="#" class="testimonial-link" onclick="return false;">&rarr; Read her story</a>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">List Style</h3>
+                <p class="sg-note">Lists use a small black square bullet (&#9642; Unicode \25AA) positioned absolutely. No default disc bullets.</p>
+                <div class="sg-example">
+                    <ul class="cohort-list" style="max-width: 400px;">
+                        <li>12-week intensive AI engineering program</li>
+                        <li>1-3 internship opportunities at real NYC startups</li>
+                        <li>Career coaching until you're hired</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================
+             8. FORMS & INPUTS
+             ================================ -->
+        <section class="sg-section" id="forms">
+            <div class="container">
+                <p class="sg-label">Section 8</p>
+                <h2 class="sg-heading">Forms & Inputs</h2>
+
+                <h3 class="sg-subheading">Form Field</h3>
+                <div class="sg-example" style="max-width: 400px;">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" placeholder="John">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" placeholder="john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>LinkedIn <span class="optional">(optional)</span></label>
+                        <input type="url" placeholder="linkedin.com/in/johndoe">
+                    </div>
+                </div>
+                <p class="sg-note">
+                    Labels: 11px, bold, uppercase, 0.05em spacing. Inputs: 2px charcoal border, 16px font, no border-radius. Focus state: inset shadow, no outline. Optional text: slate, normal weight, no uppercase.
+                </p>
+
+                <h3 class="sg-subheading">Error State</h3>
+                <div class="sg-example" style="max-width: 400px;">
+                    <div class="form-group error">
+                        <label>Email Address</label>
+                        <input type="email" value="not-an-email" style="border-color: var(--color-error); background: #FFF5F5;">
+                        <div class="error-message" style="display: block;">Please enter a valid email address</div>
+                    </div>
+                </div>
+                <p class="sg-note">
+                    Error border: #8B0000. Background: #FFF5F5. Message: 9px, bold, uppercase, error red.
+                </p>
+
+                <h3 class="sg-subheading">Progress Steps</h3>
+                <p class="sg-note">Used on multi-step forms (e.g., the apply page).</p>
+                <div class="sg-example">
+                    <div class="progress-steps" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">
+                        <div class="step active">
+                            <div class="step-number">1</div>
+                            <span class="step-label">Your Info</span>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <span class="step-label">Book a Call</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================
+             9. MODALS
+             ================================ -->
+        <section class="sg-section" id="modals">
+            <div class="container">
+                <p class="sg-label">Section 9</p>
+                <h2 class="sg-heading">Modals</h2>
+                <p class="sg-description">
+                    Modals use the hero window treatment (3px border, 6px shadow) with a close button. They appear over a 50% black overlay.
+                </p>
+                <div class="sg-example">
+                    <div style="max-width: 450px; background: var(--color-white); border: 3px solid var(--color-charcoal); box-shadow: 6px 6px 0 rgba(0,0,0,0.3);">
+                        <div style="background: var(--color-platinum); padding: var(--space-3) var(--space-4); border-bottom: 3px solid var(--color-charcoal); display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                                <span style="font-size: var(--text-xs); letter-spacing: 2px;">&#9726; &#9726; &#9726;</span>&nbsp; Modal Title
+                            </span>
+                            <span style="background: var(--color-charcoal); color: var(--color-white); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--text-sm);">&#10005;</span>
+                        </div>
+                        <div style="padding: var(--space-7); text-align: center;">
+                            <h2 style="font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-3);">Modal Heading</h2>
+                            <p style="font-size: var(--text-base); color: var(--color-slate);">Description text goes here.</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="sg-note">
+                    Close button: 24x24px, charcoal background, white text, 1px offset shadow. Max modal width: 500px. Max height: 90vh with overflow scroll.
+                </p>
+            </div>
+        </section>
+
+        <!-- ================================
+             10. NAVIGATION & FOOTER
+             ================================ -->
+        <section class="sg-section" id="navigation">
+            <div class="container">
+                <p class="sg-label">Section 10</p>
+                <h2 class="sg-heading">Navigation & Footer</h2>
+
+                <h3 class="sg-subheading">Header</h3>
+                <p class="sg-note">Sticky, platinum background, 3px charcoal bottom border. Logo on left, nav links on right.</p>
+                <div class="sg-example" style="padding: 0;">
+                    <div style="background: var(--color-platinum); border-bottom: 3px solid var(--color-charcoal); padding: var(--space-5) var(--space-6); display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: var(--text-xl); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">FRACTAL</span>
+                        <div style="display: flex; gap: var(--space-4);">
+                            <span style="font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Apply Now</span>
+                            <span style="font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Hire Engineers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">Footer</h3>
+                <p class="sg-note">Platinum background, 3px charcoal top border. Three-column link sections with a centered bottom bar. Footer text is 9px uppercase.</p>
+                <div class="sg-example" style="padding: 0;">
+                    <div style="background: var(--color-platinum); border-top: 3px solid var(--color-charcoal); padding: var(--space-6);">
+                        <div style="display: flex; justify-content: space-around; margin-bottom: var(--space-5);">
+                            <div>
+                                <p style="font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-3);">Accelerator</p>
+                                <p style="font-size: var(--text-sm); margin-bottom: var(--space-2);">How It Works</p>
+                                <p style="font-size: var(--text-sm); margin-bottom: var(--space-2);">Testimonials</p>
+                            </div>
+                            <div>
+                                <p style="font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-3);">Connect</p>
+                                <p style="font-size: var(--text-sm); margin-bottom: var(--space-2);">Twitter/X</p>
+                                <p style="font-size: var(--text-sm); margin-bottom: var(--space-2);">Discord</p>
+                            </div>
+                            <div>
+                                <p style="font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-3);">More</p>
+                                <p style="font-size: var(--text-sm); margin-bottom: var(--space-2);">Community Hub</p>
+                                <p style="font-size: var(--text-sm); margin-bottom: var(--space-2);">Privacy Policy</p>
+                            </div>
+                        </div>
+                        <div style="text-align: center; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; padding-top: var(--space-4); border-top: 2px solid var(--color-charcoal);">
+                            &copy; 2026 FRACTAL ACCELERATOR. NYC.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================
+             11. IMAGERY & ASSETS
+             ================================ -->
+        <section class="sg-section" id="imagery">
+            <div class="container">
+                <p class="sg-label">Section 11</p>
+                <h2 class="sg-heading">Imagery & Assets</h2>
+
+                <h3 class="sg-subheading">Photo Treatment</h3>
+                <p class="sg-description">
+                    All photos on the site get a border and drop shadow treatment that matches the window aesthetic. Photos should look like they belong inside the design system, not floating free.
+                </p>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Context</th>
+                        <th>Treatment</th>
+                    </tr>
+                    <tr>
+                        <td>Community/cohort photos</td>
+                        <td>3px solid black border, 4px 4px 0 black shadow, height: 250px, object-fit: cover</td>
+                    </tr>
+                    <tr>
+                        <td>Value prop card images</td>
+                        <td>No separate border (contained within window), height: 180px, object-fit: cover, 4px border-radius</td>
+                    </tr>
+                    <tr>
+                        <td>Team headshots</td>
+                        <td>80x80px, 2px charcoal border, platinum background fallback</td>
+                    </tr>
+                    <tr>
+                        <td>Hero images (scholarship page)</td>
+                        <td>Full width (max 800px), 2px charcoal border, centered</td>
+                    </tr>
+                    <tr>
+                        <td>Partner logos</td>
+                        <td>Inside white container with 1px charcoal border, 30px height, object-fit: contain</td>
+                    </tr>
+                </table>
+
+                <h3 class="sg-subheading">Photography Guidelines</h3>
+                <ul style="list-style: none; margin-bottom: var(--space-5);">
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Use real photos of real Fractal people, spaces, and events. No stock photography.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Prefer candid, in-action shots (coding, collaborating, presenting) over posed portraits.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Photos should feel energetic and communal &mdash; groups working together, not lone individuals.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Always apply the border + shadow treatment. Raw photos without framing break the design system.</li>
+                </ul>
+
+                <h3 class="sg-subheading">Brand Assets</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Asset</th>
+                        <th>File</th>
+                        <th>Usage</th>
+                    </tr>
+                    <tr>
+                        <td>Code slash icon</td>
+                        <td>assets/Fractal_Asset_code_slash.svg</td>
+                        <td>Hero section icon (80px width, 0.8 opacity)</td>
+                    </tr>
+                    <tr>
+                        <td>Logo</td>
+                        <td>Text-based: "FRACTAL"</td>
+                        <td>18px, bold, uppercase, 0.1em letter-spacing. The logo is typographic, not a graphic mark.</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- ================================
+             12. RESPONSIVE BEHAVIOR
+             ================================ -->
+        <section class="sg-section" id="responsive">
+            <div class="container">
+                <p class="sg-label">Section 12</p>
+                <h2 class="sg-heading">Responsive Behavior</h2>
+
+                <h3 class="sg-subheading">Breakpoints</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Breakpoint</th>
+                        <th>Max Width</th>
+                        <th>Target</th>
+                    </tr>
+                    <tr>
+                        <td>Tablet</td>
+                        <td>1024px</td>
+                        <td>Footer wraps at 45% width</td>
+                    </tr>
+                    <tr>
+                        <td>Mobile</td>
+                        <td>768px</td>
+                        <td>Full responsive transformation</td>
+                    </tr>
+                </table>
+
+                <h3 class="sg-subheading">Mobile Changes (768px and below)</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Element</th>
+                        <th>Desktop</th>
+                        <th>Mobile</th>
+                    </tr>
+                    <tr>
+                        <td>Hero h1</td>
+                        <td>48px</td>
+                        <td>24px</td>
+                    </tr>
+                    <tr>
+                        <td>Section titles</td>
+                        <td>36px</td>
+                        <td>24px</td>
+                    </tr>
+                    <tr>
+                        <td>Multi-column grids</td>
+                        <td>2&ndash;3 columns</td>
+                        <td>1 column (stacked)</td>
+                    </tr>
+                    <tr>
+                        <td>4-col stats (team page)</td>
+                        <td>4 columns</td>
+                        <td>2x2 grid</td>
+                    </tr>
+                    <tr>
+                        <td>Nav links</td>
+                        <td>Horizontal flex row</td>
+                        <td>Vertical stack</td>
+                    </tr>
+                    <tr>
+                        <td>Buttons</td>
+                        <td>Inline, auto-width</td>
+                        <td>Full-width (100%), stacked vertically</td>
+                    </tr>
+                    <tr>
+                        <td>Button padding</td>
+                        <td>16px 32px, 18px font</td>
+                        <td>14px 24px, 16px font</td>
+                    </tr>
+                    <tr>
+                        <td>Footer</td>
+                        <td>3-column flex row</td>
+                        <td>Single column, centered</td>
+                    </tr>
+                    <tr>
+                        <td>Team member header</td>
+                        <td>Horizontal (photo + info)</td>
+                        <td>Vertical, centered</td>
+                    </tr>
+                    <tr>
+                        <td>Progress step labels</td>
+                        <td>Visible</td>
+                        <td>Hidden (numbers only)</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- ================================
+             13. VOICE & TONE
+             ================================ -->
+        <section class="sg-section" id="voice">
+            <div class="container">
+                <p class="sg-label">Section 13</p>
+                <h2 class="sg-heading">Voice & Tone</h2>
+                <p class="sg-description">
+                    Fractal's voice is the voice of a founder talking directly to someone who's considering making a big career change. It's personal, honest, and specific. It never sounds like a brochure.
+                </p>
+
+                <h3 class="sg-subheading">Brand Voice Principles</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Principle</th>
+                        <th>What It Means</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Direct & Conversational</strong></td>
+                        <td>Write like you're talking to one person. Use "you" and "I/we." No corporate third-person.</td>
+                        <td>"I'm Andrew. Before Fractal, I was a founding engineer at Culdesac."</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Honest & Transparent</strong></td>
+                        <td>Acknowledge doubts, fears, and tradeoffs. Don't oversell. Address objections head-on.</td>
+                        <td>"Fair. Let me give you the honest answer: obviously no one can guarantee that you'll get a job."</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Specific & Evidence-Based</strong></td>
+                        <td>Use real numbers, real names, real companies. Never vague claims. Prove everything.</td>
+                        <td>"100% of our first cohort who pursued engineering jobs got hired." Not "great job placement rates."</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Story-Driven</strong></td>
+                        <td>Lead with real people's stories rather than feature lists. People remember stories.</td>
+                        <td>Dorothy's story: PM who couldn't build &rarr; hacker-in-residence at Every.to</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Action-Oriented</strong></td>
+                        <td>Every piece of content should move the reader closer to a decision. Always close with a clear next step.</td>
+                        <td>"Book a call and ask me anything." Not "Learn more about our programs."</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Credible Authority</strong></td>
+                        <td>Lean on founder credentials and instructor backgrounds. Show, don't just tell.</td>
+                        <td>"Paris was a Senior Software Engineer at Netflix... under 2% acceptance rate."</td>
+                    </tr>
+                </table>
+
+                <h3 class="sg-subheading">Tone Spectrum</h3>
+                <p class="sg-description">The tone shifts depending on context, but always stays within these bounds:</p>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Context</th>
+                        <th>Tone</th>
+                    </tr>
+                    <tr>
+                        <td>Homepage / landing page</td>
+                        <td>Confident, bold, direct claims. Short sentences. Urgency.</td>
+                    </tr>
+                    <tr>
+                        <td>Email sequences</td>
+                        <td>Personal, conversational, storytelling. Signed "— Andrew."</td>
+                    </tr>
+                    <tr>
+                        <td>Case studies / testimonials</td>
+                        <td>Narrative, empathetic, transformation-focused. Before &rarr; after arc.</td>
+                    </tr>
+                    <tr>
+                        <td>FAQ / objection handling</td>
+                        <td>Honest, anticipatory, reassuring without being dismissive.</td>
+                    </tr>
+                    <tr>
+                        <td>Hiring partners page</td>
+                        <td>Professional, outcome-focused. Less personal, more business value.</td>
+                    </tr>
+                </table>
+
+                <h3 class="sg-subheading">Terminology</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Use</th>
+                        <th>Don't Use</th>
+                    </tr>
+                    <tr>
+                        <td>Engineers</td>
+                        <td>Students, graduates, learners, coders</td>
+                    </tr>
+                    <tr>
+                        <td>Fractal Accelerator</td>
+                        <td>Fractal Bootcamp (legacy, being phased out)</td>
+                    </tr>
+                    <tr>
+                        <td>Cohort</td>
+                        <td>Class, batch, group</td>
+                    </tr>
+                    <tr>
+                        <td>Ship / build / launch</td>
+                        <td>Learn / study / train (when describing outcomes)</td>
+                    </tr>
+                    <tr>
+                        <td>Partner startups</td>
+                        <td>Client companies, employers</td>
+                    </tr>
+                    <tr>
+                        <td>Staff-level engineers</td>
+                        <td>Teachers, professors, mentors</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- ================================
+             14. CTA PATTERNS
+             ================================ -->
+        <section class="sg-section" id="ctas">
+            <div class="container">
+                <p class="sg-label">Section 14</p>
+                <h2 class="sg-heading">CTA Patterns</h2>
+                <p class="sg-description">
+                    Every page and every email should end with a clear call to action. CTAs follow predictable patterns.
+                </p>
+
+                <h3 class="sg-subheading">Primary CTAs (Buttons)</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>CTA Text</th>
+                        <th>When to Use</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Apply Now &rarr;</strong></td>
+                        <td>Main conversion action on any page. Links to apply.html.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Book a Call</strong></td>
+                        <td>Lower-commitment alternative. Links to Cal.com scheduling.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Get Your Assessment</strong></td>
+                        <td>Email CTAs. Frames the call as a free value exchange.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Send Me The Action Plan &rarr;</strong></td>
+                        <td>Lead magnet modal. Captures contact info for PDF delivery.</td>
+                    </tr>
+                </table>
+
+                <h3 class="sg-subheading">Secondary CTAs (Text Links)</h3>
+                <table class="sg-voice-table">
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td>Arrow prefix + action</td>
+                        <td>&rarr; Read her story</td>
+                    </tr>
+                    <tr>
+                        <td>Arrow prefix + destination</td>
+                        <td>&rarr; Meet the team</td>
+                    </tr>
+                    <tr>
+                        <td>See all + category</td>
+                        <td>See all testimonials &rarr;</td>
+                    </tr>
+                </table>
+
+                <h3 class="sg-subheading">Urgency & Scarcity Signals</h3>
+                <p class="sg-description">Used in final CTAs and email sequences. Always based on real constraints.</p>
+                <ul style="list-style: none; margin-bottom: var(--space-5);">
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>"15 spots available" &mdash; real cohort size</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>"Spring 2026 cohort starts Feb 2" &mdash; real date</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>"Last cohort filled in 8 days" &mdash; real track record</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>"Early Bird discount expires in 48 hours" &mdash; real deadline</li>
+                </ul>
+
+                <h3 class="sg-subheading">Fallback CTA</h3>
+                <p class="sg-note">Always include a lower-commitment option below the primary CTA for people who aren't ready to apply:</p>
+                <div class="sg-example" style="text-align: center;">
+                    <a href="#" class="btn-primary" onclick="return false;">Apply Now &rarr;</a>
+                    <p style="margin-top: var(--space-5); font-size: var(--text-sm);">Not ready to apply? <a href="#" style="color: var(--color-charcoal); font-weight: 700;" onclick="return false;">Get our action plan</a></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================
+             15. WRITING DO'S & DON'TS
+             ================================ -->
+        <section class="sg-section" id="writing">
+            <div class="container">
+                <p class="sg-label">Section 15</p>
+                <h2 class="sg-heading">Writing Do's & Don'ts</h2>
+
+                <h3 class="sg-subheading">Headlines & Section Titles</h3>
+                <div class="sg-dos">
+                    <div class="sg-do">
+                        <div class="sg-do-header">Do</div>
+                        <div class="sg-do-content">
+                            <p><strong>"Land a $100K+ AI Engineering Job in 12 Weeks"</strong></p>
+                            <p style="margin-top: 8px; color: var(--color-slate); font-size: 14px;">Specific outcome, specific timeline. The reader knows exactly what they get.</p>
+                        </div>
+                    </div>
+                    <div class="sg-dont">
+                        <div class="sg-dont-header">Don't</div>
+                        <div class="sg-dont-content">
+                            <p><strong>"Transform Your Career With Our Innovative Program"</strong></p>
+                            <p style="margin-top: 8px; color: var(--color-slate); font-size: 14px;">Vague, generic, could be any company. No specific proof or outcome.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">Body Copy</h3>
+                <div class="sg-dos">
+                    <div class="sg-do">
+                        <div class="sg-do-header">Do</div>
+                        <div class="sg-do-content">
+                            <p>"Dorothy joined our first cohort. Twelve weeks later, she wasn't just 'technical enough to talk to engineers' &mdash; she <em>was</em> one. Today she's hacker-in-residence at Every.to."</p>
+                            <p style="margin-top: 8px; color: var(--color-slate); font-size: 14px;">Real person, real timeline, real outcome, real company.</p>
+                        </div>
+                    </div>
+                    <div class="sg-dont">
+                        <div class="sg-dont-header">Don't</div>
+                        <div class="sg-dont-content">
+                            <p>"Our graduates go on to successful careers in the tech industry, leveraging the skills they learned during the program."</p>
+                            <p style="margin-top: 8px; color: var(--color-slate); font-size: 14px;">No specifics, no person, no company. Reads like a brochure.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">Addressing Objections</h3>
+                <div class="sg-dos">
+                    <div class="sg-do">
+                        <div class="sg-do-header">Do</div>
+                        <div class="sg-do-content">
+                            <p>"I know what you're really thinking. 'If I do this... will I actually get a job at the end?' Fair. Let me give you the honest answer."</p>
+                            <p style="margin-top: 8px; color: var(--color-slate); font-size: 14px;">Acknowledges the fear directly, validates it, then addresses it honestly.</p>
+                        </div>
+                    </div>
+                    <div class="sg-dont">
+                        <div class="sg-dont-header">Don't</div>
+                        <div class="sg-dont-content">
+                            <p>"Our comprehensive career services ensure all participants are well-positioned for employment upon completion."</p>
+                            <p style="margin-top: 8px; color: var(--color-slate); font-size: 14px;">Avoids the actual fear, uses corporate language, makes vague promises.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">CTAs & Emails</h3>
+                <div class="sg-dos">
+                    <div class="sg-do">
+                        <div class="sg-do-header">Do</div>
+                        <div class="sg-do-content">
+                            <p>"Still skeptical? Good. Book a call and ask me anything."</p>
+                            <p style="margin-top: 8px; color: var(--color-slate); font-size: 14px;">Meets the reader where they are. Gives them control. Low pressure.</p>
+                        </div>
+                    </div>
+                    <div class="sg-dont">
+                        <div class="sg-dont-header">Don't</div>
+                        <div class="sg-dont-content">
+                            <p>"Don't miss this incredible opportunity! Apply today before spots run out!"</p>
+                            <p style="margin-top: 8px; color: var(--color-slate); font-size: 14px;">Pressure tactics, generic urgency, no specificity.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">Email Subject Lines</h3>
+                <div class="sg-dos">
+                    <div class="sg-do">
+                        <div class="sg-do-header">Do</div>
+                        <div class="sg-do-content">
+                            <p>"We couldn't hire good engineers. So we started a school."</p>
+                            <p>"From PM to engineer (Dorothy's story)"</p>
+                            <p>"He deferred med school. Now he bills $125/hr as an engineer."</p>
+                            <p style="margin-top: 8px; color: var(--color-slate); font-size: 14px;">Narrative hook, specific, makes you want to open it.</p>
+                        </div>
+                    </div>
+                    <div class="sg-dont">
+                        <div class="sg-dont-header">Don't</div>
+                        <div class="sg-dont-content">
+                            <p>"Fractal Bootcamp Newsletter #4"</p>
+                            <p>"Exciting Update From Our Team!"</p>
+                            <p>"Your Future Starts Here"</p>
+                            <p style="margin-top: 8px; color: var(--color-slate); font-size: 14px;">Generic, no hook, no reason to open.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sg-subheading">General Rules</h3>
+                <ul style="list-style: none; margin-bottom: var(--space-5);">
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Sign emails from <strong>"&mdash; Andrew"</strong>. The brand voice comes from the founder, not "the Fractal team."</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Use <strong>bold</strong> for key claims and numbers. Use <em>italics</em> only for inner dialogue or quotes.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Keep paragraphs to <strong>2&ndash;3 sentences max</strong> in emails. One idea per paragraph.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Every email and page section should end with a <strong>clear, single next step</strong>.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Numbers are more convincing than adjectives: <strong>"$100K+"</strong> over "high-paying," <strong>"12 weeks"</strong> over "short program," <strong>"40+"</strong> over "many partners."</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>Never use "innovative," "cutting-edge," "world-class," "state-of-the-art," or other meaningless superlatives.</li>
+                    <li style="padding-left: var(--space-5); margin-bottom: var(--space-3); position: relative; line-height: 1.6;"><span style="position: absolute; left: 0; font-weight: 700;">&#9642;</span>The word "just" is allowed only when minimizing something ("it's not just another bootcamp"). Never use it to minimize the reader's concerns.</li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>FRACTAL STYLE GUIDE &mdash; INTERNAL REFERENCE</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
