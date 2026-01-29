@@ -20,11 +20,11 @@
     --font-primary: "Geneva", "Chicago", -apple-system, BlinkMacSystemFont, sans-serif;
 
     /* Font Sizes */
-    --text-xs: 9px;
-    --text-sm: 11px;
+    --text-xs: 11px;
+    --text-sm: 13px;
     --text-base: 16px;
-    --text-lg: 14px;
-    --text-xl: 18px;
+    --text-lg: 18px;
+    --text-xl: 20px;
     --text-2xl: 24px;
     --text-3xl: 36px;
     --text-4xl: 48px;
@@ -76,7 +76,7 @@ header {
 .header-content {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: var(--space-5) var(--space-6);
+    padding: var(--space-5) var(--space-7);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -93,7 +93,7 @@ header {
 
 .nav-links {
     display: flex;
-    gap: var(--space-4);
+    gap: var(--space-5);
     list-style: none;
     align-items: center;
 }
@@ -310,6 +310,9 @@ section {
     font-weight: 700;
     margin-bottom: var(--space-7);
     color: var(--color-charcoal);
+    padding-bottom: var(--space-4);
+    border-bottom: 3px solid var(--color-charcoal);
+    display: inline-block;
 }
 
 .section-content {
@@ -1353,7 +1356,7 @@ input::placeholder {
     font-style: italic;
 }
 
-.student-quote {
+.engineer-quote {
     background: var(--color-white);
     border: 2px solid var(--color-charcoal);
     border-left: 4px solid var(--color-charcoal);
@@ -1362,7 +1365,7 @@ input::placeholder {
     line-height: 1.6;
 }
 
-.student-quote strong {
+.engineer-quote strong {
     font-weight: 700;
     text-transform: uppercase;
     font-size: var(--text-xs);
