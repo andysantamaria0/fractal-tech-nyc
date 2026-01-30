@@ -1,0 +1,1102 @@
+/* ========================================
+   FRACTAL PARTNERS PORTAL - DESIGN SYSTEM
+   Ported from fractaltech.nyc (Snow White / Classic Mac)
+   ======================================== */
+
+/* ========================================
+   1. CSS VARIABLES (Design Tokens)
+   ======================================== */
+:root {
+    /* Color Palette - Snow White Era */
+    --color-platinum: #E8E8E8;
+    --color-fog: #F5F5F0;
+    --color-charcoal: #2C2C2C;
+    --color-slate: #5A5A5A;
+    --color-white: #FFFFFF;
+    --color-line: #D0D0D0;
+    --color-error: #8B0000;
+    --color-accent: #C7547C;
+
+    /* Typography */
+    --font-primary: "Geneva", "Chicago", -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Font Sizes */
+    --text-xs: 9px;
+    --text-sm: 11px;
+    --text-base: 16px;
+    --text-lg: 14px;
+    --text-xl: 18px;
+    --text-2xl: 24px;
+    --text-3xl: 36px;
+    --text-4xl: 48px;
+
+    /* Spacing Scale */
+    --space-1: 2px;
+    --space-2: 4px;
+    --space-3: 8px;
+    --space-4: 12px;
+    --space-5: 16px;
+    --space-6: 24px;
+    --space-7: 32px;
+    --space-8: 48px;
+    --space-9: 64px;
+
+    /* Layout */
+    --max-width: 960px;
+}
+
+/* ========================================
+   2. RESET & BASE STYLES
+   ======================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-primary);
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--color-charcoal);
+    background: var(--color-fog);
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* ========================================
+   3. LAYOUT
+   ======================================== */
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+}
+
+.container-narrow {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+}
+
+/* ========================================
+   4. HEADER & NAVIGATION
+   ======================================== */
+.portal-header {
+    background: var(--color-platinum);
+    border-bottom: 3px solid var(--color-charcoal);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--color-charcoal);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.nav-links {
+    display: flex;
+    gap: var(--space-4);
+    list-style: none;
+    align-items: center;
+}
+
+.nav-links a,
+.nav-links button {
+    text-decoration: none;
+    color: var(--color-charcoal);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-primary);
+}
+
+.nav-links a:hover,
+.nav-links button:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   5. BUTTONS
+   ======================================== */
+.btn-primary {
+    background-color: white;
+    color: var(--color-accent);
+    border: 3px solid var(--color-accent);
+    padding: 16px 32px;
+    font-size: 18px;
+    font-weight: 700;
+    box-shadow: 4px 4px 0 var(--color-accent);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    cursor: pointer;
+    font-family: var(--font-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-accent);
+    color: white;
+}
+
+.btn-primary:active {
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+    transform: translate(1px, 1px);
+}
+
+.btn-primary:disabled {
+    background: var(--color-platinum);
+    color: var(--color-slate);
+    border-color: var(--color-slate);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-secondary {
+    background-color: var(--color-white);
+    color: var(--color-charcoal);
+    border: 2px solid var(--color-charcoal);
+    padding: 12px 24px;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    cursor: pointer;
+    font-family: var(--font-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-charcoal);
+    color: var(--color-white);
+}
+
+.btn-secondary:active {
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+    transform: translate(1px, 1px);
+}
+
+.btn-full {
+    width: 100%;
+    text-align: center;
+}
+
+/* ========================================
+   6. WINDOW COMPONENTS (Classic Mac Style)
+   ======================================== */
+.window {
+    background: var(--color-white);
+    border: 2px solid var(--color-charcoal);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.15);
+    margin-bottom: var(--space-7);
+}
+
+.window-title {
+    background: var(--color-platinum);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 2px solid var(--color-charcoal);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.window-title::before {
+    content: "\25FE \25FE \25FE";
+    font-size: var(--text-xs);
+    letter-spacing: 2px;
+}
+
+.window-content {
+    padding: var(--space-6);
+}
+
+/* Hero Window (larger shadow) */
+.hero-window {
+    background: var(--color-white);
+    border: 3px solid var(--color-charcoal);
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+}
+
+.hero-title-bar {
+    background: var(--color-platinum);
+    padding: var(--space-3);
+    border-bottom: 3px solid var(--color-charcoal);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+.hero-title-bar::before {
+    content: "\25FE \25FE \25FE";
+    font-size: var(--text-xs);
+    letter-spacing: 2px;
+}
+
+.hero-content {
+    padding: var(--space-7);
+    background: var(--color-white);
+    text-align: center;
+}
+
+/* ========================================
+   7. FORMS
+   ======================================== */
+.form-group {
+    margin-bottom: var(--space-6);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--space-3);
+    font-weight: 700;
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-white);
+    border: 2px solid var(--color-charcoal);
+    color: var(--color-charcoal);
+    font-size: var(--text-base);
+    font-family: var(--font-primary);
+}
+
+.form-input:focus {
+    outline: none;
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--color-slate);
+}
+
+.form-select {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-white);
+    border: 2px solid var(--color-charcoal);
+    color: var(--color-charcoal);
+    font-size: var(--text-base);
+    font-family: var(--font-primary);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232C2C2C' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+.form-select:focus {
+    outline: none;
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    cursor: pointer;
+}
+
+.form-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--color-charcoal);
+    cursor: pointer;
+    accent-color: var(--color-charcoal);
+}
+
+.form-checkbox span {
+    font-size: var(--text-base);
+}
+
+.form-error {
+    color: var(--color-error);
+    font-size: var(--text-xs);
+    margin-top: var(--space-2);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-group.error .form-input,
+.form-group.error .form-select {
+    border-color: var(--color-error);
+    background: #FFF5F5;
+}
+
+/* ========================================
+   8. DASHBOARD LAYOUT
+   ======================================== */
+.dashboard {
+    padding: var(--space-7) 0;
+}
+
+.dashboard-grid {
+    display: grid;
+    gap: var(--space-7);
+}
+
+/* ========================================
+   9. SECTION LABELS
+   ======================================== */
+.section-label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-4);
+    font-weight: 700;
+    color: var(--color-slate);
+}
+
+.section-title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    margin-bottom: var(--space-7);
+    color: var(--color-charcoal);
+}
+
+/* ========================================
+   10. COHORT OVERVIEW
+   ======================================== */
+.cohort-stats {
+    display: flex;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+}
+
+.cohort-stat {
+    background: var(--color-platinum);
+    padding: var(--space-3) var(--space-4);
+    border: 2px solid var(--color-charcoal);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.cohort-highlight {
+    font-size: var(--text-base);
+    line-height: 1.5;
+    color: var(--color-slate);
+}
+
+.cohort-highlight strong {
+    color: var(--color-charcoal);
+}
+
+/* ========================================
+   11. GITHUB ACTIVITY FEED
+   ======================================== */
+.feed-list {
+    list-style: none;
+}
+
+.feed-item {
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-line);
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+}
+
+.feed-item:last-child {
+    border-bottom: none;
+}
+
+.feed-icon {
+    width: 24px;
+    height: 24px;
+    background: var(--color-platinum);
+    border: 2px solid var(--color-charcoal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.feed-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.feed-actor {
+    font-weight: 700;
+}
+
+.feed-action {
+    font-size: var(--text-base);
+    line-height: 1.4;
+}
+
+.feed-repo {
+    font-weight: 700;
+    color: var(--color-charcoal);
+}
+
+.feed-time {
+    font-size: var(--text-xs);
+    color: var(--color-slate);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: var(--space-1);
+}
+
+.feed-link {
+    text-decoration: underline;
+    font-weight: 700;
+}
+
+.feed-link:hover {
+    color: var(--color-accent);
+}
+
+/* ========================================
+   12. ENGINEER CARDS
+   ======================================== */
+.engineers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-5);
+}
+
+.engineer-card {
+    background: var(--color-white);
+    border: 2px solid var(--color-charcoal);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+.engineer-card-title {
+    background: var(--color-platinum);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 2px solid var(--color-charcoal);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.engineer-card-body {
+    padding: var(--space-5);
+}
+
+.engineer-photo {
+    width: 64px;
+    height: 64px;
+    border: 2px solid var(--color-charcoal);
+    background: var(--color-platinum);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    margin-bottom: var(--space-4);
+    overflow: hidden;
+}
+
+.engineer-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.engineer-name {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+}
+
+.engineer-focus {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.engineer-tag {
+    background: var(--color-platinum);
+    border: 1px solid var(--color-charcoal);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.engineer-bio {
+    font-size: var(--text-lg);
+    line-height: 1.5;
+    color: var(--color-slate);
+    margin-bottom: var(--space-4);
+}
+
+.engineer-links {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.engineer-link {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-decoration: underline;
+}
+
+/* ========================================
+   13. SPOTLIGHT SECTION
+   ======================================== */
+.spotlight-content {
+    padding: var(--space-5);
+}
+
+.spotlight-video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 2px solid var(--color-charcoal);
+    background: var(--color-charcoal);
+}
+
+.spotlight-text {
+    font-size: var(--text-base);
+    line-height: 1.6;
+}
+
+/* ========================================
+   14. AUTH PAGES
+   ======================================== */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-7) var(--space-6);
+}
+
+.auth-window {
+    width: 100%;
+    max-width: 440px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: var(--space-6);
+}
+
+.auth-header h1 {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    margin-bottom: var(--space-3);
+}
+
+.auth-header p {
+    font-size: var(--text-base);
+    color: var(--color-slate);
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin: var(--space-6) 0;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-slate);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    border-top: 2px solid var(--color-line);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: var(--space-6);
+    font-size: var(--text-sm);
+    color: var(--color-slate);
+}
+
+.auth-footer a {
+    font-weight: 700;
+    text-decoration: underline;
+    color: var(--color-charcoal);
+}
+
+.google-btn {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-white);
+    border: 2px solid var(--color-charcoal);
+    font-size: var(--text-base);
+    font-weight: 700;
+    font-family: var(--font-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+}
+
+.google-btn:hover {
+    background: var(--color-platinum);
+}
+
+.google-btn:active {
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+    transform: translate(1px, 1px);
+}
+
+/* ========================================
+   15. LANDING PAGE
+   ======================================== */
+.landing-hero {
+    padding: var(--space-9) 0 var(--space-8);
+    text-align: center;
+}
+
+.landing-hero h1 {
+    font-size: var(--text-4xl);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: var(--space-6);
+}
+
+.landing-hero p {
+    font-size: var(--text-lg);
+    color: var(--color-slate);
+    margin-bottom: var(--space-7);
+    line-height: 1.5;
+}
+
+.landing-ctas {
+    display: flex;
+    gap: var(--space-4);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.landing-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+    padding: var(--space-8) 0;
+}
+
+/* ========================================
+   16. ALERT MESSAGES
+   ======================================== */
+.alert {
+    padding: var(--space-4) var(--space-5);
+    border: 2px solid;
+    margin-bottom: var(--space-5);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.alert-error {
+    border-color: var(--color-error);
+    background: #FFF5F5;
+    color: var(--color-error);
+}
+
+.alert-success {
+    border-color: var(--color-charcoal);
+    background: var(--color-platinum);
+    color: var(--color-charcoal);
+}
+
+/* ========================================
+   17. LOADING STATES
+   ======================================== */
+.loading-text {
+    font-size: var(--text-sm);
+    color: var(--color-slate);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    padding: var(--space-5);
+    text-align: center;
+}
+
+/* ========================================
+   18. FOOTER
+   ======================================== */
+.portal-footer {
+    background: var(--color-platinum);
+    padding: var(--space-6) 0;
+    border-top: 3px solid var(--color-charcoal);
+}
+
+.footer-text {
+    text-align: center;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.footer-text a {
+    color: var(--color-charcoal);
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+/* ========================================
+   19. RESPONSIVE - TABLET
+   ======================================== */
+@media (max-width: 1024px) {
+    .landing-features {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ========================================
+   20. ADMIN STYLES
+   ======================================== */
+
+/* Admin Header */
+.admin-header {
+    background: var(--color-charcoal);
+}
+
+.admin-header .logo,
+.admin-header .nav-links a,
+.admin-header .nav-links button,
+.admin-header .nav-links span {
+    color: var(--color-white) !important;
+}
+
+.admin-header .nav-links a:hover,
+.admin-header .nav-links button:hover {
+    color: var(--color-accent) !important;
+}
+
+/* Admin Tabs */
+.admin-tabs {
+    display: flex;
+    gap: 0;
+    border: 2px solid var(--color-charcoal);
+    width: fit-content;
+}
+
+.admin-tab {
+    padding: var(--space-3) var(--space-5);
+    background: var(--color-white);
+    border: none;
+    border-right: 2px solid var(--color-charcoal);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    font-family: var(--font-primary);
+}
+
+.admin-tab:last-child {
+    border-right: none;
+}
+
+.admin-tab:hover {
+    background: var(--color-platinum);
+}
+
+.admin-tab-active {
+    background: var(--color-charcoal);
+    color: var(--color-white);
+}
+
+/* Admin Filters */
+.admin-filters {
+    display: flex;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+}
+
+/* Admin Table */
+.admin-table-wrapper {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+}
+
+.admin-table th {
+    background: var(--color-platinum);
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--color-charcoal);
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-line);
+    vertical-align: middle;
+}
+
+.admin-table tr:hover {
+    background: var(--color-fog);
+}
+
+.admin-row-selected {
+    background: var(--color-platinum) !important;
+}
+
+.admin-row-error td {
+    background: #FFF5F5;
+    color: var(--color-error);
+}
+
+/* Admin Status Badge */
+.admin-status-badge {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    border: 2px solid;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+/* Admin Flags */
+.admin-flag {
+    display: inline-block;
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid;
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: var(--space-1);
+}
+
+/* Admin Split Layout */
+.admin-split-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: var(--space-5);
+    align-items: start;
+}
+
+.admin-split-main {
+    min-width: 0;
+}
+
+.admin-split-detail {
+    position: sticky;
+    top: 80px;
+}
+
+/* Admin Detail Panel */
+.admin-detail-panel {
+    padding: var(--space-5);
+}
+
+.admin-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-4);
+    border-bottom: 2px solid var(--color-line);
+}
+
+.admin-detail-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.admin-detail-section {
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-line);
+}
+
+.admin-detail-section:last-child {
+    border-bottom: none;
+}
+
+/* Admin History */
+.admin-history {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.admin-history-entry {
+    padding-left: var(--space-4);
+    border-left: 3px solid var(--color-line);
+}
+
+.admin-history-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-1);
+}
+
+.admin-history-who {
+    font-weight: 700;
+    font-size: var(--text-sm);
+}
+
+.admin-history-when {
+    font-size: var(--text-xs);
+    color: var(--color-slate);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.admin-history-change {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+}
+
+.admin-history-note {
+    font-size: var(--text-xs);
+    color: var(--color-slate);
+    margin-top: var(--space-1);
+    font-style: italic;
+}
+
+/* Admin Progress Bar */
+.admin-progress {
+    height: 8px;
+    background: var(--color-platinum);
+    border: 2px solid var(--color-charcoal);
+}
+
+.admin-progress-bar {
+    height: 100%;
+    background: var(--color-charcoal);
+    transition: width 0.3s ease;
+}
+
+/* ========================================
+   21. RESPONSIVE - MOBILE
+   ======================================== */
+@media (max-width: 768px) {
+    .landing-hero h1 {
+        font-size: var(--text-2xl);
+    }
+
+    .landing-features {
+        grid-template-columns: 1fr;
+    }
+
+    .engineers-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cohort-stats {
+        flex-direction: column;
+    }
+
+    .nav-links {
+        gap: var(--space-2);
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 14px 24px;
+        font-size: 16px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .landing-ctas {
+        flex-direction: column;
+    }
+
+    .section-title {
+        font-size: var(--text-2xl);
+    }
+
+    .window-content {
+        padding: var(--space-6) var(--space-5);
+    }
+
+    /* Admin responsive */
+    .admin-split-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-split-detail {
+        position: static;
+    }
+
+    .admin-tabs {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .admin-tab {
+        flex: 1;
+        text-align: center;
+        padding: var(--space-3);
+    }
+
+    .admin-filters {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    .admin-table {
+        font-size: var(--text-xs);
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: var(--space-2) var(--space-3);
+    }
+}
