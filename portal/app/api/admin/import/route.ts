@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
+import { verifyAdmin } from '@/lib/admin'
 
 interface ImportRowInput {
   email: string
@@ -12,23 +13,8 @@ const MAX_BATCH_SIZE = 100
 
 export async function POST(request: Request) {
   try {
-    // Verify admin
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: adminProfile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single()
-
-    if (!adminProfile?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-    }
+    const auth = await verifyAdmin()
+    if (auth.error) return auth.error
 
     const body = await request.json()
     const { rows, send_welcome = true, skip_duplicates = true } = body as {
@@ -108,6 +94,9 @@ export async function POST(request: Request) {
         // Add to our set to prevent duplicates within the same batch
         existingEmails.add(row.email.toLowerCase())
 
+        // Derive company name from LinkedIn URL
+        const derivedCompanyName = row.company_linkedin?.split('/company/')?.[1]?.split('/')?.[0]?.split('?')?.[0]?.replace(/-/g, ' ')?.replace(/\b\w/g, (c: string) => c.toUpperCase()) || null
+
         // Create profile
         const { error: profileError } = await serviceClient
           .from('profiles')
@@ -117,6 +106,7 @@ export async function POST(request: Request) {
             email: row.email,
             company_linkedin: row.company_linkedin,
             company_stage: row.company_stage,
+            company_name: derivedCompanyName,
           })
 
         if (profileError) {
