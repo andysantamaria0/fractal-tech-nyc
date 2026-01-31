@@ -82,7 +82,8 @@ export async function middleware(request: NextRequest) {
   // Redirect authenticated users away from auth pages (but not /complete-profile)
   if (
     user &&
-    (request.nextUrl.pathname === '/login' ||
+    (request.nextUrl.pathname === '/' ||
+      request.nextUrl.pathname === '/login' ||
       request.nextUrl.pathname === '/signup')
   ) {
     // Check if user has a profile — if not, send them to complete it

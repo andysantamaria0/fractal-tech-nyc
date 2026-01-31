@@ -126,17 +126,16 @@ The Fractal Company Portal is a platform for companies to discover and engage wi
 
 **Purpose:** Showcase curated content—videos, demos, highlights
 
-**CMS-Managed Content:**
-- Video embeds (YouTube, Vimeo, Loom)
-- Intro videos of engineers or instructors
-- Demo videos of projects
-- Featured project writeups
-- Any promotional content
+**CMS-Managed Content (via `/admin/content` → Spotlight tab):**
+- Video embeds (YouTube, Vimeo, Loom) — `video` type
+- Embed websites/portfolios as iframes — `embed` type
+- Text blocks with title and body — `text` type
+- Image spotlights — `image` type
 
 **Display:**
-- Prominent placement on dashboard
-- Can rotate multiple spotlight items (carousel) or single feature
-- Updated manually by Fractal team
+- Prominent placement on dashboard (above GitHub Feed)
+- Shows up to 3 active items ordered by `display_order`
+- Managed via admin Content page (Spotlight tab)
 
 ---
 
@@ -262,7 +261,7 @@ The Fractal Company Portal is a platform for companies to discover and engage wi
 
 **Access:** Admin only
 
-**Navigation:** Consolidated hub replacing the previous separate Invite and Import pages. Admin nav: `Cycles | Companies | Engineers | Portal`
+**Navigation:** Consolidated hub replacing the previous separate Invite and Import pages. Admin nav: `Cycles | Companies | Engineers | Content | Portal`
 
 **Tabs:**
 
@@ -499,6 +498,62 @@ const isAdmin = user?.app_metadata?.role === 'admin'
 if (!isAdmin) redirect('/dashboard')
 ```
 
+#### 5.6 Admin Content Management
+
+**Route:** `/admin/content`
+
+**Access:** Admin only
+
+**Purpose:** Manage the dashboard's weekly highlights ("This Week" section) and spotlight items without needing the Supabase Table Editor.
+
+**Tabs:** Highlights | Spotlight
+
+##### Highlights Tab
+
+**Table columns:** Week # (bold), Title, Description (truncated, HTML stripped), Created date
+
+**Interactions:**
+- Click table row → opens HighlightDetail side panel (edit mode)
+- Click "Add Highlight" button → opens HighlightDetail side panel (create mode)
+
+**HighlightDetail panel:**
+- Shows "Current week is X" helper (calculated from active cohort_settings)
+- Fields: Week Number (number, auto-filled to current week on create), Title (text), Description (textarea)
+- Description supports HTML links (`<a href="...">text</a>`) which render on the dashboard via `dangerouslySetInnerHTML`
+- Auto-fills `cohort_start_date` from active cohort on create
+- Delete button on edit mode
+
+**API:**
+- `GET /api/admin/highlights` — list all highlights, ordered by week_number desc
+- `POST /api/admin/highlights` — create (requires week_number, cohort_start_date, description)
+- `GET /api/admin/highlights/[id]` — single highlight
+- `PATCH /api/admin/highlights/[id]` — update
+- `DELETE /api/admin/highlights/[id]` — delete
+
+##### Spotlight Tab
+
+**Table columns:** Title (bold), Type (badge), Active (toggle), Order
+
+**Interactions:**
+- Click table row → opens SpotlightDetail side panel (edit mode)
+- Click "Add Spotlight" button → opens SpotlightDetail side panel (create mode)
+- Click Active toggle in table → optimistic inline toggle via PATCH
+
+**SpotlightDetail panel:**
+- Fields: Title (text), Content Type (select: video / embed / text), Display Order (number), Active (checkbox)
+- Content type fields:
+  - **video:** Embed URL input (YouTube/Vimeo/Loom embed URLs) → inline iframe preview
+  - **embed:** Website URL input (portfolio sites, etc.) → inline iframe preview
+  - **text:** Body textarea
+- Delete button on edit mode
+
+**API:**
+- `GET /api/admin/spotlights` — list all spotlights (including inactive), ordered by display_order asc
+- `POST /api/admin/spotlights` — create (requires title, content_type)
+- `GET /api/admin/spotlights/[id]` — single spotlight
+- `PATCH /api/admin/spotlights/[id]` — update
+- `DELETE /api/admin/spotlights/[id]` — delete
+
 ---
 
 ### Frontend
@@ -534,11 +589,10 @@ if (!isAdmin) redirect('/dashboard')
 - **Max file size:** 2MB
 - **Allowed types:** image/jpeg, image/png, image/webp
 
-#### CMS via Supabase Dashboard
-- **Spotlight content:** Edit directly in Table Editor
-- **Weekly highlights:** Edit directly in Table Editor
-- **Cohort settings:** Edit directly in Table Editor
-- No custom admin UI needed for V1
+#### CMS via Admin Content Page
+- **Spotlight content:** Managed via `/admin/content` → Spotlight tab (CRUD with inline preview)
+- **Weekly highlights:** Managed via `/admin/content` → Highlights tab (CRUD with current-week helper)
+- **Cohort settings:** Edit directly in Supabase Table Editor
 
 #### Supabase Setup Checklist
 - [ ] Create project in Fractal organization
@@ -1294,12 +1348,12 @@ CREATE POLICY "Admins can view history" ON submission_history
 CREATE POLICY "Admins can insert history" ON submission_history
   FOR INSERT WITH CHECK (auth.jwt() ->> 'role' = 'admin');
 
--- Spotlight Content (CMS - managed via Supabase Dashboard)
+-- Spotlight Content (CMS - managed via /admin/content)
 CREATE TABLE spotlight_content (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title VARCHAR NOT NULL,
-  content_type VARCHAR NOT NULL, -- video, text, image
-  content_url VARCHAR, -- for videos/images
+  content_type VARCHAR NOT NULL, -- video, text, image, embed
+  content_url VARCHAR, -- for videos/images/embeds
   content_body TEXT, -- for text content
   is_active BOOLEAN DEFAULT true,
   display_order INT,
@@ -1315,7 +1369,7 @@ CREATE POLICY "Anyone can view active spotlight" ON spotlight_content
 CREATE POLICY "Admins can manage spotlight" ON spotlight_content
   FOR ALL USING (auth.jwt() ->> 'role' = 'admin');
 
--- Weekly Highlights (CMS - managed via Supabase Dashboard)
+-- Weekly Highlights (CMS - managed via /admin/content)
 CREATE TABLE weekly_highlights (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   week_number INT NOT NULL,

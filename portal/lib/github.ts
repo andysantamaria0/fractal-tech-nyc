@@ -62,6 +62,54 @@ export async function fetchOrgEvents(
     .slice(0, 20)
 }
 
+export async function fetchUserEvents(
+  username: string,
+  token: string,
+  perPage = 30
+): Promise<FeedItem[]> {
+  const response = await fetch(
+    `https://api.github.com/users/${username}/events/public?per_page=${perPage}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+      next: { revalidate: 300 },
+    }
+  )
+
+  if (!response.ok) {
+    // Don't throw — one engineer's missing/bad username shouldn't break the feed
+    console.error(`GitHub user events error for ${username}: ${response.status}`)
+    return []
+  }
+
+  const events: GitHubEvent[] = await response.json()
+
+  return events
+    .filter((event) => RELEVANT_EVENT_TYPES.includes(event.type))
+    .map(mapEventToFeedItem)
+}
+
+export function mergeAndDedup(feeds: FeedItem[][], limit = 30): FeedItem[] {
+  const all = feeds.flat()
+  const seen = new Set<string>()
+  const deduped: FeedItem[] = []
+
+  // Sort newest first
+  all.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+
+  for (const item of all) {
+    if (!seen.has(item.id)) {
+      seen.add(item.id)
+      deduped.push(item)
+    }
+    if (deduped.length >= limit) break
+  }
+
+  return deduped
+}
+
 function mapEventToFeedItem(event: GitHubEvent): FeedItem {
   const repoShortName = event.repo.name.split('/').pop() || event.repo.name
   const repoUrl = `https://github.com/${event.repo.name}`
