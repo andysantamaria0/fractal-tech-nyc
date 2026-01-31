@@ -4,6 +4,7 @@ interface Company {
   id: string
   name: string
   email: string
+  company_name?: string
   company_linkedin?: string
   company_stage?: string
   created_at: string
@@ -37,8 +38,8 @@ export default function CompaniesTable({ companies, onSelect, selectedId }: Comp
       <table className="admin-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email</th>
+            <th>Company</th>
+            <th>Contact</th>
             <th>Stage</th>
             <th>LinkedIn</th>
             <th>Joined</th>
@@ -52,8 +53,11 @@ export default function CompaniesTable({ companies, onSelect, selectedId }: Comp
               className={selectedId === co.id ? 'admin-row-selected' : ''}
               style={{ cursor: 'pointer' }}
             >
-              <td style={{ fontWeight: 700 }}>{co.name}</td>
-              <td>{co.email}</td>
+              <td style={{ fontWeight: 700 }}>{co.company_name || '-'}</td>
+              <td>
+                <div>{co.name}</div>
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-slate)' }}>{co.email}</div>
+              </td>
               <td>
                 {co.company_stage ? (
                   <span className="admin-flag" style={{ borderColor: 'var(--color-slate)', color: 'var(--color-slate)' }}>

@@ -11,6 +11,7 @@ interface Company {
   id: string
   name: string
   email: string
+  company_name?: string
   company_linkedin?: string
   company_stage?: string
   newsletter_optin?: boolean

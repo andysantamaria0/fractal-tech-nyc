@@ -1,28 +1,19 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
+import { verifyAdmin } from '@/lib/admin'
 
 export async function POST(request: Request) {
   try {
-    // Verify admin
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: adminProfile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single()
-
-    if (!adminProfile?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-    }
+    const auth = await verifyAdmin()
+    if (auth.error) return auth.error
 
     const body = await request.json()
-    const { email, name, company_linkedin, company_stage, send_welcome } = body
+    const { email, name, company_linkedin, company_stage, company_name, send_welcome } = body
+
+    // Derive company name from LinkedIn URL if not provided
+    const derivedCompanyName = company_name
+      || company_linkedin?.split('/company/')?.[1]?.split('/')?.[0]?.split('?')?.[0]?.replace(/-/g, ' ')?.replace(/\b\w/g, (c: string) => c.toUpperCase())
+      || null
 
     if (!email || !name || !company_linkedin || !company_stage) {
       return NextResponse.json(
@@ -54,6 +45,7 @@ export async function POST(request: Request) {
         email,
         company_linkedin,
         company_stage,
+        company_name: derivedCompanyName,
       })
 
     if (profileError) {

@@ -14,7 +14,7 @@ export async function GET(
     const serviceClient = await createServiceClient()
     const { data: company, error: fetchError } = await serviceClient
       .from('profiles')
-      .select('id, name, email, company_linkedin, company_stage, newsletter_optin, hubspot_contact_id, hubspot_company_id, created_at')
+      .select('id, name, email, company_name, company_linkedin, company_stage, newsletter_optin, hubspot_contact_id, hubspot_company_id, created_at')
       .eq('id', id)
       .single()
 
@@ -41,7 +41,7 @@ export async function PATCH(
     const body = await request.json()
     const serviceClient = await createServiceClient()
 
-    const allowedFields = ['name', 'company_linkedin', 'company_stage', 'newsletter_optin']
+    const allowedFields = ['name', 'company_name', 'company_linkedin', 'company_stage', 'newsletter_optin']
 
     const updates: Record<string, unknown> = {}
     for (const field of allowedFields) {
@@ -58,7 +58,7 @@ export async function PATCH(
       .from('profiles')
       .update(updates)
       .eq('id', id)
-      .select('id, name, email, company_linkedin, company_stage, newsletter_optin, hubspot_contact_id, hubspot_company_id, created_at')
+      .select('id, name, email, company_name, company_linkedin, company_stage, newsletter_optin, hubspot_contact_id, hubspot_company_id, created_at')
       .single()
 
     if (updateError) {

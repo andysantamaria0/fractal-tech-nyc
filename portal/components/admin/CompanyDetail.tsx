@@ -6,6 +6,7 @@ interface Company {
   id: string
   name: string
   email: string
+  company_name?: string
   company_linkedin?: string
   company_stage?: string
   newsletter_optin?: boolean
@@ -42,6 +43,7 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
   const [company, setCompany] = useState<Company | null>(null)
 
   const [name, setName] = useState('')
+  const [companyName, setCompanyName] = useState('')
   const [companyLinkedin, setCompanyLinkedin] = useState('')
   const [companyStage, setCompanyStage] = useState('')
   const [newsletterOptin, setNewsletterOptin] = useState(false)
@@ -58,6 +60,7 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
         const { company: co } = await res.json()
         setCompany(co)
         setName(co.name || '')
+        setCompanyName(co.company_name || '')
         setCompanyLinkedin(co.company_linkedin || '')
         setCompanyStage(co.company_stage || '')
         setNewsletterOptin(co.newsletter_optin || false)
@@ -81,6 +84,7 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
+          company_name: companyName.trim() || null,
           company_linkedin: companyLinkedin.trim() || null,
           company_stage: companyStage || null,
           newsletter_optin: newsletterOptin,
@@ -150,7 +154,18 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
         <div className="admin-detail-section">
           <div className="section-label">Edit</div>
           <div className="form-group">
-            <label htmlFor="co-name" style={labelStyle}>Name</label>
+            <label htmlFor="co-company-name" style={labelStyle}>Company Name</label>
+            <input
+              id="co-company-name"
+              type="text"
+              className="form-input"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder="Acme Inc."
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="co-name" style={labelStyle}>Contact Name</label>
             <input
               id="co-name"
               type="text"
