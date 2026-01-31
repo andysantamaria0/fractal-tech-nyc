@@ -1546,6 +1546,15 @@ input::placeholder {
 }
 
 /* ========================================
+   21b. PORTAL FEATURES (hire page)
+   ======================================== */
+.portal-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+}
+
+/* ========================================
    22. UTILITIES
    ======================================== */
 .lines-bg {
@@ -1592,7 +1601,8 @@ input::placeholder {
     .testimonials,
     .testimonials-featured,
     .testimonial-grid,
-    .value-props {
+    .value-props,
+    .portal-features {
         grid-template-columns: 1fr;
     }
 
