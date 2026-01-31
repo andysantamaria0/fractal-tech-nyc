@@ -333,7 +333,8 @@ a {
     cursor: pointer;
 }
 
-.form-checkbox input[type="checkbox"] {
+.form-checkbox input[type="checkbox"],
+.form-checkbox input[type="radio"] {
     width: 18px;
     height: 18px;
     border: 2px solid var(--color-charcoal);
