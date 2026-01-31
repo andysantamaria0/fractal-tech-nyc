@@ -82,11 +82,11 @@ The Fractal Company Portal is a platform for companies to discover and engage wi
 **Display:**
 - **Number of engineers** in current cohort
 - **Current week** of cohort (auto-calculated)
-  - Start date: February 2, 2025
+  - Start date: February 2, 2026
   - Duration: 12 weeks (3 months)
+  - Break week: Week 7 (March 15-21, 2026)
   - Calculation: `current_week = floor((today - start_date) / 7) + 1`
-  - Display: "Week 7 of 12" 
-  - Note: There's a break week TBD—can add manual override later
+  - Display: "Week 7 of 12" (adjusted past break week)
 - **Cohort end date** (calculated)
 
 **Weekly Highlight:**

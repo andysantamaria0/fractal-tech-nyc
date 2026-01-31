@@ -276,7 +276,7 @@
 
 ### Pending
 - [ ] Add CNAME record for `partners.fractaltech.nyc` → Vercel (need domain registrar access)
-- [ ] Decide break week date and set in `cohort_settings` table
+- [x] Break week set: week 7 (March 15-21, 2026) in `cohort_settings` table; cohort start updated to Feb 2, 2026
 - [ ] End-to-end testing against live deployment
 - [ ] Soft launch to select companies
 - [ ] Public launch
@@ -304,6 +304,6 @@
 - [x] Confirm Resend domain verification (fractaltech.nyc)
 - [x] Confirm PostHog project created and API key set
 - [ ] Confirm partners.fractaltech.nyc domain pointed to Vercel (CNAME record pending — need domain registrar access)
-- [ ] Decide: break week date for cohort?
+- [x] Break week date decided: March 15-21, 2026 (week 7)
 - [x] Set your account as `is_admin = true` in profiles table
 - [x] Create HubSpot custom properties
