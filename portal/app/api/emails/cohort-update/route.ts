@@ -6,12 +6,21 @@ import { createServiceClient } from '@/lib/supabase/server'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 // Cron endpoint for bi-weekly cohort update emails
+// Vercel Cron sends GET requests, so support both GET and POST
+export async function GET(request: Request) {
+  return handleCohortUpdate(request)
+}
+
 export async function POST(request: Request) {
+  return handleCohortUpdate(request)
+}
+
+async function handleCohortUpdate(request: Request) {
   try {
-    // Verify cron secret for automated calls
+    // Verify cron secret — fail closed if not configured
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -28,11 +37,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No active cohort' }, { status: 404 })
     }
 
-    // Calculate current week
+    // Calculate current week (accounting for optional break week)
     const startDate = new Date(cohort.start_date)
     const now = new Date()
     const diffMs = now.getTime() - startDate.getTime()
-    const currentWeek = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1
+    const calendarWeek = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1
+
+    // Skip sending during break week
+    if (cohort.break_week && calendarWeek === cohort.break_week) {
+      return NextResponse.json({ message: 'Break week — no email sent' })
+    }
+
+    // Adjust week number if past break week
+    const currentWeek = cohort.break_week && calendarWeek > cohort.break_week
+      ? calendarWeek - 1
+      : calendarWeek
 
     if (currentWeek < 1 || currentWeek > cohort.duration_weeks) {
       return NextResponse.json({ message: 'Cohort not active this week' })

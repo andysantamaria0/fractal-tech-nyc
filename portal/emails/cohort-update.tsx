@@ -1,3 +1,5 @@
+import { escapeHtml } from '@/lib/sanitize'
+
 interface CohortUpdateEmailProps {
   weekNumber: number
   totalWeeks: number
@@ -15,8 +17,10 @@ export function CohortUpdateEmail({
   engineerCount,
   highlightItems = [],
 }: CohortUpdateEmailProps) {
+  const safeTitle = title ? escapeHtml(title) : undefined
+  const safeDescription = description ? escapeHtml(description) : undefined
   const itemsHtml = highlightItems.length > 0
-    ? `<ul>${highlightItems.map((item) => `<li>${item}</li>`).join('')}</ul>`
+    ? `<ul>${highlightItems.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
     : ''
 
   return `
@@ -46,8 +50,8 @@ export function CohortUpdateEmail({
     <div class="title-bar">Cohort Update — Week ${weekNumber}</div>
     <div class="content">
       <h1>Week ${weekNumber} of ${totalWeeks}</h1>
-      ${title ? `<h2>${title}</h2>` : ''}
-      ${description ? `<p>${description}</p>` : ''}
+      ${safeTitle ? `<h2>${safeTitle}</h2>` : ''}
+      ${safeDescription ? `<p>${safeDescription}</p>` : ''}
       <div class="stats">
         <div class="stat">Week ${weekNumber}/${totalWeeks}</div>
         <div class="stat">${engineerCount} Engineers</div>

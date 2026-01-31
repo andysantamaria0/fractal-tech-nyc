@@ -132,11 +132,11 @@ export default function CyclesTable({ submissions, onSelect, selectedId }: Cycle
                     className="admin-status-badge"
                     style={{ borderColor: getStatusColor(sub.status), color: getStatusColor(sub.status) }}
                   >
-                    {sub.status.replace('_', ' ')}
+                    {sub.status.replace(/_/g, ' ')}
                   </span>
                 </td>
                 <td style={{ textTransform: 'uppercase', fontSize: 'var(--text-xs)' }}>
-                  {sub.timeline.replace('-', ' ')}
+                  {sub.timeline.replace(/-/g, ' ')}
                 </td>
                 <td>{sub.assigned_engineer?.name || (sub.preferred_engineer ? `(pref: ${sub.preferred_engineer.name})` : '-')}</td>
                 <td>{getSprintDay(sub)}</td>

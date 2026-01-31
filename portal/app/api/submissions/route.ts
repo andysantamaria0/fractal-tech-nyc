@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { createNote } from '@/lib/hubspot'
+import { escapeHtml } from '@/lib/sanitize'
+import { Resend } from 'resend'
+import { FeatureSubmittedEmail } from '@/emails/feature-submitted'
 
 export async function POST(request: Request) {
   try {
@@ -27,6 +30,17 @@ export async function POST(request: Request) {
         { error: 'Title, description, and timeline are required' },
         { status: 400 }
       )
+    }
+
+    // Input length validation
+    if (title.length > 200) {
+      return NextResponse.json({ error: 'Title must be 200 characters or less' }, { status: 400 })
+    }
+    if (description.length > 5000) {
+      return NextResponse.json({ error: 'Description must be 5000 characters or less' }, { status: 400 })
+    }
+    if (tech_stack && tech_stack.length > 500) {
+      return NextResponse.json({ error: 'Tech stack must be 500 characters or less' }, { status: 400 })
     }
 
     // Insert feature submission
@@ -66,12 +80,12 @@ export async function POST(request: Request) {
 
       if (profile) {
         const noteContent = [
-          `<strong>Feature Submission: ${title}</strong>`,
-          `<br/><br/><strong>Description:</strong> ${description}`,
-          `<br/><strong>Timeline:</strong> ${timeline}`,
-          tech_stack ? `<br/><strong>Tech Stack:</strong> ${tech_stack}` : '',
-          `<br/><strong>Hiring Interest:</strong> ${is_hiring ? `Yes (${(hiring_types || []).join(', ')})` : 'No'}`,
-          `<br/><strong>Submitted by:</strong> ${profile.name}`,
+          `<strong>Feature Submission: ${escapeHtml(title)}</strong>`,
+          `<br/><br/><strong>Description:</strong> ${escapeHtml(description)}`,
+          `<br/><strong>Timeline:</strong> ${escapeHtml(timeline)}`,
+          tech_stack ? `<br/><strong>Tech Stack:</strong> ${escapeHtml(tech_stack)}` : '',
+          `<br/><strong>Hiring Interest:</strong> ${is_hiring ? `Yes (${(hiring_types || []).map((t: string) => escapeHtml(t)).join(', ')})` : 'No'}`,
+          `<br/><strong>Submitted by:</strong> ${escapeHtml(profile.name || '')}`,
         ].filter(Boolean).join('')
 
         const noteId = await createNote({
@@ -90,7 +104,7 @@ export async function POST(request: Request) {
       console.error('HubSpot note creation failed (non-blocking):', e)
     }
 
-    // Send confirmation email (non-blocking)
+    // Send confirmation email (non-blocking, direct call)
     try {
       const { data: userProfile } = await serviceClient
         .from('profiles')
@@ -98,17 +112,18 @@ export async function POST(request: Request) {
         .eq('id', user.id)
         .single()
 
-      if (userProfile) {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.headers.get('origin') || ''
-        await fetch(`${baseUrl}/api/emails/feature-submitted`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: userProfile.email,
-            name: userProfile.name,
-            featureTitle: title,
-            timeline,
-          }),
+      if (userProfile?.email && process.env.RESEND_API_KEY) {
+        const resend = new Resend(process.env.RESEND_API_KEY)
+        const html = FeatureSubmittedEmail({
+          name: userProfile.name,
+          featureTitle: title,
+          timeline,
+        })
+        await resend.emails.send({
+          from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
+          to: userProfile.email,
+          subject: `Feature Request Received: ${title}`,
+          html,
         })
       }
     } catch (e) {

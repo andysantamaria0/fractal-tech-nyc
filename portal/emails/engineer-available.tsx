@@ -1,3 +1,5 @@
+import { escapeHtml } from '@/lib/sanitize'
+
 interface EngineerAvailableEmailProps {
   engineerName: string
   focusAreas: string[]
@@ -9,8 +11,10 @@ export function EngineerAvailableEmail({
   focusAreas,
   whatExcitesYou,
 }: EngineerAvailableEmailProps) {
+  const safeName = escapeHtml(engineerName)
+  const safeExcites = whatExcitesYou ? escapeHtml(whatExcitesYou) : undefined
   const tagsHtml = focusAreas.map((area) =>
-    `<span style="display:inline-block;background:#E8E8E8;border:1px solid #2C2C2C;padding:2px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-right:4px;margin-bottom:4px;">${area}</span>`
+    `<span style="display:inline-block;background:#E8E8E8;border:1px solid #2C2C2C;padding:2px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-right:4px;margin-bottom:4px;">${escapeHtml(area)}</span>`
   ).join('')
 
   return `
@@ -35,9 +39,9 @@ export function EngineerAvailableEmail({
   <div class="container">
     <div class="title-bar">New Engineer Available</div>
     <div class="content">
-      <h1>${engineerName} is now available for cycles</h1>
+      <h1>${safeName} is now available for cycles</h1>
       <div class="tags">${tagsHtml}</div>
-      ${whatExcitesYou ? `<p><em>"${whatExcitesYou}"</em></p>` : ''}
+      ${safeExcites ? `<p><em>"${safeExcites}"</em></p>` : ''}
       <p>Have a feature to build? Submit a request and we'll match you.</p>
       <p style="text-align: center; margin-top: 32px;">
         <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://portal.fractaltech.nyc'}/cycles" class="cta">Browse Engineers</a>

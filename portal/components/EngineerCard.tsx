@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { trackEvent } from '@/lib/posthog'
 
 interface Engineer {
   id: string
@@ -10,14 +13,17 @@ interface Engineer {
   what_excites_you?: string
   linkedin_url?: string
   portfolio_url?: string
+  availability_start?: string
+  availability_hours_per_week?: number
+  availability_duration_weeks?: number
 }
 
 export default function EngineerCard({ engineer }: { engineer: Engineer }) {
-  const initials = engineer.name
+  const initials = (engineer.name || '?')
     .split(' ')
-    .map((n) => n[0])
+    .map((n) => n[0] || '')
     .join('')
-    .toUpperCase()
+    .toUpperCase() || '?'
 
   return (
     <div className="engineer-card">
@@ -45,6 +51,26 @@ export default function EngineerCard({ engineer }: { engineer: Engineer }) {
 
         {engineer.what_excites_you && (
           <p className="engineer-bio">{engineer.what_excites_you}</p>
+        )}
+
+        {(engineer.availability_start || engineer.availability_hours_per_week) && (
+          <div className="engineer-availability">
+            {engineer.availability_start && (
+              <span className="engineer-tag">
+                Starts {new Date(engineer.availability_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </span>
+            )}
+            {engineer.availability_hours_per_week && (
+              <span className="engineer-tag">
+                {engineer.availability_hours_per_week}h/week
+              </span>
+            )}
+            {engineer.availability_duration_weeks && (
+              <span className="engineer-tag">
+                {engineer.availability_duration_weeks} weeks
+              </span>
+            )}
+          </div>
         )}
 
         <div className="engineer-links">
@@ -82,6 +108,10 @@ export default function EngineerCard({ engineer }: { engineer: Engineer }) {
           href={`/cycles/submit?engineer=${engineer.id}`}
           className="btn-secondary btn-full"
           style={{ marginTop: 'var(--space-5)', fontSize: 'var(--text-sm)' }}
+          onClick={() => trackEvent('engineer_profile_viewed', {
+            engineer_id: engineer.id,
+            engineer_name: engineer.name,
+          })}
         >
           Submit a Feature
         </Link>

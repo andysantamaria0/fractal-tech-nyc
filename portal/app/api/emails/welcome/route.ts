@@ -1,11 +1,30 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { WelcomeEmail } from '@/emails/welcome'
+import { timingSafeEqual } from 'crypto'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+function verifyInternalKey(provided: string | null): boolean {
+  const expected = process.env.INTERNAL_API_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!expected || !provided) return false
+  try {
+    const a = Buffer.from(provided)
+    const b = Buffer.from(expected)
+    if (a.length !== b.length) return false
+    return timingSafeEqual(a, b)
+  } catch {
+    return false
+  }
+}
+
 export async function POST(request: Request) {
   try {
+    const internalKey = request.headers.get('x-internal-key')
+    if (!verifyInternalKey(internalKey)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { email, name } = await request.json()
 
     if (!email || !name) {

@@ -6,16 +6,42 @@ import {
   associateContactToCompany,
   createNote,
 } from '@/lib/hubspot'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { escapeHtml } from '@/lib/sanitize'
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
-    const { userId, name, email, companyLinkedin, companyStage } =
-      await request.json()
+    // Authenticate request
+    const supabaseAuth = await createClient()
+    const { data: { user } } = await supabaseAuth.auth.getUser()
 
-    if (!userId || !name || !email || !companyLinkedin) {
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Read profile data from the database — never trust client-supplied data for identity fields
+    const serviceClient = await createServiceClient()
+    const { data: profile, error: profileError } = await serviceClient
+      .from('profiles')
+      .select('name, email, company_linkedin, company_stage')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError || !profile) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Profile not found' },
+        { status: 404 }
+      )
+    }
+
+    const name = profile.name
+    const email = profile.email
+    const companyLinkedin = profile.company_linkedin
+    const companyStage = profile.company_stage
+
+    if (!name || !email || !companyLinkedin) {
+      return NextResponse.json(
+        { error: 'Incomplete profile data' },
         { status: 400 }
       )
     }
@@ -63,20 +89,34 @@ export async function POST(request: Request) {
       day: 'numeric',
     })
     await createNote({
-      content: `Created account through partners.fractaltech.nyc portal on ${today}. Company stage: ${companyStage}. LinkedIn: ${companyLinkedin}`,
+      content: `Created account through partners.fractaltech.nyc portal on ${today}. Company stage: ${escapeHtml(companyStage || '')}. LinkedIn: ${escapeHtml(companyLinkedin)}`,
       contactId,
       companyId,
     })
 
     // 5. Store HubSpot IDs back in profiles table
-    const supabase = await createServiceClient()
-    await supabase
+    await serviceClient
       .from('profiles')
       .update({
         hubspot_contact_id: contactId,
         hubspot_company_id: companyId,
       })
-      .eq('id', userId)
+      .eq('id', user.id)
+
+    // 6. Send welcome email (server-side, non-blocking)
+    try {
+      const { Resend } = await import('resend')
+      const { WelcomeEmail } = await import('@/emails/welcome')
+      const resend = new Resend(process.env.RESEND_API_KEY)
+      await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
+        to: email,
+        subject: 'Welcome to Fractal Partners Portal',
+        html: WelcomeEmail({ name }),
+      })
+    } catch (e) {
+      console.error('Welcome email failed (non-blocking):', e)
+    }
 
     return NextResponse.json({
       success: true,

@@ -32,6 +32,29 @@ export async function POST(request: Request) {
       )
     }
 
+    // Input length validation
+    if (name.length > 100) {
+      return NextResponse.json({ error: 'Name must be 100 characters or less' }, { status: 400 })
+    }
+    if (what_excites_you && what_excites_you.length > 1000) {
+      return NextResponse.json({ error: 'What excites you must be 1000 characters or less' }, { status: 400 })
+    }
+
+    // URL format validation
+    const urlFields = { github_url, linkedin_url, portfolio_url, photo_url }
+    for (const [field, value] of Object.entries(urlFields)) {
+      if (value) {
+        try {
+          const parsed = new URL(value)
+          if (!['http:', 'https:'].includes(parsed.protocol)) {
+            return NextResponse.json({ error: `${field} must use http or https` }, { status: 400 })
+          }
+        } catch {
+          return NextResponse.json({ error: `${field} is not a valid URL` }, { status: 400 })
+        }
+      }
+    }
+
     const serviceClient = await createServiceClient()
 
     // Check if profile already exists

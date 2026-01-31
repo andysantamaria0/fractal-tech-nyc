@@ -34,9 +34,12 @@ export default async function AdminLayout({
 
     isAdminUser = true
     userName = profile.name || 'Admin'
-  } else {
-    // Dev bypass
+  } else if (process.env.NODE_ENV !== 'production') {
+    // Dev bypass — local dev only
     isAdminUser = true
+  } else {
+    // Fail closed in production
+    redirect('/login')
   }
 
   if (!isAdminUser) {

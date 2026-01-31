@@ -113,8 +113,8 @@ export default function SubmissionDetail({ submissionId, onClose, onUpdated }: S
           internal_notes: internalNotes,
           sprint_start_date: sprintStart || null,
           sprint_end_date: sprintEnd || null,
-          hours_budget: hoursBudget ? parseInt(hoursBudget) : null,
-          hours_logged: hoursLogged ? parseInt(hoursLogged) : null,
+          hours_budget: hoursBudget ? parseFloat(hoursBudget) : null,
+          hours_logged: hoursLogged ? parseFloat(hoursLogged) : null,
           cancelled_reason: status === 'cancelled' ? cancelledReason : null,
         }),
       })
@@ -165,11 +165,31 @@ export default function SubmissionDetail({ submissionId, onClose, onUpdated }: S
         <div className="admin-detail-section">
           <div className="section-label">Company</div>
           <p><strong>{submission.profiles?.name}</strong> ({submission.profiles?.email})</p>
-          {submission.profiles?.company_linkedin && (
-            <a href={submission.profiles.company_linkedin} target="_blank" rel="noopener noreferrer" className="engineer-link">
-              LinkedIn
-            </a>
-          )}
+          <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', marginTop: 'var(--space-2)' }}>
+            {submission.profiles?.company_linkedin && (
+              <a href={submission.profiles.company_linkedin} target="_blank" rel="noopener noreferrer" className="engineer-link">
+                LinkedIn
+              </a>
+            )}
+            {submission.profiles?.email && (
+              <a
+                href={`mailto:${submission.profiles.email}?subject=Re: ${encodeURIComponent(submission.title)}`}
+                className="engineer-link"
+              >
+                Email Company
+              </a>
+            )}
+            {submission.profiles?.hubspot_company_id && (
+              <a
+                href={`https://app.hubspot.com/contacts/${process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID || ''}/company/${submission.profiles.hubspot_company_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="engineer-link"
+              >
+                View in HubSpot
+              </a>
+            )}
+          </div>
         </div>
 
         {/* Description */}
@@ -181,7 +201,7 @@ export default function SubmissionDetail({ submissionId, onClose, onUpdated }: S
         {/* Meta */}
         <div className="admin-detail-section">
           <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
-            <div className="cohort-stat">Timeline: {submission.timeline.replace('-', ' ')}</div>
+            <div className="cohort-stat">Timeline: {submission.timeline.replace(/-/g, ' ')}</div>
             {submission.tech_stack && <div className="cohort-stat">Tech: {submission.tech_stack}</div>}
             <div className="cohort-stat">Hiring: {submission.is_hiring ? `Yes (${(submission.hiring_types || []).join(', ')})` : 'No'}</div>
           </div>
@@ -206,7 +226,7 @@ export default function SubmissionDetail({ submissionId, onClose, onUpdated }: S
             onChange={(e) => setStatus(e.target.value)}
           >
             {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>{s.replace('_', ' ')}</option>
+              <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
             ))}
           </select>
         </div>
@@ -307,20 +327,6 @@ export default function SubmissionDetail({ submissionId, onClose, onUpdated }: S
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
 
-        {/* HubSpot Link */}
-        {submission.hubspot_note_id && (
-          <div className="admin-detail-section" style={{ marginTop: 'var(--space-5)' }}>
-            <a
-              href={`https://app.hubspot.com/contacts/${process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID || ''}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="engineer-link"
-            >
-              View in HubSpot
-            </a>
-          </div>
-        )}
-
         {/* History Timeline */}
         {history.length > 0 && (
           <div className="admin-detail-section" style={{ marginTop: 'var(--space-6)' }}>
@@ -337,7 +343,7 @@ export default function SubmissionDetail({ submissionId, onClose, onUpdated }: S
                     </span>
                   </div>
                   <div className="admin-history-change">
-                    Changed <strong>{entry.field_name.replace('_', ' ')}</strong>
+                    Changed <strong>{entry.field_name.replace(/_/g, ' ')}</strong>
                     {entry.old_value && <> from <em>{entry.old_value}</em></>}
                     {entry.new_value && <> to <em>{entry.new_value}</em></>}
                   </div>

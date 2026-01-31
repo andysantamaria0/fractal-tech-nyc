@@ -155,3 +155,52 @@ CREATE INDEX IF NOT EXISTS idx_feature_submissions_user_id ON feature_submission
 CREATE INDEX IF NOT EXISTS idx_feature_submissions_assigned_engineer ON feature_submissions(assigned_engineer_id);
 CREATE INDEX IF NOT EXISTS idx_submission_history_submission_id ON submission_history(submission_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_is_admin ON profiles(is_admin) WHERE is_admin = true;
+
+-- =============================================
+-- 6. Supabase Storage: engineer headshots bucket
+-- =============================================
+-- Note: Bucket creation must be done via Supabase dashboard or API.
+-- Run manually: INSERT INTO storage.buckets (id, name, public) VALUES ('engineer-headshots', 'engineer-headshots', true);
+--
+-- Storage RLS policies:
+-- Public read for all headshots
+CREATE POLICY "Public read engineer headshots"
+  ON storage.objects
+  FOR SELECT
+  USING (bucket_id = 'engineer-headshots');
+
+-- Authenticated users can upload their own headshots
+CREATE POLICY "Authenticated upload engineer headshots"
+  ON storage.objects
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (bucket_id = 'engineer-headshots');
+
+-- Authenticated users can update their own uploads
+CREATE POLICY "Authenticated update engineer headshots"
+  ON storage.objects
+  FOR UPDATE
+  TO authenticated
+  USING (bucket_id = 'engineer-headshots');
+
+-- Admins can delete headshots
+CREATE POLICY "Admins delete engineer headshots"
+  ON storage.objects
+  FOR DELETE
+  USING (
+    bucket_id = 'engineer-headshots'
+    AND EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.is_admin = true)
+  );
+
+-- =============================================
+-- 7. Engineers can read their own profile by email
+-- =============================================
+-- The original RLS policy only allows reading engineers where is_available_for_cycles=true.
+-- Engineers need to read their own profile (even when not yet available) to edit it.
+CREATE POLICY "Engineers read own profile"
+  ON engineers
+  FOR SELECT
+  TO authenticated
+  USING (
+    email = (SELECT email FROM auth.users WHERE id = auth.uid())
+  );

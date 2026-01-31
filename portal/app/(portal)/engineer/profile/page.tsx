@@ -37,7 +37,10 @@ export default function EngineerProfilePage() {
   useEffect(() => {
     async function loadProfile() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        setLoading(false)
+        return
+      }
 
       setEmail(user.email || '')
 
@@ -100,10 +103,26 @@ export default function EngineerProfilePage() {
     setUploading(false)
   }
 
+  function validate(): string | null {
+    if (!name.trim()) return 'Name is required'
+    if (!githubUrl.trim()) return 'GitHub URL is required'
+    if (!githubUrl.startsWith('https://github.com/')) return 'GitHub URL must start with https://github.com/'
+    if (linkedinUrl && !linkedinUrl.startsWith('https://')) return 'LinkedIn URL must start with https://'
+    if (portfolioUrl && !portfolioUrl.startsWith('https://')) return 'Portfolio URL must start with https://'
+    return null
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setSuccess('')
+
+    const validationError = validate()
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
     setSaving(true)
 
     try {
@@ -252,7 +271,7 @@ export default function EngineerProfilePage() {
 
             <div className="section-label" style={{ marginTop: 'var(--space-6)' }}>Availability</div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-4)' }}>
+            <div className="form-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-4)' }}>
               <div className="form-group">
                 <label htmlFor="eng-avail-start">Start Date</label>
                 <input

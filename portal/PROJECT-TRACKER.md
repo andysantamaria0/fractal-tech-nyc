@@ -1,9 +1,10 @@
 # Fractal Company Portal - Project Tracker
 
-**Portal URL:** partners.fractaltech.nyc
-**Repo:** fractal-bootcamp/portal
+**Portal URL:** partners.fractaltech.nyc (pending DNS) / fractal-partners-portal.vercel.app (live)
+**Repo:** andysantamaria0/fractal-tech-nyc (root directory: `portal/`)
+**Vercel Project:** fractal-partners-portal
 **Stack:** Next.js 15 + TypeScript + Supabase + HubSpot + Resend
-**Last Updated:** January 30, 2026
+**Last Updated:** January 31, 2026
 
 ---
 
@@ -16,7 +17,8 @@
 | 2 | Admin Foundation & Invite Tools | COMPLETE | 100% |
 | 3 | Admin Cycles Dashboard | COMPLETE | 100% |
 | 4 | Engineer Profile Form & Email System | COMPLETE | 100% |
-| 5 | PostHog Analytics & Polish | IN PROGRESS | 95% |
+| 5 | PostHog Analytics & Polish | IN PROGRESS | 98% |
+| 6 | Deployment & Infrastructure | IN PROGRESS | 85% |
 
 ---
 
@@ -217,6 +219,36 @@
 - [x] Input length validation on engineer profile (name 100, what_excites_you 1000)
 - [x] URL format validation on engineer profile (github, linkedin, portfolio, photo URLs)
 - [x] Welcome email moved server-side (removed client-side fetch from signup)
+
+---
+
+## Phase 6: Deployment & Infrastructure — IN PROGRESS
+
+### Vercel Deployment
+- [x] Create separate Vercel project (`fractal-partners-portal`) with root directory `portal/`
+- [x] Configure environment variables (Supabase, HubSpot, GitHub, Resend, PostHog, Cron)
+- [x] Fix `vercel.json` output directory for Next.js
+- [x] Successful production build and deployment
+
+### Supabase Setup
+- [x] Supabase project created in Fractal org
+- [x] Run `001_initial_schema.sql` migration
+- [x] Run `002_cycles_and_admin.sql` migration (RLS policies, admin columns, submission history)
+- [x] Create `engineer-headshots` storage bucket (public read, authenticated upload)
+- [x] Set admin account (`is_admin = true`)
+
+### Third-Party Services
+- [x] Google OAuth configured (Google Cloud Console + Supabase provider)
+- [x] Resend domain verified (`fractaltech.nyc`)
+- [x] PostHog project created with API key
+- [x] HubSpot custom properties created (company + contact)
+
+### Pending
+- [ ] Add CNAME record for `partners.fractaltech.nyc` → Vercel (need domain registrar access)
+- [ ] Decide break week date and set in `cohort_settings` table
+- [ ] End-to-end testing against live deployment
+- [ ] Soft launch to select companies
+- [ ] Public launch
 
 ---
 

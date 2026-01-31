@@ -6,8 +6,14 @@ const isSupabaseConfigured =
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('xxx.supabase.co')
 
 export async function middleware(request: NextRequest) {
-  // Dev bypass: skip auth when Supabase isn't configured
+  // Dev bypass: skip auth when Supabase isn't configured (local dev only)
   if (!isSupabaseConfigured) {
+    if (process.env.NODE_ENV === 'production') {
+      // Fail closed in production — redirect to an error state
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
     return NextResponse.next()
   }
 
@@ -48,6 +54,8 @@ export async function middleware(request: NextRequest) {
     (request.nextUrl.pathname.startsWith('/dashboard') ||
       request.nextUrl.pathname.startsWith('/cycles') ||
       request.nextUrl.pathname.startsWith('/settings') ||
+      request.nextUrl.pathname.startsWith('/engineer') ||
+      request.nextUrl.pathname.startsWith('/complete-profile') ||
       request.nextUrl.pathname.startsWith('/admin'))
   ) {
     const url = request.nextUrl.clone()
@@ -55,7 +63,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Admin routes — check is_admin flag (layout handles redirect for non-admins)
+  // Admin routes — check is_admin flag
   if (user && request.nextUrl.pathname.startsWith('/admin')) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -70,14 +78,21 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Redirect authenticated users away from auth pages
+  // Redirect authenticated users away from auth pages (but not /complete-profile)
   if (
     user &&
     (request.nextUrl.pathname === '/login' ||
       request.nextUrl.pathname === '/signup')
   ) {
+    // Check if user has a profile — if not, send them to complete it
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single()
+
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = profile ? '/dashboard' : '/complete-profile'
     return NextResponse.redirect(url)
   }
 

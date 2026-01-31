@@ -1,8 +1,11 @@
+import { escapeHtml } from '@/lib/sanitize'
+
 interface WelcomeEmailProps {
   name: string
 }
 
 export function WelcomeEmail({ name }: WelcomeEmailProps) {
+  const safeName = escapeHtml(name)
   return `
 <!DOCTYPE html>
 <html>
@@ -26,7 +29,7 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
   <div class="container">
     <div class="title-bar">Welcome to Fractal Partners</div>
     <div class="content">
-      <h1>Welcome, ${name}!</h1>
+      <h1>Welcome, ${safeName}!</h1>
       <p>You now have access to the Fractal Partners Portal, your window into the current engineering cohort.</p>
       <p>Here's what you can do:</p>
       <ul>

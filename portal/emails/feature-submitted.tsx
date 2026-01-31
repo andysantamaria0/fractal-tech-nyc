@@ -1,3 +1,5 @@
+import { escapeHtml } from '@/lib/sanitize'
+
 interface FeatureSubmittedEmailProps {
   name: string
   featureTitle: string
@@ -5,6 +7,9 @@ interface FeatureSubmittedEmailProps {
 }
 
 export function FeatureSubmittedEmail({ name, featureTitle, timeline }: FeatureSubmittedEmailProps) {
+  const safeName = escapeHtml(name)
+  const safeTitle = escapeHtml(featureTitle)
+  const safeTimeline = escapeHtml(timeline)
   return `
 <!DOCTYPE html>
 <html>
@@ -26,10 +31,10 @@ export function FeatureSubmittedEmail({ name, featureTitle, timeline }: FeatureS
   <div class="container">
     <div class="title-bar">Feature Request Received</div>
     <div class="content">
-      <h1>Got it, ${name}!</h1>
+      <h1>Got it, ${safeName}!</h1>
       <p>Your feature request has been submitted and our team will review it shortly.</p>
-      <div class="detail">${featureTitle}</div>
-      <div class="detail">Timeline: ${timeline.replace('-', ' ')}</div>
+      <div class="detail">${safeTitle}</div>
+      <div class="detail">Timeline: ${safeTimeline.replace(/-/g, ' ')}</div>
       <p>We'll match you with an engineer and follow up with next steps. You can track your submissions in the portal.</p>
     </div>
     <div class="footer">

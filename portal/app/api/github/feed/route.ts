@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server'
 import { fetchOrgEvents } from '@/lib/github'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET() {
+  // Require authentication — portal data is not public
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const org = process.env.GITHUB_ORG
   const token = process.env.GITHUB_TOKEN
 
@@ -16,7 +24,7 @@ export async function GET() {
     const events = await fetchOrgEvents(org, token)
     return NextResponse.json(events, {
       headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60',
+        'Cache-Control': 'private, s-maxage=300, stale-while-revalidate=60',
       },
     })
   } catch (error) {

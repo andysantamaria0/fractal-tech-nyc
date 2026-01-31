@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [newsletterOptin, setNewsletterOptin] = useState(false)
   const [message, setMessage] = useState('')
+  const [isError, setIsError] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -42,7 +44,12 @@ export default function SettingsPage() {
     setMessage('')
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) {
+      setMessage('Session expired. Please log in again.')
+      setIsError(true)
+      setSaving(false)
+      return
+    }
 
     const { error } = await supabase
       .from('profiles')
@@ -51,8 +58,10 @@ export default function SettingsPage() {
 
     if (error) {
       setMessage('Failed to save settings')
+      setIsError(true)
     } else {
       setMessage('Settings saved')
+      setIsError(false)
     }
     setSaving(false)
   }
@@ -82,7 +91,7 @@ export default function SettingsPage() {
           <div className="window-title">Notifications</div>
           <div className="window-content">
             {message && (
-              <div className="alert alert-success" style={{ marginBottom: 'var(--space-5)' }}>
+              <div className={`alert ${isError ? 'alert-error' : 'alert-success'}`} style={{ marginBottom: 'var(--space-5)' }}>
                 {message}
               </div>
             )}
@@ -105,6 +114,18 @@ export default function SettingsPage() {
             >
               {saving ? 'Saving...' : 'Save Settings'}
             </button>
+          </div>
+        </div>
+
+        <div className="window">
+          <div className="window-title">Engineer Profile</div>
+          <div className="window-content">
+            <p style={{ color: 'var(--color-slate)', marginBottom: 'var(--space-5)' }}>
+              If you&apos;re a Fractal engineer, manage your public profile that companies see.
+            </p>
+            <Link href="/engineer/profile" className="btn-secondary">
+              Edit Engineer Profile
+            </Link>
           </div>
         </div>
       </div>

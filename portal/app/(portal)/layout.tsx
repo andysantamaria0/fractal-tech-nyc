@@ -11,6 +11,7 @@ export default async function PortalLayout({
   children: React.ReactNode
 }) {
   let userName: string | undefined
+  let isAdmin = false
 
   if (isSupabaseConfigured) {
     const { createClient } = await import('@/lib/supabase/server')
@@ -23,19 +24,24 @@ export default async function PortalLayout({
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('name')
+      .select('name, is_admin')
       .eq('id', user.id)
       .single()
 
     userName = profile?.name
-  } else {
-    // Dev bypass — show pages without auth
+    isAdmin = profile?.is_admin === true
+  } else if (process.env.NODE_ENV !== 'production') {
+    // Dev bypass — show pages without auth (local dev only)
     userName = 'Dev User'
+    isAdmin = true
+  } else {
+    // Fail closed in production
+    redirect('/login')
   }
 
   return (
     <>
-      <Header userName={userName} />
+      <Header userName={userName} isAdmin={isAdmin} />
       <main>
         <div className="container">
           {children}

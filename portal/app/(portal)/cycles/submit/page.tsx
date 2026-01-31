@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { trackEvent } from '@/lib/posthog'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -17,10 +18,11 @@ const TIMELINE_OPTIONS = [
   { value: 'urgent', label: 'Urgent' },
 ]
 
-const HIRING_TYPE_OPTIONS = [
-  { value: 'contract', label: 'Contract Engineers' },
-  { value: 'interns', label: 'Interns' },
-  { value: 'full-time', label: 'Full-Time Hires' },
+const HIRING_OPTIONS = [
+  { value: 'interns', label: 'Yes, Interns' },
+  { value: 'contract', label: 'Yes, Contract' },
+  { value: 'full-time', label: 'Yes, Full-Time' },
+  { value: 'no', label: 'No' },
 ]
 
 export default function SubmitFeaturePage() {
@@ -33,15 +35,19 @@ export default function SubmitFeaturePage() {
   const [timeline, setTimeline] = useState('')
   const [techStack, setTechStack] = useState('')
   const [preferredEngineerId, setPreferredEngineerId] = useState(preselectedEngineer || '')
-  const [isHiring, setIsHiring] = useState(false)
-  const [hiringTypes, setHiringTypes] = useState<string[]>([])
+  const [hiringSelections, setHiringSelections] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
 
   const supabase = createClient()
 
   useEffect(() => {
+    trackEvent('feature_submission_started', {
+      engineer_id: preselectedEngineer || undefined,
+    })
+
     async function loadEngineers() {
       const { data } = await supabase
         .from('engineers')
@@ -54,15 +60,41 @@ export default function SubmitFeaturePage() {
     loadEngineers()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  function handleHiringTypeToggle(type: string) {
-    setHiringTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    )
+  function handleHiringToggle(value: string) {
+    if (value === 'no') {
+      // "No" deselects everything else
+      setHiringSelections((prev) => prev.includes('no') ? [] : ['no'])
+    } else {
+      // Any "Yes" option deselects "No"
+      setHiringSelections((prev) => {
+        const without = prev.filter((v) => v !== 'no')
+        return without.includes(value)
+          ? without.filter((v) => v !== value)
+          : [...without, value]
+      })
+    }
+  }
+
+  // Derived values for submission
+  const isHiring = hiringSelections.length > 0 && !hiringSelections.includes('no')
+  const hiringTypes = hiringSelections.filter((v) => v !== 'no')
+
+  function validate(): boolean {
+    const errors: Record<string, string> = {}
+    if (!title.trim()) errors.title = 'Title is required'
+    else if (title.trim().length < 5) errors.title = 'Title must be at least 5 characters'
+    if (!description.trim()) errors.description = 'Description is required'
+    else if (description.trim().length < 20) errors.description = 'Please provide more detail (at least 20 characters)'
+    if (!timeline) errors.timeline = 'Please select a timeline'
+    if (hiringSelections.length === 0) errors.hiring = 'Please indicate your hiring status'
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    if (!validate()) return
     setLoading(true)
 
     try {
@@ -76,7 +108,7 @@ export default function SubmitFeaturePage() {
           tech_stack: techStack || null,
           preferred_engineer_id: preferredEngineerId || null,
           is_hiring: isHiring,
-          hiring_types: isHiring ? hiringTypes : [],
+          hiring_types: hiringTypes,
         }),
       })
 
@@ -85,6 +117,11 @@ export default function SubmitFeaturePage() {
         throw new Error(data.error || 'Failed to submit')
       }
 
+      trackEvent('feature_submission_completed', {
+        engineer_id: preferredEngineerId || undefined,
+        timeline,
+        hiring_status: isHiring,
+      })
       setSubmitted(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -118,8 +155,7 @@ export default function SubmitFeaturePage() {
                   setTimeline('')
                   setTechStack('')
                   setPreferredEngineerId('')
-                  setIsHiring(false)
-                  setHiringTypes([])
+                  setHiringSelections([])
                 }}
               >
                 Submit Another
@@ -143,7 +179,7 @@ export default function SubmitFeaturePage() {
           {error && <div className="alert alert-error">{error}</div>}
 
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
+            <div className={`form-group ${fieldErrors.title ? 'error' : ''}`}>
               <label htmlFor="title">Feature Title *</label>
               <input
                 id="title"
@@ -151,32 +187,34 @@ export default function SubmitFeaturePage() {
                 className="form-input"
                 placeholder="e.g. Build a Stripe integration"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => { setTitle(e.target.value); setFieldErrors((prev) => ({ ...prev, title: '' })) }}
                 required
               />
+              {fieldErrors.title && <div className="form-error">{fieldErrors.title}</div>}
             </div>
 
-            <div className="form-group">
+            <div className={`form-group ${fieldErrors.description ? 'error' : ''}`}>
               <label htmlFor="description">Description *</label>
               <textarea
                 id="description"
                 className="form-input"
                 placeholder="Describe the feature, goals, and any requirements..."
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => { setDescription(e.target.value); setFieldErrors((prev) => ({ ...prev, description: '' })) }}
                 required
                 rows={5}
                 style={{ resize: 'vertical' }}
               />
+              {fieldErrors.description && <div className="form-error">{fieldErrors.description}</div>}
             </div>
 
-            <div className="form-group">
+            <div className={`form-group ${fieldErrors.timeline ? 'error' : ''}`}>
               <label htmlFor="timeline">Timeline *</label>
               <select
                 id="timeline"
                 className="form-select"
                 value={timeline}
-                onChange={(e) => setTimeline(e.target.value)}
+                onChange={(e) => { setTimeline(e.target.value); setFieldErrors((prev) => ({ ...prev, timeline: '' })) }}
                 required
               >
                 <option value="">Select timeline...</option>
@@ -186,6 +224,7 @@ export default function SubmitFeaturePage() {
                   </option>
                 ))}
               </select>
+              {fieldErrors.timeline && <div className="form-error">{fieldErrors.timeline}</div>}
             </div>
 
             <div className="form-group">
@@ -217,50 +256,22 @@ export default function SubmitFeaturePage() {
               </select>
             </div>
 
-            <div className="form-group">
-              <label>Are you hiring?</label>
-              <div style={{ display: 'flex', gap: 'var(--space-5)', marginTop: 'var(--space-3)' }}>
-                <label className="form-checkbox">
-                  <input
-                    type="radio"
-                    name="isHiring"
-                    checked={!isHiring}
-                    onChange={() => {
-                      setIsHiring(false)
-                      setHiringTypes([])
-                    }}
-                  />
-                  <span>No</span>
-                </label>
-                <label className="form-checkbox">
-                  <input
-                    type="radio"
-                    name="isHiring"
-                    checked={isHiring}
-                    onChange={() => setIsHiring(true)}
-                  />
-                  <span>Yes</span>
-                </label>
+            <div className={`form-group ${fieldErrors.hiring ? 'error' : ''}`}>
+              <label>Is your company hiring? *</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-3)' }}>
+                {HIRING_OPTIONS.map((opt) => (
+                  <label key={opt.value} className="form-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={hiringSelections.includes(opt.value)}
+                      onChange={() => { handleHiringToggle(opt.value); setFieldErrors((prev) => ({ ...prev, hiring: '' })) }}
+                    />
+                    <span>{opt.label}</span>
+                  </label>
+                ))}
               </div>
+              {fieldErrors.hiring && <div className="form-error">{fieldErrors.hiring}</div>}
             </div>
-
-            {isHiring && (
-              <div className="form-group">
-                <label>What types of roles?</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-3)' }}>
-                  {HIRING_TYPE_OPTIONS.map((opt) => (
-                    <label key={opt.value} className="form-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={hiringTypes.includes(opt.value)}
-                        onChange={() => handleHiringTypeToggle(opt.value)}
-                      />
-                      <span>{opt.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <button
               type="submit"

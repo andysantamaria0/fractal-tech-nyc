@@ -86,7 +86,7 @@ function mapEventToFeedItem(event: GitHubEvent): FeedItem {
         type: 'push',
         action: `pushed ${commitCount} commit${commitCount !== 1 ? 's' : ''} to`,
         description: message,
-        url: `${repoUrl}/commits/${payload.ref as string || 'main'}`,
+        url: `${repoUrl}/commits/${((payload.ref as string) || 'refs/heads/main').replace('refs/heads/', '')}`,
       }
     }
 
