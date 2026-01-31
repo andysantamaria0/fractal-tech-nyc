@@ -17,8 +17,8 @@
 | 2 | Admin Foundation & Invite Tools | COMPLETE | 100% |
 | 3 | Admin Cycles Dashboard | COMPLETE | 100% |
 | 4 | Engineer Profile Form & Email System | COMPLETE | 100% |
-| 5 | PostHog Analytics & Polish | IN PROGRESS | 98% |
-| 6 | Deployment & Infrastructure | IN PROGRESS | 85% |
+| 5 | PostHog Analytics & Polish | COMPLETE | 100% |
+| 6 | Deployment & Infrastructure | IN PROGRESS | 90% |
 
 ---
 
@@ -80,7 +80,7 @@
 - [x] Admin layout (`app/admin/layout.tsx`) with auth check and admin nav
 - [x] `is_admin` check on profile in layout (redirects non-admins to /dashboard)
 - [x] Dev bypass for local development
-- [x] Admin nav: Cycles, Companies, Engineers, Portal link (consolidated from Cycles, Engineers, Invite, Import, Portal)
+- [x] Admin nav: Cycles | Companies | Engineers | Content | Portal (consolidated from Cycles, Engineers, Invite, Import, Portal)
 
 ### Single Company Invite (`/admin/invite`)
 - [x] Build invite form (email, name, company LinkedIn, stage, send email checkbox)
@@ -158,7 +158,7 @@
 
 ---
 
-## Phase 5: PostHog Analytics & Polish — IN PROGRESS
+## Phase 5: PostHog Analytics & Polish — COMPLETE
 
 ### PostHog Integration
 - [x] Set up PostHog client (`lib/posthog.ts`)
@@ -183,9 +183,6 @@
 - [x] Loading skeleton states (dashboard, cycles, admin)
 - [x] Mobile responsiveness audit (all pages including admin)
 - [x] Security review (RLS policies, admin middleware, input sanitization)
-- [ ] End-to-end testing against live Supabase
-- [ ] Soft launch to select companies
-- [ ] Public launch
 
 ### Admin Engineers Management (`/admin/engineers`)
 - [x] Build engineers table with columns: Name, Email, Focus Areas, Hours/wk, Available toggle
@@ -214,7 +211,7 @@
 ### Admin Auth Refactor
 - [x] Extract shared `verifyAdmin()` helper in `lib/admin.ts` (returns userId or NextResponse error)
 - [x] Dev bypass: all admin API routes skip auth in non-production environments
-- [x] Refactored all 7 admin API routes to use `verifyAdmin()` (cycles, cycles/[id], cycles/[id]/history, invite, import, engineers, engineers/[id])
+- [x] Refactored all 11 admin API routes to use `verifyAdmin()` (cycles, cycles/[id], cycles/[id]/history, invite, import, engineers, engineers/[id], highlights, highlights/[id], spotlights, spotlights/[id])
 - [x] Fix middleware to prioritize dev bypass over Supabase auth check
 - [x] Fix admin layout to prioritize dev bypass over Supabase auth check
 
@@ -231,12 +228,36 @@
 - [x] Admin Cycles: filter by company (search)
 - [x] GitHub Activity Feed: pagination / "Load more"
 - [x] GitHub Activity Feed: filter by activity type
+- [x] GitHub Activity Feed: engineer-level feed with real commit/PR data from Fractal org
+- [x] GitHub Activity Feed: availability sidebar on dashboard
 - [x] CSV Import: "Send welcome emails" option checkbox
 - [x] CSV Import: "Skip duplicates silently" option checkbox
 - [x] CSV Import: progress bar with percentage during import
 - [x] CSV Import: "Download Results CSV" button on completion
 - [x] Admin Invite: show invite link in success message (backup if email fails)
 - [x] Create HubSpot custom properties (company: portal_signup_date, company_stage, portal_newsletter_optin, is_hiring, hiring_types; contact: portal_user, portal_signup_date)
+
+### Admin Content Management (`/admin/content`)
+- [x] Build `/admin/content` page with Highlights and Spotlight tabs
+- [x] Highlights tab: table + split-pane detail panel, add/edit/delete weekly highlights
+- [x] Spotlight tab: table + split-pane detail panel, add/edit/delete spotlight items (video, text, embed types)
+- [x] `embed` content type for spotlights (renders URLs as iframes)
+- [x] HTML link support in highlight descriptions
+- [x] Create API routes: `GET+POST /api/admin/highlights`, `GET+PATCH+DELETE /api/admin/highlights/[id]`
+- [x] Create API routes: `GET+POST /api/admin/spotlights`, `GET+PATCH+DELETE /api/admin/spotlights/[id]`
+- [x] All routes use `verifyAdmin()` auth
+- [x] Database migration `004_spotlight_embed_type.sql`
+- [x] Loading skeleton state (`loading.tsx`)
+- [x] Add "Content" nav link to admin layout
+
+### Marketing Site → Portal Funnel (`/hire`)
+- [x] Replace mailto CTAs on `/hire` with direct portal signup links
+- [x] Add "Partners Portal" section to `/hire` with feature cards (Cohort Overview, GitHub Activity, Engineer Profiles)
+- [x] Full-funnel conversion flow: value props → social proof → portal intro → signup CTA
+- [x] Email fallback CTA ("Or just get in touch: hello@fractaltech.nyc")
+- [x] Portal landing page (`/`) converted from feature-card pitch to focused signup gateway (Google + email form)
+- [x] Middleware updated to redirect authenticated users from `/` to dashboard
+- [x] Responsive `.portal-features` grid (3-col → 1-col on mobile)
 
 ### Security Fixes Applied
 - [x] Auth check on `/api/auth/hubspot-sync` (was unauthenticated)
@@ -287,7 +308,7 @@
 
 - **Admin flag:** Using `is_admin` boolean on `profiles` table (simpler than app_metadata for V1)
 - **Hours tracking:** Manual entry in V1, GitHub-based tracking deferred
-- **CMS:** Spotlight + Weekly Highlights managed via Supabase Dashboard (no custom admin UI)
+- **CMS:** Spotlight + Weekly Highlights managed via `/admin/content` (custom admin UI with Highlights + Spotlight tabs)
 - **Email provider:** Resend with HTML templates (Snow White themed)
 - **Analytics:** PostHog (free tier: 1M events/month)
 - **GitHub feed:** Org-level API (individual OAuth deferred)
