@@ -56,6 +56,7 @@ export default async function AdminLayout({
               <li><Link href="/admin/cycles">Cycles</Link></li>
               <li><Link href="/admin/companies">Companies</Link></li>
               <li><Link href="/admin/engineers">Engineers</Link></li>
+              <li><Link href="/admin/content">Content</Link></li>
               <li><Link href="/dashboard">Portal</Link></li>
               <li>
                 <span style={{ fontWeight: 700, fontSize: 'var(--text-sm)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>

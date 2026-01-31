@@ -123,9 +123,9 @@ export default async function DashboardPage() {
           weekDescription={highlight?.description ?? undefined}
         />
 
-        <GitHubFeed />
-
         <SpotlightSection items={spotlights ?? []} />
+
+        <GitHubFeed />
 
         <div className="window">
           <div className="window-title">Available Engineers</div>

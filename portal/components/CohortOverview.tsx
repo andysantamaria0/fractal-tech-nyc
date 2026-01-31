@@ -28,7 +28,7 @@ export default function CohortOverview({
         {(weekTitle || weekDescription) && (
           <div className="cohort-highlight">
             {weekTitle && <strong>This week: {weekTitle}</strong>}
-            {weekDescription && <p>{weekDescription}</p>}
+            {weekDescription && <p dangerouslySetInnerHTML={{ __html: weekDescription }} />}
           </div>
         )}
       </div>

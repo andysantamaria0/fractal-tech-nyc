@@ -5,7 +5,7 @@ import { trackEvent } from '@/lib/posthog'
 interface SpotlightItem {
   id: string
   title: string
-  content_type: 'video' | 'text' | 'image'
+  content_type: 'video' | 'text' | 'image' | 'embed'
   content_url?: string
   content_body?: string
 }
@@ -67,6 +67,22 @@ export default function SpotlightSection({
                     border: '2px solid var(--color-charcoal)',
                   }}
                 />
+                <p style={{ marginTop: 'var(--space-3)', fontWeight: 700 }}>
+                  {item.title}
+                </p>
+              </>
+            )}
+            {item.content_type === 'embed' && item.content_url && (
+              <>
+                <div className="spotlight-video-wrapper">
+                  <iframe
+                    className="spotlight-video"
+                    src={item.content_url}
+                    title={item.title}
+                    allowFullScreen
+                    frameBorder="0"
+                  />
+                </div>
                 <p style={{ marginTop: 'var(--space-3)', fontWeight: 700 }}>
                   {item.title}
                 </p>
