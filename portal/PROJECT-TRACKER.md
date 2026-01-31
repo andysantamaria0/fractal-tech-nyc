@@ -80,7 +80,7 @@
 - [x] Admin layout (`app/admin/layout.tsx`) with auth check and admin nav
 - [x] `is_admin` check on profile in layout (redirects non-admins to /dashboard)
 - [x] Dev bypass for local development
-- [x] Admin nav: Cycles, Invite, Import, Portal link
+- [x] Admin nav: Cycles, Companies, Engineers, Portal link (consolidated from Cycles, Engineers, Invite, Import, Portal)
 
 ### Single Company Invite (`/admin/invite`)
 - [x] Build invite form (email, name, company LinkedIn, stage, send email checkbox)
@@ -186,6 +186,37 @@
 - [ ] End-to-end testing against live Supabase
 - [ ] Soft launch to select companies
 - [ ] Public launch
+
+### Admin Engineers Management (`/admin/engineers`)
+- [x] Build engineers table with columns: Name, Email, Focus Areas, Hours/wk, Available toggle
+- [x] Filters: search by name/email, focus area dropdown, available-only checkbox
+- [x] "Add Engineer" button opens side panel in create mode
+- [x] Click table row to open side panel in edit mode (EngineerDetail component)
+- [x] Form fields: name, email, GitHub URL/username, focus areas, what excites you, availability (start/hours/duration), LinkedIn, portfolio, available toggle
+- [x] Inline availability checkbox toggle with optimistic UI and rollback
+- [x] Create API routes: `GET+POST /api/admin/engineers`, `PATCH /api/admin/engineers/[id]`
+- [x] Add "Engineers" nav link to admin layout (between Cycles and Invite)
+- [x] Loading skeleton state (`loading.tsx`)
+
+### Admin Companies Hub (`/admin/companies`)
+- [x] Consolidate `/admin/invite` and `/admin/import` into `/admin/companies` with tabs (Directory | Import)
+- [x] Admin nav restructured: `Cycles | Companies | Engineers | Portal` (removed Invite and Import links)
+- [x] Create API routes: `GET /api/admin/companies`, `GET+PATCH /api/admin/companies/[id]`
+- [x] Build CompaniesTable component (Name, Email, Stage badge, LinkedIn link, Joined date; clickable rows)
+- [x] Build CompanyDetail side panel (read-only info + editable fields: name, LinkedIn, stage, newsletter opt-in)
+- [x] Build AddCompanyForm side panel (invite flow — calls `POST /api/admin/invite`, shows invite link on success)
+- [x] Extract CompanyImport component from import page (same CSV parse, preview, progress, results, download logic)
+- [x] Main companies page with Directory/Import tabs, search + stage filter, split-pane layout
+- [x] Loading skeleton state (`loading.tsx`) with tab indicators
+- [x] `/admin/invite` → redirect to `/admin/companies`
+- [x] `/admin/import` → redirect to `/admin/companies?tab=import`
+
+### Admin Auth Refactor
+- [x] Extract shared `verifyAdmin()` helper in `lib/admin.ts` (returns userId or NextResponse error)
+- [x] Dev bypass: all admin API routes skip auth in non-production environments
+- [x] Refactored all 7 admin API routes to use `verifyAdmin()` (cycles, cycles/[id], cycles/[id]/history, invite, import, engineers, engineers/[id])
+- [x] Fix middleware to prioritize dev bypass over Supabase auth check
+- [x] Fix admin layout to prioritize dev bypass over Supabase auth check
 
 ### Additional Features
 - [x] Admin home page (`/admin` → redirects to `/admin/cycles`)

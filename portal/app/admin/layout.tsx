@@ -54,9 +54,8 @@ export default async function AdminLayout({
           <nav>
             <ul className="nav-links">
               <li><Link href="/admin/cycles">Cycles</Link></li>
+              <li><Link href="/admin/companies">Companies</Link></li>
               <li><Link href="/admin/engineers">Engineers</Link></li>
-              <li><Link href="/admin/invite">Invite</Link></li>
-              <li><Link href="/admin/import">Import</Link></li>
               <li><Link href="/dashboard">Portal</Link></li>
               <li>
                 <span style={{ fontWeight: 700, fontSize: 'var(--text-sm)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
