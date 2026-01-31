@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
+import { verifyAdmin } from '@/lib/admin'
 
 export async function GET(
   request: Request,
@@ -7,22 +8,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-    }
+    const { error: authError } = await verifyAdmin()
+    if (authError) return authError
 
     const serviceClient = await createServiceClient()
     const { data: submission, error: fetchError } = await serviceClient
@@ -53,22 +40,8 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-    }
+    const { error: authError, userId } = await verifyAdmin()
+    if (authError) return authError
 
     const body = await request.json()
     const serviceClient = await createServiceClient()
@@ -127,7 +100,7 @@ export async function PATCH(
       await serviceClient.from('submission_history').insert(
         historyEntries.map((entry) => ({
           submission_id: id,
-          changed_by: user.id,
+          changed_by: userId ?? null,
           ...entry,
           note: body.audit_note || null,
         }))

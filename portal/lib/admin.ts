@@ -23,7 +23,7 @@ export async function requireAdmin() {
   }
 }
 
-export async function verifyAdmin(): Promise<{ error?: NextResponse }> {
+export async function verifyAdmin(): Promise<{ error?: NextResponse; userId?: string }> {
   if (process.env.NODE_ENV !== 'production') {
     return {}
   }
@@ -45,5 +45,5 @@ export async function verifyAdmin(): Promise<{ error?: NextResponse }> {
     return { error: NextResponse.json({ error: 'Not authorized' }, { status: 403 }) }
   }
 
-  return {}
+  return { userId: user.id }
 }

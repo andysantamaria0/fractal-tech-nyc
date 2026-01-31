@@ -1,24 +1,11 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
+import { verifyAdmin } from '@/lib/admin'
 
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-    }
+    const { error: authError } = await verifyAdmin()
+    if (authError) return authError
 
     const serviceClient = await createServiceClient()
     const { data: engineers, error: fetchError } = await serviceClient
@@ -40,22 +27,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile?.is_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-    }
+    const { error: authError } = await verifyAdmin()
+    if (authError) return authError
 
     const body = await request.json()
 
@@ -89,12 +62,13 @@ export async function POST(request: Request) {
       if (insertError.code === '23505') {
         return NextResponse.json({ error: 'An engineer with this email already exists' }, { status: 409 })
       }
-      return NextResponse.json({ error: 'Failed to create engineer' }, { status: 500 })
+      return NextResponse.json({ error: `Failed to create engineer: ${insertError.message}` }, { status: 500 })
     }
 
     return NextResponse.json({ engineer }, { status: 201 })
   } catch (error) {
     console.error('Admin engineers POST error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const msg = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: `Internal server error: ${msg}` }, { status: 500 })
   }
 }
