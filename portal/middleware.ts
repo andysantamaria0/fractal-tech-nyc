@@ -6,15 +6,16 @@ const isSupabaseConfigured =
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('xxx.supabase.co')
 
 export async function middleware(request: NextRequest) {
-  // Dev bypass: skip auth when Supabase isn't configured (local dev only)
-  if (!isSupabaseConfigured) {
-    if (process.env.NODE_ENV === 'production') {
-      // Fail closed in production — redirect to an error state
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
+  // Dev bypass: skip auth in local dev
+  if (process.env.NODE_ENV !== 'production') {
     return NextResponse.next()
+  }
+
+  if (!isSupabaseConfigured) {
+    // Fail closed in production — redirect to an error state
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
   }
 
   let supabaseResponse = NextResponse.next({

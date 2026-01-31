@@ -13,7 +13,10 @@ export default async function AdminLayout({
   let isAdminUser = false
   let userName = 'Admin'
 
-  if (isSupabaseConfigured) {
+  if (process.env.NODE_ENV !== 'production') {
+    // Dev bypass — local dev only
+    isAdminUser = true
+  } else if (isSupabaseConfigured) {
     const { createClient } = await import('@/lib/supabase/server')
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -34,9 +37,6 @@ export default async function AdminLayout({
 
     isAdminUser = true
     userName = profile.name || 'Admin'
-  } else if (process.env.NODE_ENV !== 'production') {
-    // Dev bypass — local dev only
-    isAdminUser = true
   } else {
     // Fail closed in production
     redirect('/login')
@@ -54,6 +54,7 @@ export default async function AdminLayout({
           <nav>
             <ul className="nav-links">
               <li><Link href="/admin/cycles">Cycles</Link></li>
+              <li><Link href="/admin/engineers">Engineers</Link></li>
               <li><Link href="/admin/invite">Invite</Link></li>
               <li><Link href="/admin/import">Import</Link></li>
               <li><Link href="/dashboard">Portal</Link></li>
