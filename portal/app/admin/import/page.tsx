@@ -18,13 +18,46 @@ interface ImportResult {
   details: { email: string; status: 'created' | 'skipped' | 'failed'; reason?: string }[]
 }
 
+function parseCSVLine(line: string): string[] {
+  const fields: string[] = []
+  let current = ''
+  let inQuotes = false
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i]
+    if (inQuotes) {
+      if (char === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"'
+          i++ // skip escaped quote
+        } else {
+          inQuotes = false
+        }
+      } else {
+        current += char
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true
+      } else if (char === ',') {
+        fields.push(current.trim())
+        current = ''
+      } else {
+        current += char
+      }
+    }
+  }
+  fields.push(current.trim())
+  return fields
+}
+
 function parseCSV(text: string): Record<string, string>[] {
-  const lines = text.trim().split('\n')
+  const lines = text.replace(/^\uFEFF/, '').trim().split('\n')
   if (lines.length < 2) return []
 
-  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase().replace(/\s+/g, '_'))
-  return lines.slice(1).map((line) => {
-    const values = line.split(',').map((v) => v.trim().replace(/^"|"$/g, ''))
+  const headers = parseCSVLine(lines[0]).map((h) => h.toLowerCase().replace(/\s+/g, '_'))
+  return lines.slice(1).filter((line) => line.trim()).map((line) => {
+    const values = parseCSVLine(line)
     const row: Record<string, string> = {}
     headers.forEach((h, i) => {
       row[h] = values[i] || ''
@@ -63,6 +96,8 @@ export default function AdminImportPage() {
   const [progress, setProgress] = useState(0)
   const [result, setResult] = useState<ImportResult | null>(null)
   const [error, setError] = useState('')
+  const [sendWelcome, setSendWelcome] = useState(true)
+  const [skipDuplicates, setSkipDuplicates] = useState(true)
   const fileRef = useRef<HTMLInputElement>(null)
 
   function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -85,6 +120,21 @@ export default function AdminImportPage() {
     reader.readAsText(file)
   }
 
+  function downloadResultsCSV(details: ImportResult['details']) {
+    const header = 'email,status,reason'
+    const csvRows = details.map((d) =>
+      `"${d.email}","${d.status}","${(d.reason || '').replace(/"/g, '""')}"`
+    )
+    const csv = [header, ...csvRows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'import-results.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   async function handleImport() {
     const validRows = rows.filter((r) => r.valid)
     if (validRows.length === 0) {
@@ -95,6 +145,11 @@ export default function AdminImportPage() {
     setImporting(true)
     setProgress(0)
     setError('')
+
+    // Simulate progress increments while waiting for the API
+    const progressInterval = setInterval(() => {
+      setProgress((p) => Math.min(p + 5, 90))
+    }, 300)
 
     try {
       const res = await fetch('/api/admin/import', {
@@ -107,8 +162,12 @@ export default function AdminImportPage() {
             company_linkedin: r.company_linkedin,
             company_stage: r.company_stage,
           })),
+          send_welcome: sendWelcome,
+          skip_duplicates: skipDuplicates,
         }),
       })
+
+      clearInterval(progressInterval)
 
       if (!res.ok) {
         const data = await res.json()
@@ -119,6 +178,7 @@ export default function AdminImportPage() {
       setResult(data)
       setProgress(100)
     } catch (err) {
+      clearInterval(progressInterval)
       setError(err instanceof Error ? err.message : 'Import failed')
     } finally {
       setImporting(false)
@@ -152,6 +212,17 @@ export default function AdminImportPage() {
               className="form-input"
               onChange={handleFileUpload}
             />
+          </div>
+
+          <div style={{ display: 'flex', gap: 'var(--space-5)', marginBottom: 'var(--space-5)' }}>
+            <label className="form-checkbox">
+              <input type="checkbox" checked={sendWelcome} onChange={(e) => setSendWelcome(e.target.checked)} />
+              <span>Send welcome emails</span>
+            </label>
+            <label className="form-checkbox">
+              <input type="checkbox" checked={skipDuplicates} onChange={(e) => setSkipDuplicates(e.target.checked)} />
+              <span>Skip duplicates silently</span>
+            </label>
           </div>
 
           {rows.length > 0 && !result && (
@@ -232,17 +303,24 @@ export default function AdminImportPage() {
                 </table>
               </div>
 
-              <button
-                className="btn-secondary"
-                style={{ marginTop: 'var(--space-5)' }}
-                onClick={() => {
-                  setRows([])
-                  setResult(null)
-                  if (fileRef.current) fileRef.current.value = ''
-                }}
-              >
-                Import Another File
-              </button>
+              <div style={{ display: 'flex', gap: 'var(--space-4)', marginTop: 'var(--space-5)' }}>
+                <button
+                  className="btn-secondary"
+                  onClick={() => downloadResultsCSV(result.details)}
+                >
+                  Download Results CSV
+                </button>
+                <button
+                  className="btn-secondary"
+                  onClick={() => {
+                    setRows([])
+                    setResult(null)
+                    if (fileRef.current) fileRef.current.value = ''
+                  }}
+                >
+                  Import Another File
+                </button>
+              </div>
             </div>
           )}
         </div>

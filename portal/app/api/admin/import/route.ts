@@ -8,6 +8,8 @@ interface ImportRowInput {
   company_stage: string
 }
 
+const MAX_BATCH_SIZE = 100
+
 export async function POST(request: Request) {
   try {
     // Verify admin
@@ -29,13 +31,42 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { rows } = body as { rows: ImportRowInput[] }
+    const { rows, send_welcome = true, skip_duplicates = true } = body as {
+      rows: ImportRowInput[]
+      send_welcome?: boolean
+      skip_duplicates?: boolean
+    }
 
     if (!rows || rows.length === 0) {
       return NextResponse.json({ error: 'No rows provided' }, { status: 400 })
     }
 
+    if (rows.length > MAX_BATCH_SIZE) {
+      return NextResponse.json(
+        { error: `Batch size exceeds maximum of ${MAX_BATCH_SIZE} rows` },
+        { status: 400 }
+      )
+    }
+
     const serviceClient = await createServiceClient()
+
+    // Fetch all existing users ONCE before the loop (with pagination)
+    const existingEmails = new Set<string>()
+    let page = 1
+    const perPage = 1000
+    while (true) {
+      const { data: usersPage } = await serviceClient.auth.admin.listUsers({
+        page,
+        perPage,
+      })
+      if (!usersPage?.users || usersPage.users.length === 0) break
+      for (const u of usersPage.users) {
+        if (u.email) existingEmails.add(u.email.toLowerCase())
+      }
+      if (usersPage.users.length < perPage) break
+      page++
+    }
+
     const details: { email: string; status: 'created' | 'skipped' | 'failed'; reason?: string }[] = []
     let created = 0
     let skipped = 0
@@ -43,14 +74,24 @@ export async function POST(request: Request) {
 
     for (const row of rows) {
       try {
-        // Check if user already exists
-        const { data: existingUsers } = await serviceClient.auth.admin.listUsers()
-        const exists = existingUsers?.users?.some((u) => u.email === row.email)
-
-        if (exists) {
-          skipped++
-          details.push({ email: row.email, status: 'skipped', reason: 'User already exists' })
+        // Validate required fields
+        if (!row.email || !row.name || !row.company_linkedin || !row.company_stage) {
+          failed++
+          details.push({ email: row.email || '(missing)', status: 'failed', reason: 'Missing required fields' })
           continue
+        }
+
+        // Check if user already exists using the pre-fetched set
+        if (existingEmails.has(row.email.toLowerCase())) {
+          if (skip_duplicates) {
+            skipped++
+            details.push({ email: row.email, status: 'skipped', reason: 'User already exists' })
+            continue
+          } else {
+            failed++
+            details.push({ email: row.email, status: 'failed', reason: 'User already exists' })
+            continue
+          }
         }
 
         // Create auth user via invite
@@ -63,6 +104,9 @@ export async function POST(request: Request) {
           details.push({ email: row.email, status: 'failed', reason: inviteError.message })
           continue
         }
+
+        // Add to our set to prevent duplicates within the same batch
+        existingEmails.add(row.email.toLowerCase())
 
         // Create profile
         const { error: profileError } = await serviceClient
@@ -117,6 +161,23 @@ export async function POST(request: Request) {
             .eq('id', inviteData.user.id)
         } catch (e) {
           console.error(`HubSpot sync failed for ${row.email}:`, e)
+        }
+
+        // Send welcome email if requested
+        if (send_welcome) {
+          try {
+            const { Resend } = await import('resend')
+            const { WelcomeEmail } = await import('@/emails/welcome')
+            const resend = new Resend(process.env.RESEND_API_KEY)
+            await resend.emails.send({
+              from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
+              to: row.email,
+              subject: 'Welcome to Fractal Partners Portal',
+              html: WelcomeEmail({ name: row.name }),
+            })
+          } catch (e) {
+            console.error(`Welcome email failed for ${row.email}:`, e)
+          }
         }
 
         created++

@@ -108,29 +108,27 @@ export async function POST(request: Request) {
     if (send_welcome) {
       try {
         const { Resend } = await import('resend')
+        const { WelcomeEmail } = await import('@/emails/welcome')
         const resend = new Resend(process.env.RESEND_API_KEY)
         await resend.emails.send({
           from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
           to: email,
           subject: 'Welcome to Fractal Partners Portal',
-          html: `
-            <h2>Welcome to Fractal Partners, ${name}!</h2>
-            <p>You've been invited to the Fractal Partners Portal where you can:</p>
-            <ul>
-              <li>Browse our current cohort of engineers</li>
-              <li>Submit feature requests for your product</li>
-              <li>Track cohort progress and highlights</li>
-            </ul>
-            <p>Check your email for a login link, or visit the portal to get started.</p>
-            <p>— The Fractal Team</p>
-          `,
+          html: WelcomeEmail({ name }),
         })
       } catch (e) {
         console.error('Welcome email failed (non-blocking):', e)
       }
     }
 
-    return NextResponse.json({ success: true, userId: inviteData.user.id })
+    // Extract the action link from the invite response if available
+    const actionLink = (inviteData.user as unknown as Record<string, unknown>).action_link as string | undefined
+
+    return NextResponse.json({
+      success: true,
+      userId: inviteData.user.id,
+      inviteLink: actionLink || null,
+    })
   } catch (error) {
     console.error('Invite API error:', error)
     return NextResponse.json(

@@ -29,6 +29,11 @@ const STATUS_TABS = [
   { value: 'cancelled', label: 'Cancelled' },
 ]
 
+interface Engineer {
+  id: string
+  name: string
+}
+
 export default function AdminCyclesPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [loading, setLoading] = useState(true)
@@ -39,6 +44,30 @@ export default function AdminCyclesPage() {
   const [overdueOnly, setOverdueOnly] = useState(false)
   const [unassignedOnly, setUnassignedOnly] = useState(false)
   const [hiringOnly, setHiringOnly] = useState(false)
+  const [engineerFilter, setEngineerFilter] = useState('')
+  const [companySearch, setCompanySearch] = useState('')
+
+  // Engineers list for dropdown
+  const [engineers, setEngineers] = useState<Engineer[]>([])
+
+  useEffect(() => {
+    async function loadEngineers() {
+      try {
+        const res = await fetch('/api/admin/cycles?status=all')
+        if (res.ok) {
+          const data = await res.json()
+          const engMap = new Map<string, string>()
+          for (const s of data.submissions) {
+            if (s.assigned_engineer) {
+              engMap.set(s.assigned_engineer.id, s.assigned_engineer.name)
+            }
+          }
+          setEngineers(Array.from(engMap, ([id, name]) => ({ id, name })))
+        }
+      } catch { /* ignore */ }
+    }
+    loadEngineers()
+  }, [])
 
   const loadSubmissions = useCallback(async () => {
     setLoading(true)
@@ -47,19 +76,29 @@ export default function AdminCyclesPage() {
     if (overdueOnly) params.set('overdue', 'true')
     if (unassignedOnly) params.set('unassigned', 'true')
     if (hiringOnly) params.set('hiring', 'true')
+    if (engineerFilter) params.set('engineer_id', engineerFilter)
 
     try {
       const res = await fetch(`/api/admin/cycles?${params.toString()}`)
       if (res.ok) {
         const data = await res.json()
-        setSubmissions(data.submissions)
+        let filtered = data.submissions
+        // Client-side company name search
+        if (companySearch.trim()) {
+          const q = companySearch.trim().toLowerCase()
+          filtered = filtered.filter((s: Submission) =>
+            s.profiles?.name?.toLowerCase().includes(q) ||
+            s.profiles?.email?.toLowerCase().includes(q)
+          )
+        }
+        setSubmissions(filtered)
       }
     } catch (e) {
       console.error('Failed to load submissions:', e)
     } finally {
       setLoading(false)
     }
-  }, [activeTab, overdueOnly, unassignedOnly, hiringOnly])
+  }, [activeTab, overdueOnly, unassignedOnly, hiringOnly, engineerFilter, companySearch])
 
   useEffect(() => {
     loadSubmissions()
@@ -88,6 +127,25 @@ export default function AdminCyclesPage() {
 
         {/* Filters */}
         <div className="admin-filters">
+          <select
+            className="form-select"
+            value={engineerFilter}
+            onChange={(e) => setEngineerFilter(e.target.value)}
+            style={{ maxWidth: 180 }}
+          >
+            <option value="">All Engineers</option>
+            {engineers.map((eng) => (
+              <option key={eng.id} value={eng.id}>{eng.name}</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            className="form-input"
+            placeholder="Search company..."
+            value={companySearch}
+            onChange={(e) => setCompanySearch(e.target.value)}
+            style={{ maxWidth: 200 }}
+          />
           <label className="form-checkbox">
             <input type="checkbox" checked={overdueOnly} onChange={(e) => setOverdueOnly(e.target.checked)} />
             <span>Overdue Only</span>

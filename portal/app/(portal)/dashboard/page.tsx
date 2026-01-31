@@ -2,6 +2,7 @@ import CohortOverview from '@/components/CohortOverview'
 import GitHubFeed from '@/components/GitHubFeed'
 import SpotlightSection from '@/components/SpotlightSection'
 import EngineerCard from '@/components/EngineerCard'
+import DashboardTracker from '@/components/DashboardTracker'
 import Link from 'next/link'
 
 const isSupabaseConfigured =
@@ -66,14 +67,19 @@ export default async function DashboardPage() {
       .single()
     cohort = cohortData
 
-    // Calculate current week
+    // Calculate current week (accounting for optional break week)
     currentWeek = 1
     if (cohort?.start_date) {
       const start = new Date(cohort.start_date)
       const now = new Date()
       const diffMs = now.getTime() - start.getTime()
-      const diffWeeks = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1
-      currentWeek = Math.max(1, Math.min(diffWeeks, cohort.duration_weeks || 12))
+      const calendarWeek = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1
+      // If a break week is set and we're past it, subtract 1 from the displayed week
+      const breakWeek = cohort.break_week as number | null
+      const adjustedWeek = breakWeek && calendarWeek > breakWeek
+        ? calendarWeek - 1
+        : calendarWeek
+      currentWeek = Math.max(1, Math.min(adjustedWeek, cohort.duration_weeks || 12))
     }
 
     // Fetch current week highlight
@@ -83,7 +89,7 @@ export default async function DashboardPage() {
       .eq('week_number', currentWeek)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single()
+      .maybeSingle()
     highlight = highlightData
 
     // Fetch spotlight content
@@ -107,6 +113,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="dashboard">
+      <DashboardTracker />
       <div className="dashboard-grid">
         <CohortOverview
           numEngineers={cohort?.num_engineers ?? 15}

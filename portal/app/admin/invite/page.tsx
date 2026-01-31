@@ -19,11 +19,13 @@ export default function AdminInvitePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [inviteLink, setInviteLink] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setSuccess('')
+    setInviteLink('')
     setLoading(true)
 
     try {
@@ -46,6 +48,9 @@ export default function AdminInvitePage() {
       }
 
       setSuccess(`Invited ${email} successfully.`)
+      if (data.inviteLink) {
+        setInviteLink(data.inviteLink)
+      }
       setEmail('')
       setName('')
       setCompanyLinkedin('')
@@ -67,7 +72,19 @@ export default function AdminInvitePage() {
           </p>
 
           {error && <div className="alert alert-error">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
+          {success && (
+            <div className="alert alert-success">
+              {success}
+              {inviteLink && (
+                <div style={{ marginTop: 'var(--space-3)', fontSize: 'var(--text-sm)' }}>
+                  <strong>Invite link (backup):</strong>{' '}
+                  <a href={inviteLink} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
+                    {inviteLink}
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">

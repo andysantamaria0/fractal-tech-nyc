@@ -1,34 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-
-type Step = 'auth' | 'profile'
+import { trackEvent } from '@/lib/posthog'
 
 export default function SignupPage() {
-  const [step, setStep] = useState<Step>('auth')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  // Profile fields
-  const [name, setName] = useState('')
-  const [companyLinkedin, setCompanyLinkedin] = useState('')
-  const [companyStage, setCompanyStage] = useState('')
-  const [newsletterOptin, setNewsletterOptin] = useState(false)
+  const [confirmationSent, setConfirmationSent] = useState(false)
 
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    trackEvent('signup_started')
+  }, [])
 
   async function handleEmailSignup(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -42,157 +39,49 @@ export default function SignupPage() {
       return
     }
 
+    // If session exists, email confirmation is disabled — redirect to profile completion
+    if (data.session) {
+      router.push('/complete-profile')
+      return
+    }
+
+    // Email confirmation is enabled — show confirmation message
+    setConfirmationSent(true)
     setLoading(false)
-    setStep('profile')
   }
 
   async function handleGoogleSignup() {
+    setLoading(true)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/callback?next=profile`,
+        redirectTo: `${window.location.origin}/callback`,
       },
     })
 
     if (error) {
       setError(error.message)
+      setLoading(false)
     }
   }
 
-  async function handleProfileSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      setError('Not authenticated. Please sign up again.')
-      setLoading(false)
-      return
-    }
-
-    // Insert profile
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: user.id,
-      name,
-      email: user.email!,
-      company_linkedin: companyLinkedin,
-      company_stage: companyStage,
-      newsletter_optin: newsletterOptin,
-    })
-
-    if (profileError) {
-      setError(profileError.message)
-      setLoading(false)
-      return
-    }
-
-    // Trigger HubSpot sync
-    try {
-      await fetch('/api/auth/hubspot-sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          name,
-          email: user.email!,
-          companyLinkedin,
-          companyStage,
-        }),
-      })
-    } catch {
-      // HubSpot sync failure is non-blocking
-      console.error('HubSpot sync failed')
-    }
-
-    // Send welcome email (non-blocking)
-    try {
-      await fetch('/api/emails/welcome', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email!, name }),
-      })
-    } catch {
-      console.error('Welcome email failed')
-    }
-
-    router.push('/dashboard')
-  }
-
-  if (step === 'profile') {
+  if (confirmationSent) {
     return (
       <div className="auth-page">
         <div className="auth-window">
           <div className="hero-window">
-            <div className="hero-title-bar">COMPLETE YOUR PROFILE</div>
+            <div className="hero-title-bar">CHECK YOUR EMAIL</div>
             <div className="window-content">
               <div className="auth-header">
-                <h1>Almost There</h1>
-                <p>Tell us about your company</p>
+                <h1>Confirm Your Email</h1>
+                <p>
+                  We sent a confirmation link to <strong>{email}</strong>.
+                  Click the link in your email to continue setting up your account.
+                </p>
               </div>
-
-              {error && <div className="alert alert-error">{error}</div>}
-
-              <form onSubmit={handleProfileSubmit}>
-                <div className="form-group">
-                  <label htmlFor="name">Your Name *</label>
-                  <input
-                    id="name"
-                    type="text"
-                    className="form-input"
-                    placeholder="Jane Smith"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="companyLinkedin">Company LinkedIn URL *</label>
-                  <input
-                    id="companyLinkedin"
-                    type="url"
-                    className="form-input"
-                    placeholder="https://linkedin.com/company/..."
-                    value={companyLinkedin}
-                    onChange={(e) => setCompanyLinkedin(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="companyStage">Company Stage *</label>
-                  <select
-                    id="companyStage"
-                    className="form-select"
-                    value={companyStage}
-                    onChange={(e) => setCompanyStage(e.target.value)}
-                    required
-                  >
-                    <option value="">Select stage...</option>
-                    <option value="bootstrapped">Bootstrapped</option>
-                    <option value="angel">Angel</option>
-                    <option value="pre-seed">Pre-Seed</option>
-                    <option value="seed">Seed</option>
-                    <option value="bigger">Series A+</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={newsletterOptin}
-                      onChange={(e) => setNewsletterOptin(e.target.checked)}
-                    />
-                    <span>Send me bi-weekly cohort updates</span>
-                  </label>
-                </div>
-
-                <button type="submit" className="btn-primary btn-full" disabled={loading}>
-                  {loading ? 'Saving...' : 'Complete Setup'}
-                </button>
-              </form>
+              <div className="auth-footer">
+                <Link href="/login">Back to Log In</Link>
+              </div>
             </div>
           </div>
         </div>
@@ -213,7 +102,7 @@ export default function SignupPage() {
 
             {error && <div className="alert alert-error">{error}</div>}
 
-            <button onClick={handleGoogleSignup} className="google-btn" type="button">
+            <button onClick={handleGoogleSignup} className="google-btn" type="button" disabled={loading}>
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
                 <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>

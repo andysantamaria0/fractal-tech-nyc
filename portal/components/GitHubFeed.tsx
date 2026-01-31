@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { trackEvent } from '@/lib/posthog'
 import type { FeedItem } from '@/lib/github'
 
 function getTypeIcon(type: FeedItem['type']): string {
@@ -24,10 +25,22 @@ function timeAgo(timestamp: string): string {
   return `${Math.floor(seconds / 86400)}d ago`
 }
 
+const PAGE_SIZE = 10
+
+const TYPE_FILTERS: { value: FeedItem['type'] | 'all'; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'push', label: 'Commits' },
+  { value: 'pr', label: 'PRs' },
+  { value: 'review', label: 'Reviews' },
+  { value: 'comment', label: 'Comments' },
+]
+
 export default function GitHubFeed() {
   const [events, setEvents] = useState<FeedItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [typeFilter, setTypeFilter] = useState<FeedItem['type'] | 'all'>('all')
 
   useEffect(() => {
     async function fetchFeed() {
@@ -46,48 +59,85 @@ export default function GitHubFeed() {
     fetchFeed()
   }, [])
 
+  const filteredEvents = typeFilter === 'all'
+    ? events
+    : events.filter((e) => e.type === typeFilter)
+  const visibleEvents = filteredEvents.slice(0, visibleCount)
+  const hasMore = visibleCount < filteredEvents.length
+
   return (
     <div className="window">
       <div className="window-title">GitHub Activity</div>
       <div className="window-content" style={{ padding: 0 }}>
+        {!loading && !error && events.length > 0 && (
+          <div className="feed-filters">
+            {TYPE_FILTERS.map((f) => (
+              <button
+                key={f.value}
+                className={`feed-filter-btn${typeFilter === f.value ? ' feed-filter-active' : ''}`}
+                onClick={() => { setTypeFilter(f.value); setVisibleCount(PAGE_SIZE) }}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        )}
         {loading && <div className="loading-text">Loading activity...</div>}
         {error && <div className="loading-text">{error}</div>}
         {!loading && !error && events.length === 0 && (
           <div className="loading-text">No recent activity</div>
         )}
-        {events.length > 0 && (
-          <ul className="feed-list">
-            {events.map((event) => (
-              <li key={event.id} className="feed-item">
-                <div className="feed-icon">{getTypeIcon(event.type)}</div>
-                <div className="feed-content">
-                  <div className="feed-action">
-                    <span className="feed-actor">{event.actor}</span>{' '}
-                    {event.action}{' '}
-                    <a
-                      href={event.repoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="feed-repo"
-                    >
-                      {event.repo}
-                    </a>
+        {!loading && !error && events.length > 0 && filteredEvents.length === 0 && (
+          <div className="loading-text">No {typeFilter} activity</div>
+        )}
+        {visibleEvents.length > 0 && (
+          <>
+            <ul className="feed-list">
+              {visibleEvents.map((event) => (
+                <li key={event.id} className="feed-item">
+                  <div className="feed-icon">{getTypeIcon(event.type)}</div>
+                  <div className="feed-content">
+                    <div className="feed-action">
+                      <span className="feed-actor">{event.actor}</span>{' '}
+                      {event.action}{' '}
+                      <a
+                        href={event.repoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="feed-repo"
+                      >
+                        {event.repo}
+                      </a>
+                    </div>
+                    <div className="feed-action">
+                      <a
+                        href={event.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="feed-link"
+                        onClick={() => trackEvent('github_activity_clicked', {
+                          activity_type: event.type,
+                        })}
+                      >
+                        {event.description}
+                      </a>
+                    </div>
+                    <div className="feed-time">{timeAgo(event.timestamp)}</div>
                   </div>
-                  <div className="feed-action">
-                    <a
-                      href={event.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="feed-link"
-                    >
-                      {event.description}
-                    </a>
-                  </div>
-                  <div className="feed-time">{timeAgo(event.timestamp)}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
+            {hasMore && (
+              <div style={{ padding: 'var(--space-4)', textAlign: 'center' }}>
+                <button
+                  className="btn-secondary"
+                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                >
+                  Load More
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
