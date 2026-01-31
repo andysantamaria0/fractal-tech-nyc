@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@hubspot/api-client": "^11.0.0",
+    "@supabase/supabase-js": "^2.49.0",
     "resend": "^3.0.0"
   },
   "engines": {
