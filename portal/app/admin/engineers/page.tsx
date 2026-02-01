@@ -15,6 +15,23 @@ interface Engineer {
   created_at: string
 }
 
+interface AmaSubmission {
+  id: string
+  name: string
+  email: string
+  twitter: string
+  phone: string
+  context: string
+  question: string
+  tag_preference: string
+  created_at: string
+}
+
+function truncate(text: string, max: number) {
+  if (text.length <= max) return text
+  return text.slice(0, max) + '...'
+}
+
 export default function AdminEngineersPage() {
   const [engineers, setEngineers] = useState<Engineer[]>([])
   const [loading, setLoading] = useState(true)
@@ -24,6 +41,13 @@ export default function AdminEngineersPage() {
   const [search, setSearch] = useState('')
   const [focusFilter, setFocusFilter] = useState('')
   const [availableOnly, setAvailableOnly] = useState(false)
+
+  // AMA state
+  const [amaSubmissions, setAmaSubmissions] = useState<AmaSubmission[]>([])
+  const [amaLoading, setAmaLoading] = useState(true)
+  const [amaSearch, setAmaSearch] = useState('')
+  const [amaTagFilter, setAmaTagFilter] = useState('')
+  const [selectedAmaId, setSelectedAmaId] = useState<string | null>(null)
 
   const loadEngineers = useCallback(async () => {
     setLoading(true)
@@ -40,9 +64,25 @@ export default function AdminEngineersPage() {
     }
   }, [])
 
+  const loadAmaSubmissions = useCallback(async () => {
+    setAmaLoading(true)
+    try {
+      const res = await fetch('/api/admin/ama')
+      if (res.ok) {
+        const data = await res.json()
+        setAmaSubmissions(data.submissions)
+      }
+    } catch (e) {
+      console.error('Failed to load AMA submissions:', e)
+    } finally {
+      setAmaLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     loadEngineers()
-  }, [loadEngineers])
+    loadAmaSubmissions()
+  }, [loadEngineers, loadAmaSubmissions])
 
   // Derive unique focus areas for the filter dropdown
   const allFocusAreas = useMemo(() => {
@@ -72,6 +112,28 @@ export default function AdminEngineersPage() {
     }
     return result
   }, [engineers, search, focusFilter, availableOnly])
+
+  const filteredAma = useMemo(() => {
+    let result = amaSubmissions
+    if (amaSearch.trim()) {
+      const q = amaSearch.trim().toLowerCase()
+      result = result.filter(
+        (s) =>
+          s.name.toLowerCase().includes(q) ||
+          s.email.toLowerCase().includes(q) ||
+          s.twitter.toLowerCase().includes(q)
+      )
+    }
+    if (amaTagFilter) {
+      result = result.filter((s) => s.tag_preference === amaTagFilter)
+    }
+    return result
+  }, [amaSubmissions, amaSearch, amaTagFilter])
+
+  const selectedAma = useMemo(
+    () => amaSubmissions.find((s) => s.id === selectedAmaId) || null,
+    [amaSubmissions, selectedAmaId]
+  )
 
   async function handleToggleAvailability(id: string, available: boolean) {
     // Optimistic update
@@ -180,6 +242,138 @@ export default function AdminEngineersPage() {
                   onClose={() => setSelectedId(null)}
                   onSaved={handleSaved}
                 />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* AMA Submissions */}
+        <div>
+          <div className="section-label">Submissions</div>
+          <h2 className="section-title">AMA</h2>
+        </div>
+
+        <div className="admin-filters">
+          <input
+            type="text"
+            className="form-input"
+            placeholder="Search name, email, or twitter..."
+            value={amaSearch}
+            onChange={(e) => setAmaSearch(e.target.value)}
+            style={{ maxWidth: 260 }}
+          />
+          <select
+            className="form-select"
+            value={amaTagFilter}
+            onChange={(e) => setAmaTagFilter(e.target.value)}
+            style={{ maxWidth: 180 }}
+          >
+            <option value="">All Preferences</option>
+            <option value="tag-me">Tag Me</option>
+            <option value="keep-anon">Keep Anon</option>
+          </select>
+        </div>
+
+        <div className={selectedAmaId ? 'admin-split-layout' : ''}>
+          <div className={selectedAmaId ? 'admin-split-main' : ''}>
+            <div className="window">
+              <div className="window-title">
+                AMA Submissions ({amaLoading ? '...' : filteredAma.length})
+              </div>
+              <div style={{ padding: 0 }}>
+                {amaLoading ? (
+                  <div className="loading-text">Loading submissions...</div>
+                ) : (
+                  <div className="admin-table-wrapper">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Twitter</th>
+                          <th>Phone</th>
+                          <th>Context</th>
+                          <th>Question</th>
+                          <th>Tag Pref</th>
+                          <th>Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredAma.map((s) => (
+                          <tr
+                            key={s.id}
+                            onClick={() => setSelectedAmaId(s.id === selectedAmaId ? null : s.id)}
+                            className={selectedAmaId === s.id ? 'admin-row-selected' : ''}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <td style={{ fontWeight: 700 }}>{s.name}</td>
+                            <td>{s.email}</td>
+                            <td>{s.twitter}</td>
+                            <td>{s.phone}</td>
+                            <td>{truncate(s.context, 60)}</td>
+                            <td>{truncate(s.question, 60)}</td>
+                            <td>
+                              <span className="admin-flag">{s.tag_preference}</span>
+                            </td>
+                            <td style={{ whiteSpace: 'nowrap' }}>
+                              {new Date(s.created_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {selectedAma && (
+            <div className="admin-split-detail">
+              <div className="window">
+                <div className="window-title">Submission Detail</div>
+                <div className="admin-detail-panel">
+                  <div className="admin-detail-header">
+                    <h3>{selectedAma.name}</h3>
+                    <button className="btn-secondary" onClick={() => setSelectedAmaId(null)}>
+                      Close
+                    </button>
+                  </div>
+                  <div className="admin-detail-body">
+                    <div className="admin-detail-section">
+                      <div className="section-label">Contact</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+                        <div>
+                          <div style={{ fontSize: 'var(--text-xs)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-1)' }}>Email</div>
+                          <div>{selectedAma.email}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 'var(--text-xs)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-1)' }}>Twitter</div>
+                          <div>{selectedAma.twitter}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 'var(--text-xs)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-1)' }}>Phone</div>
+                          <div>{selectedAma.phone}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 'var(--text-xs)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-1)' }}>Tag Preference</div>
+                          <div><span className="admin-flag">{selectedAma.tag_preference}</span></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="admin-detail-section">
+                      <div className="section-label">Context</div>
+                      <div style={{ whiteSpace: 'pre-wrap' }}>{selectedAma.context}</div>
+                    </div>
+                    <div className="admin-detail-section">
+                      <div className="section-label">Question</div>
+                      <div style={{ whiteSpace: 'pre-wrap' }}>{selectedAma.question}</div>
+                    </div>
+                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-mid)' }}>
+                      Submitted {new Date(selectedAma.created_at).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
