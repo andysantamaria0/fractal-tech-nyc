@@ -1,4 +1,5 @@
 import EngineerCard from '@/components/EngineerCard'
+import MySubmissions from '@/components/MySubmissions'
 import { demoEngineers } from '@/lib/constants'
 
 const isSupabaseConfigured =
@@ -49,6 +50,15 @@ export default async function CyclesPage() {
             </div>
           </div>
         )}
+
+        <div style={{ marginTop: 'var(--space-7)' }}>
+          <h2 className="section-title">My Submissions</h2>
+          <p style={{ color: 'var(--color-slate)', marginBottom: 'var(--space-7)' }}>
+            Track the status of your feature requests.
+          </p>
+        </div>
+
+        <MySubmissions />
       </div>
     </div>
   )
