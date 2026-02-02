@@ -2,14 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-
-interface Engineer {
-  id: string
-  name: string
-  is_available_for_cycles: boolean
-  availability_hours_per_week?: number
-  focus_areas?: string[]
-}
+type EngineerSummary = Pick<
+  import('@/lib/types').Engineer,
+  'id' | 'name' | 'is_available_for_cycles' | 'availability_hours_per_week' | 'focus_areas'
+>
 
 interface ActiveSprint {
   id: string
@@ -26,7 +22,7 @@ interface EngineerAssignmentProps {
 }
 
 export default function EngineerAssignment({ currentEngineerId, onAssign }: EngineerAssignmentProps) {
-  const [engineers, setEngineers] = useState<Engineer[]>([])
+  const [engineers, setEngineers] = useState<EngineerSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [activeSprints, setActiveSprints] = useState<ActiveSprint[]>([])
   const [sprintsLoading, setSprintsLoading] = useState(false)

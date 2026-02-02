@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
-import { verifyAdmin } from '@/lib/admin'
+import { withAdmin } from '@/lib/api/admin-helpers'
 
 export async function GET(request: Request) {
-  try {
-    const { error: authError } = await verifyAdmin()
-    if (authError) return authError
-
+  return withAdmin(async ({ serviceClient }) => {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const engineerId = searchParams.get('engineer_id')
@@ -15,7 +11,6 @@ export async function GET(request: Request) {
     const unassignedOnly = searchParams.get('unassigned') === 'true'
     const hiringOnly = searchParams.get('hiring') === 'true'
 
-    const serviceClient = await createServiceClient()
     let query = serviceClient
       .from('feature_submissions')
       .select(`
@@ -64,8 +59,5 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({ submissions: filtered })
-  } catch (error) {
-    console.error('Admin cycles API error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  })
 }

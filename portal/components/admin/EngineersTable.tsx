@@ -1,15 +1,6 @@
 'use client'
 
-interface Engineer {
-  id: string
-  name: string
-  email: string
-  focus_areas?: string[]
-  is_available_for_cycles: boolean
-  availability_hours_per_week?: number
-  github_url?: string
-  created_at: string
-}
+import type { Engineer } from '@/lib/types'
 
 interface EngineersTableProps {
   engineers: Engineer[]

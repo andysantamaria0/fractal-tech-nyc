@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
-import { verifyAdmin } from '@/lib/admin'
+import { withAdmin } from '@/lib/api/admin-helpers'
+import { pickAllowedFields, ENGINEER_FIELDS } from '@/lib/api/field-validator'
 
 export async function GET() {
-  try {
-    const { error: authError } = await verifyAdmin()
-    if (authError) return authError
-
-    const serviceClient = await createServiceClient()
+  return withAdmin(async ({ serviceClient }) => {
     const { data: engineers, error: fetchError } = await serviceClient
       .from('engineers')
       .select('*')
@@ -19,38 +15,18 @@ export async function GET() {
     }
 
     return NextResponse.json({ engineers: engineers || [] })
-  } catch (error) {
-    console.error('Admin engineers API error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  })
 }
 
 export async function POST(request: Request) {
-  try {
-    const { error: authError } = await verifyAdmin()
-    if (authError) return authError
-
+  return withAdmin(async ({ serviceClient }) => {
     const body = await request.json()
-
-    const allowedFields = [
-      'name', 'email', 'photo_url', 'github_url', 'github_username',
-      'focus_areas', 'what_excites_you', 'availability_start',
-      'availability_hours_per_week', 'availability_duration_weeks',
-      'linkedin_url', 'portfolio_url', 'is_available_for_cycles',
-    ]
-
-    const insert: Record<string, unknown> = {}
-    for (const field of allowedFields) {
-      if (field in body) {
-        insert[field] = body[field]
-      }
-    }
+    const insert = pickAllowedFields(body, ENGINEER_FIELDS)
 
     if (!insert.name || !insert.email) {
       return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
     }
 
-    const serviceClient = await createServiceClient()
     const { data: engineer, error: insertError } = await serviceClient
       .from('engineers')
       .insert(insert)
@@ -66,9 +42,5 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ engineer }, { status: 201 })
-  } catch (error) {
-    console.error('Admin engineers POST error:', error)
-    const msg = error instanceof Error ? error.message : String(error)
-    return NextResponse.json({ error: `Internal server error: ${msg}` }, { status: 500 })
-  }
+  })
 }

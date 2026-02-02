@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
-import { verifyAdmin } from '@/lib/admin'
+import { withAdmin } from '@/lib/api/admin-helpers'
+import { SUBMISSION_FIELDS } from '@/lib/api/field-validator'
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return withAdmin(async ({ serviceClient }) => {
     const { id } = await params
-    const { error: authError } = await verifyAdmin()
-    if (authError) return authError
-
-    const serviceClient = await createServiceClient()
     const { data: submission, error: fetchError } = await serviceClient
       .from('feature_submissions')
       .select(`
@@ -28,23 +24,16 @@ export async function GET(
     }
 
     return NextResponse.json({ submission })
-  } catch (error) {
-    console.error('Admin cycles detail API error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  })
 }
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return withAdmin(async ({ serviceClient, userId }) => {
     const { id } = await params
-    const { error: authError, userId } = await verifyAdmin()
-    if (authError) return authError
-
     const body = await request.json()
-    const serviceClient = await createServiceClient()
 
     // Fetch current submission for audit trail
     const { data: current } = await serviceClient
@@ -58,16 +47,10 @@ export async function PATCH(
     }
 
     // Build update and audit entries
-    const allowedFields = [
-      'status', 'assigned_engineer_id', 'internal_notes',
-      'sprint_start_date', 'sprint_end_date', 'hours_budget',
-      'hours_logged', 'cancelled_reason',
-    ]
-
     const updates: Record<string, unknown> = {}
     const historyEntries: { field_name: string; old_value: string | null; new_value: string | null }[] = []
 
-    for (const field of allowedFields) {
+    for (const field of SUBMISSION_FIELDS) {
       if (field in body && body[field] !== current[field as keyof typeof current]) {
         updates[field] = body[field]
         historyEntries.push({
@@ -108,8 +91,5 @@ export async function PATCH(
     }
 
     return NextResponse.json({ submission: updated })
-  } catch (error) {
-    console.error('Admin cycles PATCH error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  })
 }

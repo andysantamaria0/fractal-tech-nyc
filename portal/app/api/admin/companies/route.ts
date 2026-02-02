@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
-import { verifyAdmin } from '@/lib/admin'
+import { withAdmin } from '@/lib/api/admin-helpers'
 
 export async function GET() {
-  try {
-    const auth = await verifyAdmin()
-    if (auth.error) return auth.error
-
-    const serviceClient = await createServiceClient()
+  return withAdmin(async ({ serviceClient }) => {
     const { data: companies, error: fetchError } = await serviceClient
       .from('profiles')
       .select('id, name, email, company_name, company_linkedin, company_stage, newsletter_optin, hubspot_contact_id, hubspot_company_id, created_at')
@@ -20,8 +15,5 @@ export async function GET() {
     }
 
     return NextResponse.json({ companies: companies || [] })
-  } catch (error) {
-    console.error('Admin companies API error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  })
 }

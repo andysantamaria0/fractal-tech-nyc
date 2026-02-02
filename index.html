@@ -58,13 +58,13 @@
             </div>
         </section>
 
-        <section class="community-preview" style="background: var(--color-fog); padding: var(--space-7) 0;">
+        <section class="community-preview section-fog" style="padding: var(--space-7) 0;">
             <div class="container">
                 <p class="section-label" style="margin-bottom: var(--space-5);">REAL PEOPLE, REAL COMMUNITY</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-4);">
-                    <img src="assets/photos/FT.headshots_180824_fullteam-2.webp" alt="Fractal cohort team photo" width="1600" height="1196" decoding="async" style="width: 100%; height: 250px; object-fit: cover; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
-                    <img src="assets/photos/Fractal_Week1_070624-60.webp" alt="Fractal engineers learning" width="1600" height="1067" decoding="async" style="width: 100%; height: 250px; object-fit: cover; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
-                    <img src="assets/photos/Fractal_Week1_070624-5.webp" alt="Fractal engineers collaborating" width="1600" height="1067" decoding="async" style="width: 100%; height: 250px; object-fit: cover; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+                <div class="photo-grid">
+                    <img src="assets/photos/FT.headshots_180824_fullteam-2.webp" alt="Fractal cohort team photo" width="1600" height="1196" loading="lazy" decoding="async" class="photo-grid-item">
+                    <img src="assets/photos/Fractal_Week1_070624-60.webp" alt="Fractal engineers learning" width="1600" height="1067" loading="lazy" decoding="async" class="photo-grid-item">
+                    <img src="assets/photos/Fractal_Week1_070624-5.webp" alt="Fractal engineers collaborating" width="1600" height="1067" loading="lazy" decoding="async" class="photo-grid-item">
                 </div>
             </div>
         </section>
@@ -149,7 +149,7 @@
                     <div class="window value-prop">
                         <div class="window-title">◾ ELITE INSTRUCTION</div>
                         <div class="window-content">
-                            <img src="assets/photos/Fractal_Week1_070624-46.webp" alt="Instructors mentoring engineers" width="667" height="1000" loading="lazy" decoding="async" style="width: 100%; height: 180px; object-fit: cover; margin-bottom: var(--space-4); border-radius: 4px;">
+                            <img src="assets/photos/Fractal_Week1_070624-46.webp" alt="Instructors mentoring engineers" width="667" height="1000" loading="lazy" decoding="async" class="value-prop-img">
                             <h4 style="margin-bottom: var(--space-3); font-weight: 700;">Learn from ex-Netflix, Google, Stripe engineers</h4>
                             <p>Not TAs. Not junior developers. Staff-level engineers who've hired 400+ engineers and know exactly what gets you hired.</p>
                             <a href="team.html" class="value-link" style="margin-top: var(--space-4); display: inline-block;">→ Meet the team</a>
@@ -160,7 +160,7 @@
                     <div class="window value-prop">
                         <div class="window-title">◾ AI-FIRST CURRICULUM</div>
                         <div class="window-content">
-                            <img src="assets/photos/Fractal_Week1_070624-43.webp" alt="Engineer coding with AI tools" width="667" height="1000" loading="lazy" decoding="async" style="width: 100%; height: 180px; object-fit: cover; margin-bottom: var(--space-4); border-radius: 4px;">
+                            <img src="assets/photos/Fractal_Week1_070624-43.webp" alt="Engineer coding with AI tools" width="667" height="1000" loading="lazy" decoding="async" class="value-prop-img">
                             <h4 style="margin-bottom: var(--space-3); font-weight: 700;">Built for the AI-assisted engineering era</h4>
                             <p>Master Cursor, Claude Code, v0 from Day 1. Work 10x faster than other engineers. Build in 3 months what takes others a year.</p>
                         </div>
@@ -170,7 +170,7 @@
                     <div class="window value-prop">
                         <div class="window-title">◾ REAL EXPERIENCE</div>
                         <div class="window-content">
-                            <img src="assets/photos/prodex-pitch.webp" alt="Engineer pitching at startup" width="526" height="600" loading="lazy" decoding="async" style="width: 100%; height: 180px; object-fit: cover; margin-bottom: var(--space-4); border-radius: 4px;">
+                            <img src="assets/photos/prodex-pitch.webp" alt="Engineer pitching at startup" width="526" height="600" loading="lazy" decoding="async" class="value-prop-img">
                             <h4 style="margin-bottom: var(--space-3); font-weight: 700;">Real internship opportunities at New York City startups</h4>
                             <p>Intensive training to build your foundation, then work on actual startup teams, shipping real code. Portfolio projects can't compete.</p>
                         </div>
@@ -180,7 +180,7 @@
                     <div class="window value-prop">
                         <div class="window-title">◾ IRL ADVANTAGE</div>
                         <div class="window-content">
-                            <img src="assets/photos/irl-space.webp" alt="Fractal NYC space with engineers" width="1000" height="731" loading="lazy" decoding="async" style="width: 100%; height: 180px; object-fit: cover; margin-bottom: var(--space-4); border-radius: 4px;">
+                            <img src="assets/photos/irl-space.webp" alt="Fractal NYC space with engineers" width="1000" height="731" loading="lazy" decoding="async" class="value-prop-img">
                             <h4 style="margin-bottom: var(--space-3); font-weight: 700;">In-person immersion you can't replicate online</h4>
                             <p>There's something irreplaceable about being in the trenches together every day with your cohort. Online courses can't give you that.</p>
                         </div>
@@ -365,6 +365,7 @@
         </div>
     </div>
 
+    <script src="js/form-utils.js"></script>
     <script>
         function openModal() {
             document.getElementById('careerHackModal').classList.add('active');
@@ -378,68 +379,50 @@
 
         // Close modal when clicking outside
         document.getElementById('careerHackModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
+            if (e.target === this) closeModal();
         });
 
         // Handle form submission
         document.getElementById('careerHackForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            clearFormErrors(this);
 
-            const firstName = document.getElementById('modal-firstName').value;
-            const lastName = document.getElementById('modal-lastName').value;
-            const email = document.getElementById('modal-email').value;
-            const phone = document.getElementById('modal-phone').value;
+            if (!validateFields(this, ['modal-firstName', 'modal-lastName', 'modal-email', 'modal-phone'])) return;
 
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Sending...';
-
-            // Submit to serverless function to send email
-            fetch('/api/send-action-plan', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+            var email = document.getElementById('modal-email').value;
+            submitForm({
+                url: '/api/send-action-plan',
+                data: {
+                    firstName: document.getElementById('modal-firstName').value,
+                    lastName: document.getElementById('modal-lastName').value,
+                    email: email,
+                    phone: document.getElementById('modal-phone').value
                 },
-                body: JSON.stringify({ firstName, lastName, email, phone })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    const modalContent = document.querySelector('.modal-content');
-                    modalContent.innerHTML = `
-                        <div style="padding: var(--space-7); text-align: center;">
-                            <h2 style="font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-5);">Check Your Email!</h2>
-                            <p style="font-size: var(--text-base); line-height: 1.6; margin-bottom: var(--space-6);">
-                                We've sent Fractal's Engineering Action Plan to <strong>${email}</strong>.
-                                Check your inbox (and spam folder just in case).
-                            </p>
-                            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                                <a href="apply.html" class="btn-primary" style="text-decoration: none; display: inline-block; padding: 12px 24px;">Book a Call →</a>
-                                <button onclick="closeModal()" class="btn-secondary" style="padding: 12px 24px;">Close</button>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    throw new Error(data.error || 'Failed to send email');
+                button: this.querySelector('button[type="submit"]'),
+                loadingText: 'Sending...',
+                onSuccess: function() {
+                    document.querySelector('.modal-content').innerHTML =
+                        '<div style="padding: var(--space-7); text-align: center;">' +
+                            '<h2 style="font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-5);">Check Your Email!</h2>' +
+                            '<p style="font-size: var(--text-base); line-height: 1.6; margin-bottom: var(--space-6);">' +
+                                'We\'ve sent Fractal\'s Engineering Action Plan to <strong>' + email + '</strong>.' +
+                                ' Check your inbox (and spam folder just in case).' +
+                            '</p>' +
+                            '<div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">' +
+                                '<a href="apply.html" class="btn-primary" style="text-decoration: none; display: inline-block; padding: 12px 24px;">Book a Call →</a>' +
+                                '<button onclick="closeModal()" class="btn-secondary" style="padding: 12px 24px;">Close</button>' +
+                            '</div>' +
+                        '</div>';
+                },
+                onError: function() {
+                    alert('There was an issue sending the action plan. Please try again or email us at hello@fractaltech.nyc');
                 }
-            })
-            .catch(error => {
-                console.error('Error sending action plan:', error);
-                alert('There was an issue sending the action plan. Please try again or email us at hello@fractaltech.nyc');
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
             });
         });
 
         // Close modal with Escape key
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
+            if (e.key === 'Escape') closeModal();
         });
     </script>
 </body>

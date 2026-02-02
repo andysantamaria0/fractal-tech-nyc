@@ -1,14 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-
-const COMPANY_STAGES = [
-  { value: 'bootstrapped', label: 'Bootstrapped' },
-  { value: 'angel', label: 'Angel' },
-  { value: 'pre-seed', label: 'Pre-Seed' },
-  { value: 'seed', label: 'Seed' },
-  { value: 'bigger', label: 'Series A+' },
-]
+import { COMPANY_STAGES } from '@/lib/constants'
 
 interface AddCompanyFormProps {
   onClose: () => void

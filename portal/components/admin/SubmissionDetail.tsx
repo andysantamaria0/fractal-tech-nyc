@@ -2,43 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import EngineerAssignment from './EngineerAssignment'
-
-interface Submission {
-  id: string
-  title: string
-  description: string
-  status: string
-  timeline: string
-  tech_stack?: string
-  is_hiring: boolean
-  hiring_types?: string[]
-  created_at: string
-  sprint_start_date?: string
-  sprint_end_date?: string
-  hours_budget?: number
-  hours_logged?: number
-  internal_notes?: string
-  cancelled_reason?: string
-  assigned_engineer_id?: string
-  hubspot_note_id?: string
-  profiles?: { name: string; email: string; company_linkedin: string; hubspot_contact_id?: string; hubspot_company_id?: string }
-  assigned_engineer?: { id: string; name: string; email: string } | null
-  preferred_engineer?: { id: string; name: string } | null
-}
-
-interface HistoryEntry {
-  id: string
-  field_name: string
-  old_value?: string
-  new_value?: string
-  note?: string
-  created_at: string
-  profiles?: { name: string }
-}
-
-const STATUS_OPTIONS = [
-  'submitted', 'reviewing', 'posted', 'matched', 'in_progress', 'completed', 'cancelled',
-]
+import type { Submission, HistoryEntry } from '@/lib/types'
+import { STATUS_OPTIONS } from '@/lib/constants'
 
 interface SubmissionDetailProps {
   submissionId: string

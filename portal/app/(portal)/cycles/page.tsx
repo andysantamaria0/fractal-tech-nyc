@@ -1,46 +1,9 @@
 import EngineerCard from '@/components/EngineerCard'
+import { demoEngineers } from '@/lib/constants'
 
 const isSupabaseConfigured =
   process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('xxx.supabase.co')
-
-const demoEngineers = [
-  {
-    id: '1',
-    name: 'Alex Chen',
-    github_url: 'https://github.com/alexchen',
-    github_username: 'alexchen',
-    focus_areas: ['React', 'TypeScript', 'AI'],
-    what_excites_you: 'Building full-stack AI apps that solve real problems for startups.',
-    linkedin_url: 'https://linkedin.com/in/alexchen',
-  },
-  {
-    id: '2',
-    name: 'Jordan Rivera',
-    github_url: 'https://github.com/jordanr',
-    github_username: 'jordanr',
-    focus_areas: ['Python', 'Data Pipelines', 'APIs'],
-    what_excites_you: 'Designing robust backend systems and data infrastructure.',
-  },
-  {
-    id: '3',
-    name: 'Sam Patel',
-    github_url: 'https://github.com/sampatel',
-    github_username: 'sampatel',
-    focus_areas: ['Next.js', 'Postgres', 'DevOps'],
-    what_excites_you: 'Shipping product fast with modern web tooling.',
-    portfolio_url: 'https://sampatel.dev',
-  },
-  {
-    id: '4',
-    name: 'Morgan Lee',
-    github_url: 'https://github.com/morganlee',
-    github_username: 'morganlee',
-    focus_areas: ['Mobile', 'React Native', 'GraphQL'],
-    what_excites_you: 'Crafting seamless mobile experiences with native performance.',
-    linkedin_url: 'https://linkedin.com/in/morganlee',
-  },
-]
 
 export default async function CyclesPage() {
   let engineers = demoEngineers

@@ -1,39 +1,12 @@
 'use client'
 
-interface Submission {
-  id: string
-  title: string
-  status: string
-  timeline: string
-  is_hiring: boolean
-  created_at: string
-  sprint_start_date?: string
-  sprint_end_date?: string
-  hours_budget?: number
-  hours_logged?: number
-  assigned_engineer_id?: string
-  profiles?: { name: string; email: string; company_linkedin: string }
-  assigned_engineer?: { id: string; name: string } | null
-  preferred_engineer?: { id: string; name: string } | null
-}
+import type { Submission } from '@/lib/types'
+import { getStatusColor } from '@/lib/constants'
 
 interface CyclesTableProps {
   submissions: Submission[]
   onSelect: (id: string) => void
   selectedId?: string
-}
-
-function getStatusColor(status: string): string {
-  switch (status) {
-    case 'submitted': return 'var(--color-slate)'
-    case 'reviewing': return '#6B7280'
-    case 'posted': return '#2563EB'
-    case 'matched': return '#7C3AED'
-    case 'in_progress': return '#D97706'
-    case 'completed': return '#059669'
-    case 'cancelled': return 'var(--color-error)'
-    default: return 'var(--color-charcoal)'
-  }
 }
 
 function getFlags(submission: Submission): { label: string; color: string }[] {

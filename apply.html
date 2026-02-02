@@ -134,96 +134,49 @@
 
     <footer>
         <div class="footer-text">
-            <p>© 2025 FRACTAL ACCELERATOR. NYC.</p>
+            <p>© 2026 FRACTAL ACCELERATOR. NYC.</p>
             <p>Questions? <a href="mailto:hello@fractaltech.nyc">hello@fractaltech.nyc</a></p>
         </div>
     </footer>
 
+    <script src="js/form-utils.js"></script>
     <script>
-        const form = document.getElementById('applicationForm');
-        const formSection = document.getElementById('formSection');
-        const bookingSection = document.getElementById('bookingSection');
+        var form = document.getElementById('applicationForm');
+        var formSection = document.getElementById('formSection');
+        var bookingSection = document.getElementById('bookingSection');
 
-        // Form validation and submission
         form.addEventListener('submit', function(e) {
             e.preventDefault();
+            clearFormErrors(form);
 
-            let isValid = true;
-            const formGroups = form.querySelectorAll('.form-group');
+            var isValid = validateFields(form, ['fullName', 'email', 'phone']);
 
-            // Clear previous errors
-            formGroups.forEach(group => group.classList.remove('error'));
-
-            // Validate required fields
-            const fullName = document.getElementById('fullName');
-            const email = document.getElementById('email');
-            const phone = document.getElementById('phone');
-            const linkedin = document.getElementById('linkedin');
-
-            if (!fullName.value.trim()) {
-                fullName.closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-
-            if (!email.value.trim() || !email.validity.valid) {
-                email.closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-
-            if (!phone.value.trim()) {
-                phone.closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-
-            // Validate LinkedIn URL if provided
+            // Validate optional LinkedIn URL if provided
+            var linkedin = document.getElementById('linkedin');
             if (linkedin.value.trim() && !linkedin.validity.valid) {
                 linkedin.closest('.form-group').classList.add('error');
                 isValid = false;
             }
 
-            if (isValid) {
-                // Prepare form data
-                const formData = {
-                    fullName: fullName.value,
-                    email: email.value,
-                    phone: phone.value,
+            if (!isValid) return;
+
+            submitForm({
+                url: '/api/submit-application',
+                data: {
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
                     linkedin: linkedin.value,
                     timestamp: new Date().toISOString()
-                };
-
-                // Disable submit button and show loading state
-                const submitBtn = applicationForm.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Submitting...';
-
-                // Submit to HubSpot via serverless function
-                fetch('/api/submit-application', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log('Application submitted to HubSpot:', data);
-                        // Show booking section on success
-                        showBooking();
-                    } else {
-                        throw new Error(data.error || 'Submission failed');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error submitting application:', error);
+                },
+                button: form.querySelector('button[type="submit"]'),
+                onSuccess: function() {
+                    showBooking();
+                },
+                onError: function() {
                     alert('There was an issue submitting your application. Please try again or email us directly at hello@fractaltech.nyc');
-
-                    // Re-enable submit button
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalText;
-                });
-            }
+                }
+            });
         });
 
         function showBooking() {
@@ -238,22 +191,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Real-time validation feedback
-        document.querySelectorAll('input[required]').forEach(input => {
-            input.addEventListener('blur', function() {
-                if (!this.value.trim() || !this.validity.valid) {
-                    this.closest('.form-group').classList.add('error');
-                } else {
-                    this.closest('.form-group').classList.remove('error');
-                }
-            });
-
-            input.addEventListener('input', function() {
-                if (this.value.trim() && this.validity.valid) {
-                    this.closest('.form-group').classList.remove('error');
-                }
-            });
-        });
+        attachRealtimeValidation('#applicationForm');
     </script>
 </body>
 </html>

@@ -1,32 +1,15 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
-import { verifyAdmin } from '@/lib/admin'
+import { withAdmin } from '@/lib/api/admin-helpers'
+import { pickAllowedFields, ENGINEER_FIELDS } from '@/lib/api/field-validator'
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return withAdmin(async ({ serviceClient }) => {
     const { id } = await params
-    const { error: authError } = await verifyAdmin()
-    if (authError) return authError
-
     const body = await request.json()
-    const serviceClient = await createServiceClient()
-
-    const allowedFields = [
-      'name', 'email', 'photo_url', 'github_url', 'github_username',
-      'focus_areas', 'what_excites_you', 'availability_start',
-      'availability_hours_per_week', 'availability_duration_weeks',
-      'linkedin_url', 'portfolio_url', 'is_available_for_cycles',
-    ]
-
-    const updates: Record<string, unknown> = {}
-    for (const field of allowedFields) {
-      if (field in body) {
-        updates[field] = body[field]
-      }
-    }
+    const updates = pickAllowedFields(body, ENGINEER_FIELDS)
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
@@ -52,8 +35,5 @@ export async function PATCH(
     }
 
     return NextResponse.json({ engineer })
-  } catch (error) {
-    console.error('Admin engineers PATCH error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  })
 }

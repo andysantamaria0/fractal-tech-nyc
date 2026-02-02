@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
-import { verifyAdmin } from '@/lib/admin'
+import { withAdmin } from '@/lib/api/admin-helpers'
+import { pickAllowedFields, COMPANY_FIELDS } from '@/lib/api/field-validator'
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return withAdmin(async ({ serviceClient }) => {
     const { id } = await params
-    const auth = await verifyAdmin()
-    if (auth.error) return auth.error
-
-    const serviceClient = await createServiceClient()
     const { data: company, error: fetchError } = await serviceClient
       .from('profiles')
       .select('id, name, email, company_name, company_linkedin, company_stage, newsletter_optin, hubspot_contact_id, hubspot_company_id, created_at')
@@ -23,32 +19,17 @@ export async function GET(
     }
 
     return NextResponse.json({ company })
-  } catch (error) {
-    console.error('Admin company GET error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  })
 }
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return withAdmin(async ({ serviceClient }) => {
     const { id } = await params
-    const auth = await verifyAdmin()
-    if (auth.error) return auth.error
-
     const body = await request.json()
-    const serviceClient = await createServiceClient()
-
-    const allowedFields = ['name', 'company_name', 'company_linkedin', 'company_stage', 'newsletter_optin']
-
-    const updates: Record<string, unknown> = {}
-    for (const field of allowedFields) {
-      if (field in body) {
-        updates[field] = body[field]
-      }
-    }
+    const updates = pickAllowedFields(body, COMPANY_FIELDS)
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
@@ -71,8 +52,5 @@ export async function PATCH(
     }
 
     return NextResponse.json({ company })
-  } catch (error) {
-    console.error('Admin company PATCH error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  })
 }

@@ -5,77 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ask Me Anything | Fractal Accelerator</title>
     <link rel="stylesheet" href="css/styles.css">
-    <style>
-        textarea {
-            width: 100%;
-            padding: var(--space-3) var(--space-4);
-            background: var(--color-white);
-            border: 2px solid var(--color-charcoal);
-            color: var(--color-charcoal);
-            font-size: var(--text-base);
-            font-family: var(--font-primary);
-            resize: vertical;
-        }
-        textarea:focus {
-            outline: none;
-            box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1);
-        }
-        textarea::placeholder {
-            color: var(--color-slate);
-        }
-        .form-group.error textarea {
-            border-color: var(--color-error);
-            background: #FFF5F5;
-        }
-        .radio-group {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-3);
-            margin-top: var(--space-3);
-        }
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: var(--space-3);
-            cursor: pointer;
-        }
-        .radio-option input[type="radio"] {
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--color-charcoal);
-            cursor: pointer;
-            accent-color: var(--color-charcoal);
-        }
-        .radio-option span {
-            font-size: var(--text-base);
-        }
-        .alert-error {
-            padding: var(--space-4) var(--space-5);
-            border: 2px solid var(--color-error);
-            background: #FFF5F5;
-            color: var(--color-error);
-            margin-bottom: var(--space-5);
-            font-size: var(--text-xs);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            display: none;
-        }
-        .success-message {
-            text-align: center;
-            padding: var(--space-7) 0;
-        }
-        .success-message h2 {
-            font-size: var(--text-2xl);
-            font-weight: 700;
-            margin-bottom: var(--space-5);
-        }
-        .success-message p {
-            color: var(--color-slate);
-            margin-bottom: var(--space-6);
-            line-height: 1.6;
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -184,52 +113,21 @@
         </div>
     </footer>
 
+    <script src="js/form-utils.js"></script>
     <script>
-        const form = document.getElementById('amaForm');
-        const formSection = document.getElementById('formSection');
-        const successSection = document.getElementById('successSection');
-        const alertError = document.getElementById('alertError');
+        var form = document.getElementById('amaForm');
+        var formSection = document.getElementById('formSection');
+        var successSection = document.getElementById('successSection');
+        var alertError = document.getElementById('alertError');
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             alertError.style.display = 'none';
+            clearFormErrors(form);
 
-            let isValid = true;
-            const formGroups = form.querySelectorAll('.form-group');
-            formGroups.forEach(group => group.classList.remove('error'));
+            var isValid = validateFields(form, ['name', 'email', 'twitter', 'phone', 'context', 'question']);
 
-            const name = document.getElementById('name');
-            const email = document.getElementById('email');
-            const twitter = document.getElementById('twitter');
-            const phone = document.getElementById('phone');
-            const context = document.getElementById('context');
-            const question = document.getElementById('question');
-            const tagPreference = document.querySelector('input[name="tagPreference"]:checked');
-
-            if (!name.value.trim()) {
-                name.closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-            if (!email.value.trim() || !email.validity.valid) {
-                email.closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-            if (!twitter.value.trim()) {
-                twitter.closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-            if (!phone.value.trim()) {
-                phone.closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-            if (!context.value.trim()) {
-                context.closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-            if (!question.value.trim()) {
-                question.closest('.form-group').classList.add('error');
-                isValid = false;
-            }
+            var tagPreference = document.querySelector('input[name="tagPreference"]:checked');
             if (!tagPreference) {
                 document.getElementById('tagGroup').classList.add('error');
                 isValid = false;
@@ -237,68 +135,42 @@
 
             if (!isValid) return;
 
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-
-            fetch('/api/submit-ama', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: name.value.trim(),
-                    email: email.value.trim(),
-                    twitter: twitter.value.trim(),
-                    phone: phone.value.trim(),
-                    context: context.value.trim(),
-                    question: question.value.trim(),
+            submitForm({
+                url: '/api/submit-ama',
+                data: {
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    twitter: document.getElementById('twitter').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    context: document.getElementById('context').value.trim(),
+                    question: document.getElementById('question').value.trim(),
                     tag_preference: tagPreference.value
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+                },
+                button: form.querySelector('button[type="submit"]'),
+                onSuccess: function() {
                     formSection.style.display = 'none';
                     successSection.style.display = 'block';
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    throw new Error(data.error || 'Submission failed');
+                },
+                onError: function(error) {
+                    alertError.textContent = error.message || 'Something went wrong. Please try again.';
+                    alertError.style.display = 'block';
                 }
-            })
-            .catch(error => {
-                alertError.textContent = error.message || 'Something went wrong. Please try again.';
-                alertError.style.display = 'block';
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
             });
         });
 
         function resetForm() {
             form.reset();
-            form.querySelectorAll('.form-group').forEach(g => g.classList.remove('error'));
+            clearFormErrors(form);
             alertError.style.display = 'none';
             successSection.style.display = 'none';
             formSection.style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Real-time validation
-        document.querySelectorAll('#amaForm input[required], #amaForm textarea[required]').forEach(input => {
-            input.addEventListener('blur', function() {
-                if (!this.value.trim() || !this.validity.valid) {
-                    this.closest('.form-group').classList.add('error');
-                } else {
-                    this.closest('.form-group').classList.remove('error');
-                }
-            });
-            input.addEventListener('input', function() {
-                if (this.value.trim() && this.validity.valid) {
-                    this.closest('.form-group').classList.remove('error');
-                }
-            });
-        });
+        attachRealtimeValidation('#amaForm');
 
-        document.querySelectorAll('input[name="tagPreference"]').forEach(radio => {
+        document.querySelectorAll('input[name="tagPreference"]').forEach(function(radio) {
             radio.addEventListener('change', function() {
                 document.getElementById('tagGroup').classList.remove('error');
             });

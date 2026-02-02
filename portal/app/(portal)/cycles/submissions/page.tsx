@@ -3,31 +3,8 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-
-interface Submission {
-  id: string
-  title: string
-  description: string
-  status: string
-  timeline: string
-  tech_stack?: string
-  is_hiring: boolean
-  created_at: string
-  assigned_engineer_id?: string
-}
-
-function getStatusColor(status: string): string {
-  switch (status) {
-    case 'submitted': return 'var(--color-slate)'
-    case 'reviewing': return '#6B7280'
-    case 'posted': return '#2563EB'
-    case 'matched': return '#7C3AED'
-    case 'in_progress': return '#D97706'
-    case 'completed': return '#059669'
-    case 'cancelled': return 'var(--color-error)'
-    default: return 'var(--color-charcoal)'
-  }
-}
+import type { Submission } from '@/lib/types'
+import { getStatusColor } from '@/lib/constants'
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {

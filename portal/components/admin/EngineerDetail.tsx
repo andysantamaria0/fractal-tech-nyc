@@ -1,35 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-
-interface Engineer {
-  id: string
-  name: string
-  email: string
-  photo_url?: string
-  github_url?: string
-  github_username?: string
-  focus_areas?: string[]
-  what_excites_you?: string
-  availability_start?: string
-  availability_hours_per_week?: number
-  availability_duration_weeks?: number
-  linkedin_url?: string
-  portfolio_url?: string
-  is_available_for_cycles: boolean
-}
+import type { Engineer } from '@/lib/types'
+import { labelStyle } from '@/lib/constants'
 
 interface EngineerDetailProps {
   engineerId: string | 'new'
   onClose: () => void
   onSaved: () => void
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  marginBottom: 'var(--space-2)',
-  fontSize: 'var(--text-xs)',
-  fontWeight: 700,
 }
 
 export default function EngineerDetail({ engineerId, onClose, onSaved }: EngineerDetailProps) {

@@ -1,39 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-
-interface Company {
-  id: string
-  name: string
-  email: string
-  company_name?: string
-  company_linkedin?: string
-  company_stage?: string
-  newsletter_optin?: boolean
-  hubspot_contact_id?: string
-  hubspot_company_id?: string
-  created_at: string
-}
+import type { Company } from '@/lib/types'
+import { labelStyle, COMPANY_STAGES } from '@/lib/constants'
 
 interface CompanyDetailProps {
   companyId: string
   onClose: () => void
   onSaved: () => void
-}
-
-const COMPANY_STAGES = [
-  { value: 'bootstrapped', label: 'Bootstrapped' },
-  { value: 'angel', label: 'Angel' },
-  { value: 'pre-seed', label: 'Pre-Seed' },
-  { value: 'seed', label: 'Seed' },
-  { value: 'bigger', label: 'Series A+' },
-]
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  marginBottom: 'var(--space-2)',
-  fontSize: 'var(--text-xs)',
-  fontWeight: 700,
 }
 
 export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDetailProps) {
