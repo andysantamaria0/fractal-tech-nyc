@@ -20,6 +20,18 @@ export async function GET() {
   }
 
   try {
+    // Get sp2026 engineer GitHub usernames
+    const serviceClient = await createServiceClient()
+    const { data: engineers } = await serviceClient
+      .from('engineers')
+      .select('github_username')
+      .eq('cohort', 'sp2026')
+      .not('github_username', 'is', null)
+
+    const allowedUsernames = new Set(
+      (engineers || []).map((e) => e.github_username!.toLowerCase())
+    )
+
     const feeds = []
 
     // Fetch org events if configured
@@ -28,24 +40,14 @@ export async function GET() {
       feeds.push(fetchOrgEvents(org, token))
     }
 
-    // Fetch events for engineers with github_username
-    const serviceClient = await createServiceClient()
-    const { data: engineers } = await serviceClient
-      .from('engineers')
-      .select('github_username')
-      .eq('cohort', 'sp2026')
-      .not('github_username', 'is', null)
-
-    if (engineers) {
-      for (const eng of engineers) {
-        if (eng.github_username) {
-          feeds.push(fetchUserEvents(eng.github_username, token, 15))
-        }
-      }
+    // Fetch individual engineer events
+    for (const username of allowedUsernames) {
+      feeds.push(fetchUserEvents(username, token, 15))
     }
 
     const results = await Promise.all(feeds)
     const events = mergeAndDedup(results, 30)
+      .filter((item) => allowedUsernames.has(item.actor.toLowerCase()))
 
     return NextResponse.json(events, {
       headers: {
