@@ -398,9 +398,9 @@ section {
 }
 
 .partner-logo img {
-    height: 30px;
+    height: 40px;
     width: auto;
-    max-width: 100px;
+    max-width: 140px;
     object-fit: contain;
 }
 
