@@ -33,7 +33,6 @@ export async function GET() {
     const { data: engineers } = await serviceClient
       .from('engineers')
       .select('github_username')
-      .eq('is_available_for_cycles', true)
       .eq('cohort', 'sp2026')
       .not('github_username', 'is', null)
 
