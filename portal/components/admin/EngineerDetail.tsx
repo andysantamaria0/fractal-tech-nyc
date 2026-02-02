@@ -15,6 +15,9 @@ export default function EngineerDetail({ engineerId, onClose, onSaved }: Enginee
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [notifying, setNotifying] = useState(false)
+  const [notifyConfirm, setNotifyConfirm] = useState(false)
+  const [notifyResult, setNotifyResult] = useState<{ sent: number; failed: number } | null>(null)
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -110,6 +113,30 @@ export default function EngineerDetail({ engineerId, onClose, onSaved }: Enginee
       setError(err instanceof Error ? err.message : 'Save failed')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleNotify() {
+    if (!notifyConfirm) {
+      setNotifyConfirm(true)
+      return
+    }
+    setNotifying(true)
+    setNotifyResult(null)
+    setNotifyConfirm(false)
+    try {
+      const res = await fetch('/api/emails/engineer-available', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ engineer_id: engineerId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to send')
+      setNotifyResult({ sent: data.sent, failed: data.failed })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Notification failed')
+    } finally {
+      setNotifying(false)
     }
   }
 
@@ -307,6 +334,33 @@ export default function EngineerDetail({ engineerId, onClose, onSaved }: Enginee
         >
           {saving ? 'Saving...' : isNew ? 'Create Engineer' : 'Save Changes'}
         </button>
+
+        {/* Notify Subscribers Button — existing engineers only */}
+        {!isNew && (
+          <div style={{ marginTop: 'var(--space-4)' }}>
+            <button
+              className="btn-secondary btn-full"
+              onClick={handleNotify}
+              disabled={notifying}
+              style={notifyConfirm ? { borderColor: 'var(--color-warning, #e67e22)', color: 'var(--color-warning, #e67e22)' } : {}}
+            >
+              {notifying
+                ? 'Sending...'
+                : notifyConfirm
+                  ? 'Click again to confirm — this emails all subscribers'
+                  : 'Notify Subscribers'}
+            </button>
+            {notifyResult && (
+              <div
+                className={notifyResult.failed > 0 ? 'alert alert-error' : 'alert alert-success'}
+                style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' }}
+              >
+                Sent {notifyResult.sent} email{notifyResult.sent !== 1 ? 's' : ''}
+                {notifyResult.failed > 0 && `, ${notifyResult.failed} failed`}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
