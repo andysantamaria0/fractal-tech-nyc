@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import EngineersTable from '@/components/admin/EngineersTable'
 import EngineerDetail from '@/components/admin/EngineerDetail'
+import EngineerImport from '@/components/admin/EngineerImport'
 
 interface Engineer {
   id: string
@@ -36,6 +37,7 @@ export default function AdminEngineersPage() {
   const [engineers, setEngineers] = useState<Engineer[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [showImport, setShowImport] = useState(false)
 
   // Filters
   const [search, setSearch] = useState('')
@@ -173,14 +175,25 @@ export default function AdminEngineersPage() {
             <div className="section-label">Admin</div>
             <h1 className="section-title">Engineers</h1>
           </div>
-          <button
-            className="btn-primary"
-            onClick={() => setSelectedId('new')}
-            style={{ marginTop: 'var(--space-2)' }}
-          >
-            Add Engineer
-          </button>
+          <div style={{ display: 'flex', gap: 'var(--space-3)', marginTop: 'var(--space-2)' }}>
+            <button
+              className="btn-secondary"
+              onClick={() => setShowImport((v) => !v)}
+            >
+              {showImport ? 'Hide Import' : 'Bulk Import'}
+            </button>
+            <button
+              className="btn-primary"
+              onClick={() => setSelectedId('new')}
+            >
+              Add Engineer
+            </button>
+          </div>
         </div>
+
+        {showImport && (
+          <EngineerImport onImported={loadEngineers} />
+        )}
 
         {/* Filters */}
         <div className="admin-filters">
