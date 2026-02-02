@@ -27,46 +27,64 @@ interface ImportResult {
   details: { email: string; status: 'created' | 'skipped' | 'failed'; reason?: string }[]
 }
 
-function parseCSVLine(line: string): string[] {
-  const fields: string[] = []
-  let current = ''
+/**
+ * Parse a full CSV text into rows, handling multiline quoted fields correctly.
+ * Google Sheets exports can have newlines inside quoted cells (including headers).
+ */
+function parseCSV(text: string): Record<string, string>[] {
+  const input = text.replace(/^\uFEFF/, '') // strip BOM
+  const records: string[][] = []
+  let current: string[] = []
+  let field = ''
   let inQuotes = false
 
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i]
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i]
     if (inQuotes) {
       if (char === '"') {
-        if (i + 1 < line.length && line[i + 1] === '"') {
-          current += '"'
-          i++ // skip escaped quote
+        if (i + 1 < input.length && input[i + 1] === '"') {
+          field += '"'
+          i++
         } else {
           inQuotes = false
         }
       } else {
-        current += char
+        field += char
       }
     } else {
       if (char === '"') {
         inQuotes = true
       } else if (char === ',') {
-        fields.push(current.trim())
-        current = ''
+        current.push(field.trim())
+        field = ''
+      } else if (char === '\n' || (char === '\r' && input[i + 1] === '\n')) {
+        if (char === '\r') i++ // skip \r in \r\n
+        current.push(field.trim())
+        field = ''
+        if (current.some((c) => c !== '')) {
+          records.push(current)
+        }
+        current = []
       } else {
-        current += char
+        field += char
       }
     }
   }
-  fields.push(current.trim())
-  return fields
-}
+  // Last field/record
+  current.push(field.trim())
+  if (current.some((c) => c !== '')) {
+    records.push(current)
+  }
 
-function parseCSV(text: string): Record<string, string>[] {
-  const lines = text.replace(/^\uFEFF/, '').trim().split('\n')
-  if (lines.length < 2) return []
+  if (records.length < 2) return []
 
-  const headers = parseCSVLine(lines[0]).map((h) => h.toLowerCase().replace(/\s+/g, '_'))
-  return lines.slice(1).filter((line) => line.trim()).map((line) => {
-    const values = parseCSVLine(line)
+  const headers = records[0].map((h) => {
+    // Take only the first line of multiline headers, normalize to snake_case
+    const firstLine = h.split('\n')[0].trim()
+    return firstLine.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+  })
+
+  return records.slice(1).map((values) => {
     const row: Record<string, string> = {}
     headers.forEach((h, i) => {
       row[h] = values[i] || ''
@@ -75,10 +93,61 @@ function parseCSV(text: string): Record<string, string>[] {
   })
 }
 
-function validateRow(row: Record<string, string>): ImportRow {
+/**
+ * Map common alternate CSV column names to the engineer field names.
+ * This lets us accept Google Sheets exports with headers like "Full name", "Github", etc.
+ */
+const COLUMN_ALIASES: Record<string, string> = {
+  'full_name': 'name',
+  'github': 'github_url',
+  'linkedin': 'linkedin_url',
+  'photo_url': 'photo_url',
+  'photo': 'photo_url',
+  'goals_interests': 'what_excites_you',
+  'twitter': '_twitter', // keep for reference but not an engineer field
+}
+
+function applyColumnAliases(row: Record<string, string>): Record<string, string> {
+  const mapped: Record<string, string> = {}
+  for (const [key, value] of Object.entries(row)) {
+    const alias = COLUMN_ALIASES[key]
+    if (alias) {
+      mapped[alias] = value
+    }
+    // Always keep original key too (so exact matches like "email" still work)
+    mapped[key] = mapped[key] || value
+  }
+  return mapped
+}
+
+/**
+ * Normalize a GitHub value that might be a username, a URL without protocol,
+ * or a full URL into a proper https://github.com/... URL.
+ */
+function normalizeGithubUrl(value: string): string {
+  if (!value) return ''
+  // Already a full URL
+  if (value.startsWith('http://') || value.startsWith('https://')) return value
+  // URL without protocol
+  if (value.startsWith('github.com/')) return `https://${value}`
+  // Just a username (no slashes)
+  if (!value.includes('/') && !value.includes('.')) return `https://github.com/${value}`
+  return value
+}
+
+function normalizeLinkedinUrl(value: string): string {
+  if (!value) return ''
+  if (value.startsWith('http://') || value.startsWith('https://')) return value
+  if (value.startsWith('www.') || value.startsWith('linkedin.com')) return `https://${value}`
+  return value
+}
+
+function validateRow(rawRow: Record<string, string>): ImportRow {
+  const row = applyColumnAliases(rawRow)
+
   const name = row.name || ''
   const email = row.email || ''
-  const github_url = row.github_url || ''
+  const github_url = normalizeGithubUrl(row.github_url || '')
 
   const errors: string[] = []
   if (!name) errors.push('Name required')
@@ -103,22 +172,38 @@ function validateRow(row: Record<string, string>): ImportRow {
     ? parseInt(row.availability_duration_weeks, 10) || undefined
     : undefined
 
+  // Extract github username from URL
+  const github_username = row.github_username || extractGithubUsername(github_url)
+
+  const linkedin_url = normalizeLinkedinUrl(row.linkedin_url || '')
+
   return {
     name,
     email,
     github_url,
-    github_username: row.github_username || undefined,
+    github_username: github_username || undefined,
     focus_areas,
     what_excites_you: row.what_excites_you || undefined,
     availability_start: row.availability_start || undefined,
     availability_hours_per_week,
     availability_duration_weeks,
-    linkedin_url: row.linkedin_url || undefined,
+    linkedin_url: linkedin_url || undefined,
     portfolio_url: row.portfolio_url || undefined,
     photo_url: row.photo_url || undefined,
     is_available_for_cycles,
     valid: errors.length === 0,
     error: errors.length > 0 ? errors.join('; ') : undefined,
+  }
+}
+
+function extractGithubUsername(url: string): string {
+  if (!url) return ''
+  try {
+    const parsed = new URL(url)
+    const parts = parsed.pathname.split('/').filter(Boolean)
+    return parts[0] || ''
+  } catch {
+    return ''
   }
 }
 
@@ -143,7 +228,7 @@ export default function EngineerImport({ onImported }: { onImported?: () => void
       const text = evt.target?.result as string
       const parsed = parseCSV(text)
       if (parsed.length === 0) {
-        setError('No data rows found. Ensure CSV has headers: name, email, github_url')
+        setError('No data rows found. Ensure CSV has a header row with at least: name/Full name, email, github/Github')
         return
       }
       setRows(parsed.map(validateRow))
@@ -225,13 +310,12 @@ export default function EngineerImport({ onImported }: { onImported?: () => void
       <div className="window-title">Bulk Import Engineers</div>
       <div className="window-content">
         <p style={{ color: 'var(--color-slate)', marginBottom: 'var(--space-5)' }}>
-          Upload a CSV with columns: <strong>name, email, github_url</strong> (required).
-          Optional: github_username, focus_areas, what_excites_you, availability_start,
-          availability_hours_per_week, availability_duration_weeks, linkedin_url, portfolio_url,
-          photo_url, is_available_for_cycles.
+          Upload a CSV exported from Google Sheets. Recognized columns:
+          <strong> Full name</strong> (or name), <strong>Email</strong>, <strong>Github</strong> (or github_url).
+          Also accepts: LinkedIn, Photo (URL), Goals/Interests, focus_areas, and other engineer fields.
         </p>
         <p style={{ color: 'var(--color-slate)', marginBottom: 'var(--space-7)', fontSize: 'var(--text-sm)' }}>
-          Extra columns are ignored. focus_areas should be comma-separated (e.g. &quot;React, TypeScript, AI&quot;).
+          Extra columns are ignored. GitHub usernames are auto-expanded to full URLs.
         </p>
 
         {error && <div className="alert alert-error">{error}</div>}
@@ -273,7 +357,7 @@ export default function EngineerImport({ onImported }: { onImported?: () => void
                     <th>Name</th>
                     <th>Email</th>
                     <th>GitHub URL</th>
-                    <th>Focus Areas</th>
+                    <th>LinkedIn</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -283,7 +367,7 @@ export default function EngineerImport({ onImported }: { onImported?: () => void
                       <td>{row.name}</td>
                       <td>{row.email}</td>
                       <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.github_url}</td>
-                      <td>{row.focus_areas?.join(', ') || '-'}</td>
+                      <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.linkedin_url || '-'}</td>
                     </tr>
                   ))}
                 </tbody>

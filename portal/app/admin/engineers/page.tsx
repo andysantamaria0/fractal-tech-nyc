@@ -192,7 +192,7 @@ export default function AdminEngineersPage() {
         </div>
 
         {showImport && (
-          <EngineerImport onImported={loadEngineers} />
+          <EngineerImport onImported={() => { loadEngineers(); setShowImport(false) }} />
         )}
 
         {/* Filters */}
