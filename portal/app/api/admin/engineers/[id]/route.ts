@@ -27,7 +27,7 @@ export async function PATCH(
       if (updateError.code === '23505') {
         return NextResponse.json({ error: 'An engineer with this email already exists' }, { status: 409 })
       }
-      return NextResponse.json({ error: 'Failed to update engineer' }, { status: 500 })
+      return NextResponse.json({ error: `Failed to update engineer: ${updateError.message}` }, { status: 500 })
     }
 
     if (!engineer) {
