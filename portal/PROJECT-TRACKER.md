@@ -1,6 +1,6 @@
 # Fractal Company Portal - Project Tracker
 
-**Portal URL:** partners.fractaltech.nyc (pending DNS) / fractal-partners-portal.vercel.app (live)
+**Portal URL:** partners.fractaltech.nyc (live)
 **Repo:** andysantamaria0/fractal-tech-nyc (root directory: `portal/`)
 **Vercel Project:** fractal-partners-portal
 **Stack:** Next.js 15 + TypeScript + Supabase + HubSpot + Resend
@@ -296,7 +296,7 @@
 - [x] HubSpot custom properties created (company + contact)
 
 ### Pending
-- [ ] Add CNAME record for `partners.fractaltech.nyc` → Vercel (need domain registrar access)
+- [x] Add CNAME record for `partners.fractaltech.nyc` → Vercel
 - [x] Break week set: week 7 (March 15-21, 2026) in `cohort_settings` table; cohort start updated to Feb 2, 2026
 - [ ] End-to-end testing against live deployment
 - [ ] Soft launch to select companies
@@ -324,7 +324,7 @@
 - [x] Confirm Google OAuth credentials are configured
 - [x] Confirm Resend domain verification (fractaltech.nyc)
 - [x] Confirm PostHog project created and API key set
-- [ ] Confirm partners.fractaltech.nyc domain pointed to Vercel (CNAME record pending — need domain registrar access)
+- [x] Confirm partners.fractaltech.nyc domain pointed to Vercel
 - [x] Break week date decided: March 15-21, 2026 (week 7)
 - [x] Set your account as `is_admin = true` in profiles table
 - [x] Create HubSpot custom properties
