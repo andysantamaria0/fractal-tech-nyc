@@ -8,6 +8,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [newsletterOptin, setNewsletterOptin] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [message, setMessage] = useState('')
   const [isError, setIsError] = useState(false)
   const supabase = createClient()
@@ -23,12 +24,13 @@ export default function SettingsPage() {
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('newsletter_optin')
+          .select('newsletter_optin, is_admin')
           .eq('id', user.id)
           .single()
 
         if (profile) {
           setNewsletterOptin(profile.newsletter_optin ?? false)
+          setIsAdmin(profile.is_admin === true)
         }
       } catch {
         // Dev mode without Supabase configured
@@ -117,17 +119,19 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="window">
-          <div className="window-title">Engineer Profile</div>
-          <div className="window-content">
-            <p style={{ color: 'var(--color-slate)', marginBottom: 'var(--space-5)' }}>
-              If you&apos;re a Fractal engineer, manage your public profile that companies see.
-            </p>
-            <Link href="/engineer/profile" className="btn-secondary">
-              Edit Engineer Profile
-            </Link>
+        {isAdmin && (
+          <div className="window">
+            <div className="window-title">Engineer Profile</div>
+            <div className="window-content">
+              <p style={{ color: 'var(--color-slate)', marginBottom: 'var(--space-5)' }}>
+                If you&apos;re a Fractal engineer, manage your public profile that companies see.
+              </p>
+              <Link href="/engineer/profile" className="btn-secondary">
+                Edit Engineer Profile
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
