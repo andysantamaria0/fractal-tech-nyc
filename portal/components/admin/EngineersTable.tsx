@@ -2,8 +2,12 @@
 
 import type { Engineer } from '@/lib/types'
 
+interface EngineerWithInterest extends Engineer {
+  interest_count?: number
+}
+
 interface EngineersTableProps {
-  engineers: Engineer[]
+  engineers: EngineerWithInterest[]
   onSelect: (id: string) => void
   selectedId?: string
   onToggleAvailability: (id: string, available: boolean) => void
@@ -27,6 +31,7 @@ export default function EngineersTable({ engineers, onSelect, selectedId, onTogg
             <th>Email</th>
             <th>Focus Areas</th>
             <th>Hours/wk</th>
+            <th>Interests</th>
             <th>Available</th>
           </tr>
         </thead>
@@ -54,6 +59,13 @@ export default function EngineersTable({ engineers, onSelect, selectedId, onTogg
                   : '-'}
               </td>
               <td>{eng.availability_hours_per_week ?? '-'}</td>
+              <td>
+                {eng.interest_count ? (
+                  <span className="admin-flag" style={{ borderColor: 'var(--color-primary, #2563EB)', color: 'var(--color-primary, #2563EB)' }}>
+                    {eng.interest_count}
+                  </span>
+                ) : '-'}
+              </td>
               <td>
                 <input
                   type="checkbox"

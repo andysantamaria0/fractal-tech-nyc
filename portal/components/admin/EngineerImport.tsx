@@ -15,6 +15,7 @@ interface ImportRow {
   linkedin_url?: string
   portfolio_url?: string
   photo_url?: string
+  cohort?: string
   is_available_for_cycles?: boolean
   valid: boolean
   error?: string
@@ -105,6 +106,7 @@ const COLUMN_ALIASES: Record<string, string> = {
   'photo': 'photo_url',
   'goals_interests': 'what_excites_you',
   'twitter': '_twitter', // keep for reference but not an engineer field
+  'cohort': 'cohort',
 }
 
 function applyColumnAliases(row: Record<string, string>): Record<string, string> {
@@ -190,6 +192,7 @@ function validateRow(rawRow: Record<string, string>): ImportRow {
     linkedin_url: linkedin_url || undefined,
     portfolio_url: row.portfolio_url || undefined,
     photo_url: row.photo_url || undefined,
+    cohort: row.cohort || undefined,
     is_available_for_cycles,
     valid: errors.length === 0,
     error: errors.length > 0 ? errors.join('; ') : undefined,

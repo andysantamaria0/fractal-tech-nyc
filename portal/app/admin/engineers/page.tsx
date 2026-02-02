@@ -14,6 +14,7 @@ interface Engineer {
   availability_hours_per_week?: number
   github_url?: string
   created_at: string
+  interest_count?: number
 }
 
 interface AmaSubmission {
@@ -54,10 +55,19 @@ export default function AdminEngineersPage() {
   const loadEngineers = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/engineers')
-      if (res.ok) {
-        const data = await res.json()
-        setEngineers(data.engineers)
+      const [engRes, interestRes] = await Promise.all([
+        fetch('/api/admin/engineers'),
+        fetch('/api/admin/engineers/interests'),
+      ])
+      if (engRes.ok) {
+        const data = await engRes.json()
+        let engs = data.engineers
+        if (interestRes.ok) {
+          const interestData = await interestRes.json()
+          const counts: Record<string, number> = interestData.counts || {}
+          engs = engs.map((e: Engineer) => ({ ...e, interest_count: counts[e.id] || 0 }))
+        }
+        setEngineers(engs)
       }
     } catch (e) {
       console.error('Failed to load engineers:', e)

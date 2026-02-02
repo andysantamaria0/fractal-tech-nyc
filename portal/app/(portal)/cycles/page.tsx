@@ -1,4 +1,4 @@
-import EngineerCard from '@/components/EngineerCard'
+import CyclesContent from '@/components/CyclesContent'
 import MySubmissions from '@/components/MySubmissions'
 import { demoEngineers } from '@/lib/constants'
 
@@ -8,6 +8,7 @@ const isSupabaseConfigured =
 
 export default async function CyclesPage() {
   let engineers = demoEngineers
+  let interestedIds: string[] = []
 
   if (isSupabaseConfigured) {
     const { createClient } = await import('@/lib/supabase/server')
@@ -20,6 +21,17 @@ export default async function CyclesPage() {
       .order('created_at', { ascending: false })
 
     engineers = data ?? []
+
+    // Fetch current user's interests
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: interests } = await supabase
+        .from('engineer_interests')
+        .select('engineer_id')
+        .eq('user_id', user.id)
+
+      interestedIds = (interests || []).map((i: { engineer_id: string }) => i.engineer_id)
+    }
   }
 
   return (
@@ -35,11 +47,7 @@ export default async function CyclesPage() {
         </div>
 
         {engineers && engineers.length > 0 ? (
-          <div className="engineers-grid">
-            {engineers.map((engineer) => (
-              <EngineerCard key={engineer.id} engineer={engineer} />
-            ))}
-          </div>
+          <CyclesContent engineers={engineers} interestedIds={interestedIds} />
         ) : (
           <div className="window">
             <div className="window-title">No Engineers Available</div>

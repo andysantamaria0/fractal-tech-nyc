@@ -30,11 +30,14 @@ export default function EngineerDetail({ engineerId, onClose, onSaved }: Enginee
   const [durationWeeks, setDurationWeeks] = useState('')
   const [linkedinUrl, setLinkedinUrl] = useState('')
   const [portfolioUrl, setPortfolioUrl] = useState('')
+  const [cohort, setCohort] = useState('')
   const [available, setAvailable] = useState(true)
+  const [interestedCompanies, setInterestedCompanies] = useState<{ id: string; name: string; email: string; created_at: string }[]>([])
 
   useEffect(() => {
     if (isNew) return
     loadEngineer()
+    loadInterests()
   }, [engineerId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadEngineer() {
@@ -56,6 +59,7 @@ export default function EngineerDetail({ engineerId, onClose, onSaved }: Enginee
           setDurationWeeks(eng.availability_duration_weeks?.toString() || '')
           setLinkedinUrl(eng.linkedin_url || '')
           setPortfolioUrl(eng.portfolio_url || '')
+          setCohort(eng.cohort || '')
           setAvailable(eng.is_available_for_cycles)
         }
       }
@@ -63,6 +67,18 @@ export default function EngineerDetail({ engineerId, onClose, onSaved }: Enginee
       setError('Failed to load engineer')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function loadInterests() {
+    try {
+      const res = await fetch(`/api/admin/engineers/${engineerId}/interests`)
+      if (res.ok) {
+        const data = await res.json()
+        setInterestedCompanies(data.interests || [])
+      }
+    } catch {
+      // non-critical
     }
   }
 
@@ -84,6 +100,7 @@ export default function EngineerDetail({ engineerId, onClose, onSaved }: Enginee
       availability_duration_weeks: durationWeeks ? parseInt(durationWeeks, 10) : null,
       linkedin_url: linkedinUrl.trim() || null,
       portfolio_url: portfolioUrl.trim() || null,
+      cohort: cohort.trim() || null,
       is_available_for_cycles: available,
     }
 
@@ -185,6 +202,17 @@ export default function EngineerDetail({ engineerId, onClose, onSaved }: Enginee
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@example.com"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="eng-cohort" style={labelStyle}>Cohort</label>
+            <input
+              id="eng-cohort"
+              type="text"
+              className="form-input"
+              value={cohort}
+              onChange={(e) => setCohort(e.target.value)}
+              placeholder="e.g. fa2025, sp2026, su2025"
             />
           </div>
         </div>
@@ -334,6 +362,26 @@ export default function EngineerDetail({ engineerId, onClose, onSaved }: Enginee
         >
           {saving ? 'Saving...' : isNew ? 'Create Engineer' : 'Save Changes'}
         </button>
+
+        {/* Interested Companies — existing engineers only */}
+        {!isNew && interestedCompanies.length > 0 && (
+          <div className="admin-detail-section">
+            <div className="section-label">Interested Companies ({interestedCompanies.length})</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+              {interestedCompanies.map((c) => (
+                <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--space-2) 0', borderBottom: '1px solid var(--color-border, #eee)' }}>
+                  <div>
+                    <span style={{ fontWeight: 700 }}>{c.name}</span>
+                    <span style={{ color: 'var(--color-slate)', marginLeft: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>{c.email}</span>
+                  </div>
+                  <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-mid)' }}>
+                    {new Date(c.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Notify Subscribers Button — existing engineers only */}
         {!isNew && (

@@ -15,6 +15,7 @@ export interface Engineer {
   availability_duration_weeks?: number
   linkedin_url?: string
   portfolio_url?: string
+  cohort?: string
   is_available_for_cycles?: boolean
   created_at?: string
 }

@@ -20,7 +20,7 @@ export const ENGINEER_FIELDS = [
   'name', 'email', 'photo_url', 'github_url', 'github_username',
   'focus_areas', 'what_excites_you', 'availability_start',
   'availability_hours_per_week', 'availability_duration_weeks',
-  'linkedin_url', 'portfolio_url', 'is_available_for_cycles',
+  'linkedin_url', 'portfolio_url', 'cohort', 'is_available_for_cycles',
 ] as const
 
 export const COMPANY_FIELDS = [
