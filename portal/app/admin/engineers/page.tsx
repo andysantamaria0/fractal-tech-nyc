@@ -10,6 +10,7 @@ interface Engineer {
   name: string
   email: string
   focus_areas?: string[]
+  cohort?: string
   is_available_for_cycles: boolean
   availability_hours_per_week?: number
   github_url?: string
@@ -43,6 +44,7 @@ export default function AdminEngineersPage() {
   // Filters
   const [search, setSearch] = useState('')
   const [focusFilter, setFocusFilter] = useState('')
+  const [cohortFilter, setCohortFilter] = useState('')
   const [availableOnly, setAvailableOnly] = useState(false)
 
   // AMA state
@@ -107,6 +109,14 @@ export default function AdminEngineersPage() {
     return Array.from(areas).sort()
   }, [engineers])
 
+  const allCohorts = useMemo(() => {
+    const cohorts = new Set<string>()
+    for (const eng of engineers) {
+      if (eng.cohort) cohorts.add(eng.cohort)
+    }
+    return Array.from(cohorts).sort()
+  }, [engineers])
+
   // Client-side filtering
   const filtered = useMemo(() => {
     let result = engineers
@@ -119,11 +129,14 @@ export default function AdminEngineersPage() {
     if (focusFilter) {
       result = result.filter((e) => e.focus_areas?.includes(focusFilter))
     }
+    if (cohortFilter) {
+      result = result.filter((e) => e.cohort === cohortFilter)
+    }
     if (availableOnly) {
       result = result.filter((e) => e.is_available_for_cycles)
     }
     return result
-  }, [engineers, search, focusFilter, availableOnly])
+  }, [engineers, search, focusFilter, cohortFilter, availableOnly])
 
   const filteredAma = useMemo(() => {
     let result = amaSubmissions
@@ -224,6 +237,17 @@ export default function AdminEngineersPage() {
             <option value="">All Focus Areas</option>
             {allFocusAreas.map((area) => (
               <option key={area} value={area}>{area}</option>
+            ))}
+          </select>
+          <select
+            className="form-select"
+            value={cohortFilter}
+            onChange={(e) => setCohortFilter(e.target.value)}
+            style={{ maxWidth: 180 }}
+          >
+            <option value="">All Cohorts</option>
+            {allCohorts.map((cohort) => (
+              <option key={cohort} value={cohort}>{cohort}</option>
             ))}
           </select>
           <label className="form-checkbox">
