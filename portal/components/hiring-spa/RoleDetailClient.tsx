@@ -219,7 +219,7 @@ export default function RoleDetailClient({ role: initialRole, initialMatches = [
       )}
 
       {/* Dimension Weights */}
-      <div className="spa-role-detail-section">
+      <div className="spa-role-detail-section" id="section-dimension-weights">
         <div className="spa-section-header">
           <h2 className="spa-heading-2">Dimension Weights</h2>
         </div>

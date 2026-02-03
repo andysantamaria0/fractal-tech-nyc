@@ -15,13 +15,14 @@ interface Props {
   feedback: JDFeedback | null
   onFeedbackChange: (feedback: JDFeedback) => void
   onRegenerate: () => void
-  onConfirm: () => void
+  onConfirm: () => Promise<void>
   regenerating: boolean
 }
 
 export default function InteractiveJDView({ jd, feedback, onFeedbackChange, onRegenerate, onConfirm, regenerating }: Props) {
   const fb = feedback ?? EMPTY_FEEDBACK
   const [editingNote, setEditingNote] = useState<string | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
 
   const hasAnyFeedback = (() => {
     for (const key of Object.keys(fb.requirements)) {
@@ -203,7 +204,11 @@ export default function InteractiveJDView({ jd, feedback, onFeedbackChange, onRe
 
       {/* Action area */}
       <div className="spa-jd-regenerate">
-        {hasAnyFeedback ? (
+        {confirmed ? (
+          <p className="spa-body" style={{ color: '#5a8a5a' }}>
+            &#x2713; JD confirmed — adjust dimension weights below to fine-tune matching.
+          </p>
+        ) : hasAnyFeedback ? (
           <>
             <button
               className="spa-btn spa-btn-primary"
@@ -214,7 +219,11 @@ export default function InteractiveJDView({ jd, feedback, onFeedbackChange, onRe
             </button>
             <button
               className="spa-btn spa-btn-secondary"
-              onClick={onConfirm}
+              onClick={async () => {
+                await onConfirm()
+                setConfirmed(true)
+                document.getElementById('section-dimension-weights')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }}
               disabled={regenerating}
             >
               Skip — Continue as-is
@@ -223,7 +232,11 @@ export default function InteractiveJDView({ jd, feedback, onFeedbackChange, onRe
         ) : (
           <button
             className="spa-btn spa-btn-primary"
-            onClick={onConfirm}
+            onClick={async () => {
+              await onConfirm()
+              setConfirmed(true)
+              document.getElementById('section-dimension-weights')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
           >
             Looks Good, Continue
           </button>
