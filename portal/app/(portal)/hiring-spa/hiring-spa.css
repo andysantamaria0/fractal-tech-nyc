@@ -1140,6 +1140,19 @@
   margin-top: var(--spa-space-2);
 }
 
+.hiring-spa .spa-jd-review-hint {
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--spa-graphite);
+  background-color: var(--spa-parchment);
+  border: 1px solid var(--spa-honey-border);
+  border-radius: var(--spa-radius);
+  padding: var(--spa-space-3) var(--spa-space-4);
+  margin-bottom: var(--spa-space-5);
+}
+
 .hiring-spa .spa-jd-regenerate {
   display: flex;
   justify-content: center;

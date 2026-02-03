@@ -26,6 +26,9 @@ export default function RoleDetailClient({ role: initialRole, initialMatches = [
   const [beautifying, setBeautifying] = useState(false)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState('')
+  const [jdReviewed, setJdReviewed] = useState(
+    !!(initialRole.jd_feedback || initialRole.dimension_weights_raw)
+  )
   const feedbackDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const updateRole = useCallback(async (updates: Record<string, unknown>) => {
@@ -46,6 +49,7 @@ export default function RoleDetailClient({ role: initialRole, initialMatches = [
 
   const handleSaveWeights = useCallback(async (normalized: DimensionWeights, raw: DimensionWeightsRaw) => {
     await updateRole({ dimension_weights: normalized, dimension_weights_raw: raw })
+    setJdReviewed(true)
   }, [updateRole])
 
   const handleStatusChange = useCallback(async (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -122,12 +126,25 @@ export default function RoleDetailClient({ role: initialRole, initialMatches = [
         return
       }
       setRole(data.role)
+      setJdReviewed(true)
     } catch {
       setError('Network error')
     } finally {
       setBeautifying(false)
     }
   }, [role.id, role.jd_feedback])
+
+  const handleConfirmJD = useCallback(async () => {
+    // Save empty jd_feedback to persist the "reviewed" state
+    const emptyFeedback: JDFeedback = {
+      requirements: {},
+      team_context: { sentiment: null },
+      working_vibe: { sentiment: null },
+      culture_check: { sentiment: null },
+    }
+    await updateRole({ jd_feedback: emptyFeedback })
+    setJdReviewed(true)
+  }, [updateRole])
 
   const handleMatchDecision = useCallback(async (matchId: string, decision: MatchDecision) => {
     setError('')
@@ -194,26 +211,9 @@ export default function RoleDetailClient({ role: initialRole, initialMatches = [
               feedback={role.jd_feedback as JDFeedback | null}
               onFeedbackChange={handleFeedbackChange}
               onRegenerate={handleRegenerateWithFeedback}
+              onConfirm={handleConfirmJD}
               regenerating={beautifying}
             />
-          </div>
-        </div>
-      )}
-
-      {/* Engineer Matches */}
-      {matches.length > 0 && (
-        <div className="spa-role-detail-section">
-          <div className="spa-section-header">
-            <h2 className="spa-heading-2">Engineer Matches</h2>
-          </div>
-          <div className="spa-match-cards">
-            {matches.map(match => (
-              <EngineerMatchCard
-                key={match.id}
-                match={match}
-                onDecision={handleMatchDecision}
-              />
-            ))}
           </div>
         </div>
       )}
@@ -261,6 +261,32 @@ export default function RoleDetailClient({ role: initialRole, initialMatches = [
           </div>
         )}
       </div>
+
+      {/* Engineer Matches — gated behind JD review */}
+      {matches.length > 0 && (
+        <div className="spa-role-detail-section">
+          <div className="spa-section-header">
+            <h2 className="spa-heading-2">Engineer Matches</h2>
+          </div>
+          {jdReviewed ? (
+            <div className="spa-match-cards">
+              {matches.map(match => (
+                <EngineerMatchCard
+                  key={match.id}
+                  match={match}
+                  onDecision={handleMatchDecision}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="spa-card-accent" style={{ textAlign: 'center', padding: '24px 32px' }}>
+              <p className="spa-body-muted" style={{ fontStyle: 'italic' }}>
+                {matches.length} {matches.length === 1 ? 'match' : 'matches'} ready. Review the JD and adjust dimension weights to see them.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Source info */}
       {role.source_url && (
