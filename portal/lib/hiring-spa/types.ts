@@ -224,6 +224,9 @@ export interface HiringRole {
   challenge_prompt: string | null
   status: RoleStatus
   public_slug: string
+  ats_provider?: string | null
+  ats_external_id?: string | null
+  ats_synced_at?: string | null
   created_at: string
   updated_at: string
 }
@@ -321,6 +324,38 @@ export interface EngineerProfileSpa {
   status: EngineerProfileStatus
   created_at: string
   updated_at: string
+}
+
+// ATS types
+
+export type ATSProvider = 'greenhouse'
+
+export interface ATSConnection {
+  id: string
+  company_id: string
+  provider: ATSProvider
+  last_sync_at: string | null
+  last_sync_error: string | null
+  last_sync_role_count: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface GreenhouseJob {
+  id: number
+  name: string
+  status: string
+  departments: { id: number; name: string }[]
+  offices: { id: number; name: string }[]
+  updated_at: string
+}
+
+export interface GreenhouseJobPost {
+  id: number
+  title: string
+  content: string
+  active: boolean
+  job_id: number
 }
 
 // Hiring profile status

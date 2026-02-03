@@ -13,6 +13,15 @@ interface HiringProfileStatus {
   technical_environment: Record<string, unknown> | null
 }
 
+interface ATSConnectionInfo {
+  id: string
+  provider: string
+  api_key: string // masked
+  last_sync_at: string | null
+  last_sync_error: string | null
+  last_sync_role_count: number | null
+}
+
 interface CompanyDetailProps {
   companyId: string
   onClose: () => void
@@ -36,6 +45,15 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
   const [crawling, setCrawling] = useState(false)
   const [hiringProfile, setHiringProfile] = useState<HiringProfileStatus | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // ATS state
+  const [atsConnection, setAtsConnection] = useState<ATSConnectionInfo | null>(null)
+  const [atsApiKey, setAtsApiKey] = useState('')
+  const [atsTesting, setAtsTesting] = useState(false)
+  const [atsTestResult, setAtsTestResult] = useState<boolean | null>(null)
+  const [atsSaving, setAtsSaving] = useState(false)
+  const [atsSyncing, setAtsSyncing] = useState(false)
+  const atsSyncPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     loadCompany()
@@ -118,6 +136,138 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Crawl failed')
       setCrawling(false)
+    }
+  }
+
+  // ATS functions
+  const loadAtsConnection = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/hiring-spa/ats?companyId=${companyId}`)
+      if (res.ok) {
+        const { connection } = await res.json()
+        setAtsConnection(connection)
+      }
+    } catch {
+      // Non-critical
+    }
+  }, [companyId])
+
+  useEffect(() => {
+    if (hasHiringSpaAccess) {
+      loadAtsConnection()
+    }
+    return () => {
+      if (atsSyncPollRef.current) {
+        clearInterval(atsSyncPollRef.current)
+      }
+    }
+  }, [hasHiringSpaAccess, loadAtsConnection])
+
+  async function handleAtsTest() {
+    if (!atsApiKey.trim()) return
+    setAtsTesting(true)
+    setAtsTestResult(null)
+    try {
+      const res = await fetch('/api/admin/hiring-spa/ats/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: atsApiKey }),
+      })
+      if (res.ok) {
+        const { valid } = await res.json()
+        setAtsTestResult(valid)
+      } else {
+        setAtsTestResult(false)
+      }
+    } catch {
+      setAtsTestResult(false)
+    } finally {
+      setAtsTesting(false)
+    }
+  }
+
+  async function handleAtsSave() {
+    if (!atsApiKey.trim()) return
+    setAtsSaving(true)
+    try {
+      const res = await fetch('/api/admin/hiring-spa/ats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId, provider: 'greenhouse', apiKey: atsApiKey }),
+      })
+      if (res.ok) {
+        setAtsApiKey('')
+        setAtsTestResult(null)
+        await loadAtsConnection()
+      }
+    } catch {
+      setError('Failed to save ATS connection')
+    } finally {
+      setAtsSaving(false)
+    }
+  }
+
+  async function handleAtsDelete() {
+    try {
+      await fetch('/api/admin/hiring-spa/ats', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId, provider: 'greenhouse' }),
+      })
+      setAtsConnection(null)
+      setAtsApiKey('')
+      setAtsTestResult(null)
+    } catch {
+      setError('Failed to remove ATS connection')
+    }
+  }
+
+  async function handleAtsSync() {
+    setAtsSyncing(true)
+    try {
+      const res = await fetch('/api/admin/hiring-spa/ats/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Sync failed')
+      }
+
+      // Poll for completion — check every 3s, stop after 60s
+      const startSyncAt = atsConnection?.last_sync_at
+      let elapsed = 0
+      atsSyncPollRef.current = setInterval(async () => {
+        elapsed += 3000
+        if (elapsed > 60000) {
+          if (atsSyncPollRef.current) {
+            clearInterval(atsSyncPollRef.current)
+            atsSyncPollRef.current = null
+          }
+          setAtsSyncing(false)
+          return
+        }
+        try {
+          const pollRes = await fetch(`/api/admin/hiring-spa/ats?companyId=${companyId}`)
+          if (pollRes.ok) {
+            const { connection } = await pollRes.json()
+            if (connection && connection.last_sync_at !== startSyncAt) {
+              setAtsConnection(connection)
+              setAtsSyncing(false)
+              if (atsSyncPollRef.current) {
+                clearInterval(atsSyncPollRef.current)
+                atsSyncPollRef.current = null
+              }
+            }
+          }
+        } catch {
+          // Keep polling
+        }
+      }, 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sync failed')
+      setAtsSyncing(false)
     }
   }
 
@@ -338,6 +488,105 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
                     </p>
                   )}
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* Greenhouse Integration */}
+          {hasHiringSpaAccess && (
+            <div style={{ marginTop: 'var(--space-4)', borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-3)' }}>
+              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, marginBottom: 'var(--space-2)' }}>
+                Greenhouse Integration
+              </div>
+
+              {atsConnection && (
+                <div style={{ marginBottom: 'var(--space-3)', fontSize: 'var(--text-sm)' }}>
+                  <p style={{ color: 'var(--color-slate)', marginBottom: 'var(--space-1)' }}>
+                    <strong>API Key:</strong> {atsConnection.api_key}
+                    <button
+                      onClick={handleAtsDelete}
+                      style={{
+                        marginLeft: 'var(--space-2)',
+                        color: 'var(--color-coral)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: 'var(--text-xs)',
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </p>
+                  {atsConnection.last_sync_at && (
+                    <p style={{ color: 'var(--color-slate)', marginBottom: 'var(--space-1)' }}>
+                      <strong>Last Sync:</strong> {new Date(atsConnection.last_sync_at).toLocaleString()}
+                    </p>
+                  )}
+                  {atsConnection.last_sync_role_count != null && (
+                    <p style={{ color: 'var(--color-slate)', marginBottom: 'var(--space-1)' }}>
+                      <strong>Roles Synced:</strong> {atsConnection.last_sync_role_count}
+                    </p>
+                  )}
+                  {atsConnection.last_sync_error && (
+                    <p style={{ color: 'var(--color-coral)', marginBottom: 'var(--space-1)' }}>
+                      <strong>Sync Error:</strong> {atsConnection.last_sync_error}
+                    </p>
+                  )}
+                  <button
+                    className="btn-secondary"
+                    onClick={handleAtsSync}
+                    disabled={atsSyncing}
+                    style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-2) var(--space-4)', marginTop: 'var(--space-1)' }}
+                  >
+                    {atsSyncing ? 'Syncing...' : 'Sync Roles'}
+                  </button>
+                </div>
+              )}
+
+              <div className="form-group">
+                <label htmlFor="co-ats-key" style={labelStyle}>
+                  {atsConnection ? 'Update API Key' : 'Greenhouse API Key'}
+                </label>
+                <input
+                  id="co-ats-key"
+                  type="password"
+                  className="form-input"
+                  value={atsApiKey}
+                  onChange={(e) => { setAtsApiKey(e.target.value); setAtsTestResult(null) }}
+                  placeholder="Harvest API key"
+                />
+              </div>
+
+              {atsApiKey.trim() && (
+                <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-1)' }}>
+                  <button
+                    className="btn-secondary"
+                    onClick={handleAtsTest}
+                    disabled={atsTesting}
+                    style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-2) var(--space-4)' }}
+                  >
+                    {atsTesting ? 'Testing...' : 'Test Connection'}
+                  </button>
+                  <button
+                    className="btn-secondary"
+                    onClick={handleAtsSave}
+                    disabled={atsSaving || atsTestResult === false}
+                    style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-2) var(--space-4)' }}
+                  >
+                    {atsSaving ? 'Saving...' : 'Save Key'}
+                  </button>
+                </div>
+              )}
+
+              {atsTestResult !== null && (
+                <p style={{
+                  fontSize: 'var(--text-sm)',
+                  marginTop: 'var(--space-1)',
+                  color: atsTestResult ? 'var(--color-emerald)' : 'var(--color-coral)',
+                }}>
+                  {atsTestResult ? 'Connection successful' : 'Connection failed — check your API key'}
+                </p>
               )}
             </div>
           )}
