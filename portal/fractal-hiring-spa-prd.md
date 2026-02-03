@@ -729,7 +729,7 @@ Email only. No in-app notification noise.
 | `/hiring-spa/roles/new` | New role submission + beautification flow | Yes | `has_hiring_spa_access = true` | ✅ Phase 1c |
 | `/jd/[slug]` | Public beautified JD page (email-gated) | No | Public (email gate) | ✅ Phase 1c |
 | `/engineer/apply` | Engineer self-signup (info → crawl → questionnaire → confirmation) | No | Public (middleware exemption) | ✅ Phase 3 |
-| `/admin/hiring-spa` | Admin overview of all Hiring Spa activity | Yes | Admin only | Phase 2b+ |
+| `/admin/hiring-spa` | Admin overview of all Hiring Spa activity | Yes | Admin only | ✅ Shipped |
 
 **API Routes:**
 
