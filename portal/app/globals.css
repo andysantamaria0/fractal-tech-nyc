@@ -1088,8 +1088,85 @@ a {
 }
 
 /* ========================================
-   21. SKELETON LOADING STATES
+   21. EARLY ACCESS PAGE
    ======================================== */
+.early-access-window {
+    max-width: 520px;
+}
+
+.early-access-invitation {
+    text-align: center;
+    margin-bottom: var(--space-6);
+}
+
+.early-access-invitation .section-label {
+    margin-bottom: var(--space-3);
+}
+
+.early-access-invitation h1 {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    margin-bottom: var(--space-3);
+}
+
+.early-access-invitation p {
+    font-size: var(--text-base);
+    color: var(--color-slate);
+    line-height: 1.5;
+}
+
+.early-access-perks {
+    background: var(--color-fog);
+    border: 2px solid var(--color-charcoal);
+    padding: var(--space-5);
+    margin-bottom: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.early-access-perk {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.early-access-perk strong {
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-charcoal);
+}
+
+.early-access-perk span {
+    font-size: var(--text-base);
+    color: var(--color-slate);
+}
+
+.early-access-note {
+    border-left: 3px solid var(--color-accent);
+    padding-left: var(--space-5);
+    margin-bottom: var(--space-6);
+}
+
+.early-access-note p {
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--color-charcoal);
+    font-style: italic;
+    margin-bottom: var(--space-2);
+}
+
+.early-access-note span {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-slate);
+}
+
+/* ========================================
+   22. SKELETON LOADING STATES
+   ======================================== */
+
 @keyframes skeleton-pulse {
     0% { opacity: 0.4; }
     50% { opacity: 1; }
@@ -1225,5 +1302,18 @@ a {
     /* Detail panel sprint grid */
     .admin-detail-panel .form-group {
         min-width: 0;
+    }
+
+    /* Early access responsive */
+    .early-access-window {
+        max-width: 100%;
+    }
+
+    .early-access-perks {
+        padding: var(--space-4);
+    }
+
+    .early-access-note {
+        padding-left: var(--space-4);
     }
 }

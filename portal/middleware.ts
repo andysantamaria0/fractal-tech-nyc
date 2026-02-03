@@ -84,7 +84,8 @@ export async function middleware(request: NextRequest) {
     user &&
     (request.nextUrl.pathname === '/' ||
       request.nextUrl.pathname === '/login' ||
-      request.nextUrl.pathname === '/signup')
+      request.nextUrl.pathname === '/signup' ||
+      request.nextUrl.pathname === '/early-access')
   ) {
     // Check if user has a profile — if not, send them to complete it
     const { data: profile } = await supabase
