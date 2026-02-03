@@ -101,6 +101,25 @@
   border-top: 1px solid var(--spa-stone-light);
 }
 
+.jd-public-join-pool {
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  color: var(--spa-graphite);
+  text-align: center;
+  margin-top: var(--spa-space-7);
+}
+
+.jd-public-join-pool a {
+  color: var(--spa-honey);
+  text-decoration: none;
+  border-bottom: 1px solid var(--spa-honey-border);
+  transition: border-color 0.2s;
+}
+
+.jd-public-join-pool a:hover {
+  border-bottom-color: var(--spa-honey);
+}
+
 /* =========================================
    MATCH PERCENTAGE BANNER
    ========================================= */
@@ -162,4 +181,221 @@
   padding: var(--spa-space-4) var(--spa-space-5);
   margin-top: var(--spa-space-7);
   text-align: center;
+}
+
+/* =========================================
+   ENGINEER APPLY PAGE
+   ========================================= */
+
+.engineer-apply-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: var(--spa-space-7);
+}
+
+.engineer-apply-header {
+  text-align: center;
+  margin-bottom: var(--spa-space-7);
+}
+
+.engineer-apply-header h1 {
+  font-family: var(--spa-font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--spa-charcoal);
+  margin: 0 0 var(--spa-space-2);
+}
+
+.engineer-apply-header p {
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  color: var(--spa-graphite);
+  margin: 0;
+}
+
+.engineer-apply-progress {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--spa-honey);
+  margin-bottom: var(--spa-space-5);
+}
+
+.engineer-apply-step {
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-6);
+}
+
+.engineer-apply-field {
+  margin-bottom: var(--spa-space-5);
+}
+
+.engineer-apply-field label {
+  display: block;
+  font-family: var(--spa-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--spa-graphite);
+  margin-bottom: var(--spa-space-2);
+}
+
+.engineer-apply-field input {
+  width: 100%;
+  padding: var(--spa-space-3) var(--spa-space-4);
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  color: var(--spa-charcoal);
+  background-color: var(--spa-parchment);
+  border: 1px solid var(--spa-stone-border);
+  border-radius: var(--spa-radius);
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.engineer-apply-field input:focus {
+  border-color: var(--spa-honey);
+}
+
+.engineer-apply-field input::placeholder {
+  color: var(--spa-mist);
+}
+
+.engineer-apply-section {
+  margin-bottom: var(--spa-space-6);
+}
+
+.engineer-apply-section h3 {
+  font-family: var(--spa-font-serif);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--spa-charcoal);
+  margin: 0 0 var(--spa-space-1);
+}
+
+.engineer-apply-section p {
+  font-family: var(--spa-font-serif);
+  font-size: 13px;
+  color: var(--spa-mist);
+  margin: 0 0 var(--spa-space-4);
+}
+
+.engineer-apply-question {
+  margin-bottom: var(--spa-space-5);
+}
+
+.engineer-apply-question label {
+  display: block;
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  color: var(--spa-charcoal);
+  margin-bottom: var(--spa-space-2);
+  line-height: 1.5;
+}
+
+.engineer-apply-question textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: var(--spa-space-3) var(--spa-space-4);
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  color: var(--spa-charcoal);
+  background-color: var(--spa-parchment);
+  border: 1px solid var(--spa-stone-border);
+  border-radius: var(--spa-radius);
+  outline: none;
+  resize: vertical;
+  line-height: 1.6;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.engineer-apply-question textarea:focus {
+  border-color: var(--spa-honey);
+}
+
+.engineer-apply-question textarea::placeholder {
+  color: var(--spa-mist);
+}
+
+.engineer-apply-confirmation {
+  background-color: var(--spa-parchment);
+  border: 1px solid var(--spa-honey-border);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-6);
+  text-align: center;
+}
+
+.engineer-apply-confirmation h2 {
+  font-family: var(--spa-font-serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--spa-charcoal);
+  margin: 0 0 var(--spa-space-4);
+}
+
+.engineer-apply-confirmation p {
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  color: var(--spa-graphite);
+  margin: 0 0 var(--spa-space-3);
+}
+
+/* Shared button styles */
+.engineer-apply-btn {
+  display: inline-block;
+  padding: var(--spa-space-3) var(--spa-space-5);
+  font-family: var(--spa-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: white;
+  background-color: var(--spa-charcoal);
+  border: none;
+  border-radius: var(--spa-radius);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.engineer-apply-btn:hover {
+  background-color: var(--spa-graphite);
+}
+
+.engineer-apply-btn:disabled {
+  background-color: var(--spa-stone);
+  cursor: not-allowed;
+}
+
+/* Spinner for crawling state */
+.engineer-apply-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spa-space-4);
+  padding: var(--spa-space-7) 0;
+}
+
+.engineer-apply-spinner-ring {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--spa-stone-light);
+  border-top-color: var(--spa-honey);
+  border-radius: 50%;
+  animation: engineer-apply-spin 1s linear infinite;
+}
+
+@keyframes engineer-apply-spin {
+  to { transform: rotate(360deg); }
+}
+
+.engineer-apply-spinner p {
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  color: var(--spa-graphite);
+  margin: 0;
 }

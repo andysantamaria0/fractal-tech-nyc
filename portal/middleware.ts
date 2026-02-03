@@ -55,7 +55,8 @@ export async function middleware(request: NextRequest) {
     (request.nextUrl.pathname.startsWith('/dashboard') ||
       request.nextUrl.pathname.startsWith('/cycles') ||
       request.nextUrl.pathname.startsWith('/settings') ||
-      request.nextUrl.pathname.startsWith('/engineer') ||
+      (request.nextUrl.pathname.startsWith('/engineer') &&
+        !request.nextUrl.pathname.startsWith('/engineer/apply')) ||
       request.nextUrl.pathname.startsWith('/complete-profile') ||
       request.nextUrl.pathname.startsWith('/admin') ||
       request.nextUrl.pathname.startsWith('/hiring-spa'))

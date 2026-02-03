@@ -56,7 +56,7 @@ A boolean flag `has_hiring_spa_access` on the existing `profiles` table. Default
 - **Granting access:** Admin sets the flag to `true` via the admin panel or directly in Supabase.
 - **Revoking access:** Admin sets the flag to `false`.
 - **UI behavior:** Hiring Spa routes, navigation items, and all related UI are hidden for users without access. Attempting to access a Hiring Spa route directly without access redirects to `/dashboard`.
-- **Middleware:** Server-side check on all `/hiring-spa/*` routes. Query the `profiles` table for the authenticated user's `has_hiring_spa_access` flag.
+- **Middleware:** Server-side check on all `/hiring-spa/*` routes. Query the `profiles` table for the authenticated user's `has_hiring_spa_access` flag. `/engineer/apply` is explicitly exempted from auth to allow public self-signup while keeping other `/engineer/*` routes protected.
 
 ### 4.2 Admin Management
 
@@ -728,6 +728,7 @@ Email only. No in-app notification noise.
 | `/hiring-spa/roles/[id]` | Single role with matches | Yes | `has_hiring_spa_access = true` | ✅ Phase 1c |
 | `/hiring-spa/roles/new` | New role submission + beautification flow | Yes | `has_hiring_spa_access = true` | ✅ Phase 1c |
 | `/jd/[slug]` | Public beautified JD page (email-gated) | No | Public (email gate) | ✅ Phase 1c |
+| `/engineer/apply` | Engineer self-signup (info → crawl → questionnaire → confirmation) | No | Public (middleware exemption) | ✅ Phase 3 |
 | `/admin/hiring-spa` | Admin overview of all Hiring Spa activity | Yes | Admin only | Phase 2b+ |
 
 **API Routes:**
@@ -988,7 +989,8 @@ ATS API integration, challenge infrastructure, and additional automation.
 **Deliverables:**
 - ATS API integration (Greenhouse, Lever, Ashby — OAuth, role sync)
 - Technical challenge infrastructure (upload, auto-grading pipeline, human review workflow)
-- Engineer self-signup / referral entry paths
+- Engineer self-signup ✅ SHIPPED (`/engineer/apply` — public, middleware-exempted)
+- Referral entry paths
 
 ### Phase 4 — Refinement
 

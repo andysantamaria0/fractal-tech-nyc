@@ -218,6 +218,14 @@ export default function PublicJDPage() {
             </div>
           )}
 
+          {/* Join the match pool CTA — only shown when viewer has no match */}
+          {!match && (
+            <p className="jd-public-join-pool">
+              Want to get matched with more roles?{' '}
+              <a href="/engineer/apply">Join the match pool</a>
+            </p>
+          )}
+
           <p className="jd-public-powered">Powered by Fractal Hiring Spa</p>
         </>
       )}
