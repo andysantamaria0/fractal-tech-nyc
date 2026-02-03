@@ -213,11 +213,15 @@ export default async function HiringSpaHome() {
         <div className="spa-status-card">
           <p className="spa-label-emphasis" style={{ marginBottom: 16 }}>In Progress</p>
           <p className="spa-heading-2" style={{ marginBottom: 12 }}>
-            We&apos;re analyzing your web presence
+            Breathe in&hellip; [1] [2] [3] Exhale&hellip; [1] [2] [3]
           </p>
           <p className="spa-body-muted">
-            We&apos;re crawling your website and GitHub to understand your company&apos;s
-            culture, tech stack, and values. This usually takes a few minutes.
+            We&apos;re preparing your details so we can review your spa treatments
+            (for hiring but you should also check out our favorite{' '}
+            <a href="https://www.architecturaldigest.com/gallery/best-spas-new-york-city" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--spa-honey)', textDecoration: 'none', borderBottom: '1px solid var(--spa-honey-border)' }}>
+              spas in the city
+            </a>{' '}
+            while you wait).
           </p>
           <div className="spa-progress-track" style={{ maxWidth: 300, margin: '24px auto 0' }}>
             <div className="spa-progress-fill" style={{ width: '60%' }} />
