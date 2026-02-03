@@ -11,6 +11,17 @@ export interface MatchData {
   challenge_response: string | null
   engineer_decision: 'interested' | 'not_interested' | null
   engineer_notified_at: string | null
+  challenge_submission?: {
+    id: string
+    submitted_at: string
+    auto_score: number | null
+    auto_reasoning: string | null
+    human_score: number | null
+    human_feedback: string | null
+    reviewer_name: string | null
+    reviewer_linkedin_url: string | null
+    final_score: number | null
+  } | null
 }
 
 export interface ChallengeData {

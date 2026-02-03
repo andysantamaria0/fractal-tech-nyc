@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import type { MatchWithEngineer, MatchDecision, MatchFeedback, DimensionWeights, MatchReasoning } from '@/lib/hiring-spa/types'
+import type { MatchWithEngineer, MatchDecision, MatchFeedback, ChallengeSubmission, DimensionWeights, MatchReasoning } from '@/lib/hiring-spa/types'
 import MatchFeedbackForm from './MatchFeedbackForm'
+import ChallengeReviewForm from './ChallengeReviewForm'
 
 const DIMENSION_LABELS: Record<keyof DimensionWeights, string> = {
   mission: 'Mission',
@@ -25,11 +26,28 @@ export default function EngineerMatchCard({ match, onDecision }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [deciding, setDeciding] = useState(false)
   const [feedback, setFeedback] = useState<MatchFeedback | undefined>(match.feedback)
+  const [challengeSubmission, setChallengeSubmission] = useState<ChallengeSubmission | undefined>(match.challenge_submission)
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
 
   const engineer = match.engineer
   const topSkills = engineer.engineer_dna?.topSkills?.slice(0, 3) || []
   const hasDecision = match.decision !== null
+
+  // Derive challenge badge
+  let challengeBadge: { label: string; className: string } | null = null
+  if (match.challenge_response === 'accepted' && !challengeSubmission) {
+    challengeBadge = { label: 'Challenge Pending', className: 'spa-badge-challenge-sent' }
+  } else if (challengeSubmission && !challengeSubmission.reviewed_at) {
+    challengeBadge = {
+      label: `Submitted${challengeSubmission.auto_score !== null ? ` · Auto: ${challengeSubmission.auto_score}` : ''}`,
+      className: 'spa-badge-challenge-submitted',
+    }
+  } else if (challengeSubmission?.reviewed_at) {
+    challengeBadge = {
+      label: `Reviewed · ${challengeSubmission.final_score}/100`,
+      className: 'spa-badge-challenge-reviewed',
+    }
+  }
 
   const handleDecision = useCallback(async (decision: MatchDecision) => {
     setDeciding(true)
@@ -70,7 +88,12 @@ export default function EngineerMatchCard({ match, onDecision }: Props) {
               </span>
             ))}
           </div>
-          {engineer.profile_summary?.bestFitSignals && (
+          {challengeBadge && (
+            <span className={`spa-badge ${challengeBadge.className}`} style={{ marginLeft: 'auto' }}>
+              {challengeBadge.label}
+            </span>
+          )}
+          {!challengeBadge && engineer.profile_summary?.bestFitSignals && (
             <span className="spa-badge spa-badge-honey" style={{ marginLeft: 'auto' }}>
               {match.engineer.status === 'complete' ? 'Complete' : match.engineer.status}
             </span>
@@ -122,6 +145,104 @@ export default function EngineerMatchCard({ match, onDecision }: Props) {
               )
             })}
           </div>
+
+          {/* Challenge submission detail */}
+          {challengeSubmission && (
+            <div style={{ marginTop: 16, padding: 12, background: 'var(--spa-parchment, #FAF8F5)', borderRadius: 6, borderLeft: '3px solid var(--spa-honey)' }}>
+              <p className="spa-label" style={{ marginBottom: 8 }}>Challenge Submission</p>
+
+              {challengeSubmission.text_response && (
+                <p className="spa-body-small" style={{ marginBottom: 8 }}>
+                  {challengeSubmission.text_response.length > 200
+                    ? challengeSubmission.text_response.slice(0, 200) + '...'
+                    : challengeSubmission.text_response}
+                </p>
+              )}
+              {challengeSubmission.link_url && (
+                <p className="spa-body-small" style={{ marginBottom: 8 }}>
+                  <a
+                    href={challengeSubmission.link_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: 'var(--spa-honey)', textDecoration: 'none', borderBottom: '1px solid var(--spa-honey-border)' }}
+                  >
+                    {challengeSubmission.link_url}
+                  </a>
+                </p>
+              )}
+              {challengeSubmission.file_name && challengeSubmission.file_url && (
+                <p className="spa-body-small" style={{ marginBottom: 8 }}>
+                  <a
+                    href={challengeSubmission.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: 'var(--spa-honey)', textDecoration: 'none', borderBottom: '1px solid var(--spa-honey-border)' }}
+                  >
+                    {challengeSubmission.file_name}
+                  </a>
+                </p>
+              )}
+
+              {/* Auto-Grade */}
+              {challengeSubmission.auto_score !== null && (
+                <div style={{ marginTop: 8, padding: 8, background: 'var(--spa-fog)', borderRadius: 4 }}>
+                  <p className="spa-label" style={{ marginBottom: 4 }}>Auto-Grade: {challengeSubmission.auto_score}/100</p>
+                  {challengeSubmission.auto_reasoning && (
+                    <p className="spa-body-small">{challengeSubmission.auto_reasoning}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Human review */}
+              {challengeSubmission.reviewed_at ? (
+                <div style={{ marginTop: 8, padding: 8, background: 'var(--spa-fog)', borderRadius: 4 }}>
+                  <p className="spa-label" style={{ marginBottom: 4 }}>
+                    Engineering Leader Review: {challengeSubmission.human_score}/100
+                  </p>
+                  {challengeSubmission.human_feedback && (
+                    <p className="spa-body-small" style={{ marginBottom: 4 }}>{challengeSubmission.human_feedback}</p>
+                  )}
+                  {challengeSubmission.reviewer_name && (
+                    <p className="spa-body-small">
+                      Reviewed by{' '}
+                      {challengeSubmission.reviewer_linkedin_url ? (
+                        <a
+                          href={challengeSubmission.reviewer_linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: 'var(--spa-honey)', textDecoration: 'none', borderBottom: '1px solid var(--spa-honey-border)' }}
+                        >
+                          {challengeSubmission.reviewer_name}
+                        </a>
+                      ) : (
+                        challengeSubmission.reviewer_name
+                      )}
+                    </p>
+                  )}
+                  {challengeSubmission.final_score !== null && (
+                    <p className="spa-label" style={{ marginTop: 4 }}>
+                      Final Score: {challengeSubmission.final_score}/100
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <ChallengeReviewForm
+                  submissionId={challengeSubmission.id}
+                  onReviewed={(review) => {
+                    setChallengeSubmission({
+                      ...challengeSubmission,
+                      human_score: review.human_score,
+                      human_feedback: review.human_feedback,
+                      reviewer_name: review.reviewer_name,
+                      reviewer_linkedin_url: review.reviewer_linkedin_url,
+                      reviewed_at: new Date().toISOString(),
+                      final_score: review.final_score,
+                    })
+                  }}
+                />
+              )}
+            </div>
+          )}
 
           {/* Actions */}
           {!hasDecision && (

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import BeautifiedJDView from '@/components/hiring-spa/BeautifiedJDView'
 import EmailGate from '@/components/hiring-spa/EmailGate'
+import ChallengeSubmissionForm from '@/components/hiring-spa/ChallengeSubmissionForm'
 import type { MatchData, ChallengeData } from '@/components/hiring-spa/EmailGate'
 import type { BeautifiedJD } from '@/lib/hiring-spa/types'
 
@@ -23,6 +24,7 @@ export default function PublicJDPage() {
   const [match, setMatch] = useState<MatchData | null>(null)
   const [challenge, setChallenge] = useState<ChallengeData | null>(null)
   const [challengeResponse, setChallengeResponse] = useState<string | null>(null)
+  const [challengeSubmission, setChallengeSubmission] = useState<MatchData['challenge_submission']>(null)
   const [challengeSubmitting, setChallengeSubmitting] = useState(false)
   const [consentDecision, setConsentDecision] = useState<string | null>(null)
   const [consentSubmitting, setConsentSubmitting] = useState(false)
@@ -57,6 +59,9 @@ export default function PublicJDPage() {
     setViewerEmail(email)
     if (matchData?.challenge_response) {
       setChallengeResponse(matchData.challenge_response)
+    }
+    if (matchData?.challenge_submission) {
+      setChallengeSubmission(matchData.challenge_submission)
     }
     if (matchData?.engineer_decision) {
       setConsentDecision(matchData.engineer_decision)
@@ -207,13 +212,97 @@ export default function PublicJDPage() {
             </div>
           )}
 
-          {/* Challenge response confirmation */}
-          {challengeResponse && (
+          {/* Challenge response: accepted + no submission → show form */}
+          {challengeResponse === 'accepted' && !challengeSubmission && challenge?.prompt && (
+            <ChallengeSubmissionForm
+              slug={slug}
+              email={viewerEmail}
+              challengePrompt={challenge.prompt}
+              onSubmitted={(sub) => {
+                setChallengeSubmission({
+                  id: sub.id,
+                  submitted_at: sub.submitted_at,
+                  auto_score: null,
+                  auto_reasoning: null,
+                  human_score: null,
+                  human_feedback: null,
+                  reviewer_name: null,
+                  reviewer_linkedin_url: null,
+                  final_score: null,
+                })
+              }}
+            />
+          )}
+
+          {/* Challenge response: accepted + has submission → show status */}
+          {challengeResponse === 'accepted' && challengeSubmission && (
+            <div className="jd-challenge-confirmation">
+              <p className="spa-label-emphasis" style={{ marginBottom: 8 }}>Submission Received</p>
+              <p className="spa-body-small" style={{ marginBottom: 12 }}>
+                Submitted {new Date(challengeSubmission.submitted_at).toLocaleDateString()}
+              </p>
+
+              {challengeSubmission.auto_score !== null && (
+                <div className="jd-challenge-score" style={{ marginBottom: 12 }}>
+                  <p className="jd-challenge-auto-label">Auto-Grade</p>
+                  <p className="spa-heading-3" style={{ fontFamily: 'var(--spa-font-mono)', fontSize: 16 }}>
+                    {challengeSubmission.auto_score}/100
+                  </p>
+                  {challengeSubmission.auto_reasoning && (
+                    <p className="spa-body-small" style={{ marginTop: 4 }}>
+                      {challengeSubmission.auto_reasoning}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {challengeSubmission.human_score !== null && (
+                <div className="jd-challenge-score jd-challenge-reviewer" style={{ marginBottom: 12 }}>
+                  <p className="jd-challenge-auto-label">Engineering Leader Review</p>
+                  <p className="spa-heading-3" style={{ fontFamily: 'var(--spa-font-mono)', fontSize: 16 }}>
+                    {challengeSubmission.human_score}/100
+                  </p>
+                  {challengeSubmission.reviewer_name && (
+                    <p className="spa-body-small" style={{ marginTop: 4 }}>
+                      Reviewed by{' '}
+                      {challengeSubmission.reviewer_linkedin_url ? (
+                        <a
+                          href={challengeSubmission.reviewer_linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: 'var(--spa-honey)', textDecoration: 'none', borderBottom: '1px solid var(--spa-honey-border)' }}
+                        >
+                          {challengeSubmission.reviewer_name}
+                        </a>
+                      ) : (
+                        challengeSubmission.reviewer_name
+                      )}
+                    </p>
+                  )}
+                  {challengeSubmission.human_feedback && (
+                    <p className="spa-body-small" style={{ marginTop: 4 }}>
+                      {challengeSubmission.human_feedback}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {challengeSubmission.final_score !== null && challengeSubmission.human_score !== null && (
+                <div className="jd-challenge-score">
+                  <p className="jd-challenge-auto-label">Final Score</p>
+                  <p className="spa-heading-3" style={{ fontFamily: 'var(--spa-font-mono)', fontSize: 18 }}>
+                    {challengeSubmission.final_score}/100
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Challenge response: declined */}
+          {challengeResponse === 'declined' && (
             <div className="jd-challenge-confirmation">
               <p className="spa-body">
-                {challengeResponse === 'accepted'
-                  ? 'Challenge accepted! The team will be in touch.'
-                  : 'No worries — thanks for checking out the role.'}
+                No worries — thanks for checking out the role.
               </p>
             </div>
           )}

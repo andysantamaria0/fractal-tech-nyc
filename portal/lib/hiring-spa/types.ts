@@ -186,9 +186,31 @@ export interface MatchFeedback {
   updated_at: string
 }
 
+export interface ChallengeSubmission {
+  id: string
+  match_id: string
+  text_response: string | null
+  link_url: string | null
+  file_url: string | null
+  file_name: string | null
+  auto_score: number | null
+  auto_reasoning: string | null
+  auto_graded_at: string | null
+  reviewer_name: string | null
+  reviewer_linkedin_url: string | null
+  human_score: number | null
+  human_feedback: string | null
+  reviewed_at: string | null
+  final_score: number | null
+  submitted_at: string
+  created_at: string
+  updated_at: string
+}
+
 export interface MatchWithEngineer extends HiringSpaMatch {
   engineer: EngineerProfileSpa
   feedback?: MatchFeedback
+  challenge_submission?: ChallengeSubmission
 }
 
 // JD feedback types

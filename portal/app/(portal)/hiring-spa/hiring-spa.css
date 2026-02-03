@@ -1264,3 +1264,22 @@
   flex-direction: column;
   gap: var(--spa-space-4);
 }
+
+/* =========================================
+   CHALLENGE BADGES
+   ========================================= */
+
+.hiring-spa .spa-badge-challenge-sent {
+  background-color: var(--spa-honey-light);
+  color: var(--spa-match);
+}
+
+.hiring-spa .spa-badge-challenge-submitted {
+  background-color: var(--spa-stone-subtle);
+  color: var(--spa-graphite);
+}
+
+.hiring-spa .spa-badge-challenge-reviewed {
+  background-color: var(--spa-success-light);
+  color: var(--spa-success);
+}

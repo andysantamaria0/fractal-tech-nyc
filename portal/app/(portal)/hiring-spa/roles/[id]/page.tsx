@@ -45,14 +45,15 @@ async function getMatches(roleId: string): Promise<MatchWithEngineer[]> {
 
   const { data: matches } = await supabase
     .from('hiring_spa_matches')
-    .select('*, engineer:engineer_profiles_spa(*), feedback:match_feedback(*)')
+    .select('*, engineer:engineer_profiles_spa(*), feedback:match_feedback(*), challenge_submission:challenge_submissions(*)')
     .eq('role_id', roleId)
     .order('display_rank', { ascending: true })
 
-  // Normalize feedback from join (array → single object or undefined)
+  // Normalize feedback and challenge_submission from join (array → single object or undefined)
   const normalized = (matches || []).map((m: Record<string, unknown>) => ({
     ...m,
     feedback: Array.isArray(m.feedback) ? m.feedback[0] || undefined : m.feedback || undefined,
+    challenge_submission: Array.isArray(m.challenge_submission) ? m.challenge_submission[0] || undefined : m.challenge_submission || undefined,
   }))
 
   return normalized as MatchWithEngineer[]

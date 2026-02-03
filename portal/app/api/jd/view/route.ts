@@ -51,6 +51,17 @@ export async function POST(request: Request) {
       challenge_response: string | null
       engineer_decision: 'interested' | 'not_interested' | null
       engineer_notified_at: string | null
+      challenge_submission?: {
+        id: string
+        submitted_at: string
+        auto_score: number | null
+        auto_reasoning: string | null
+        human_score: number | null
+        human_feedback: string | null
+        reviewer_name: string | null
+        reviewer_linkedin_url: string | null
+        final_score: number | null
+      } | null
     } | null = null
 
     const { data: engineer } = await supabase
@@ -77,6 +88,15 @@ export async function POST(request: Request) {
           engineer_decision: match.engineer_decision,
           engineer_notified_at: match.engineer_notified_at,
         }
+
+        // Fetch challenge submission if exists
+        const { data: submission } = await supabase
+          .from('challenge_submissions')
+          .select('id, submitted_at, auto_score, auto_reasoning, human_score, human_feedback, reviewer_name, reviewer_linkedin_url, final_score')
+          .eq('match_id', match.id)
+          .maybeSingle()
+
+        matchData.challenge_submission = submission || null
       }
     }
 
