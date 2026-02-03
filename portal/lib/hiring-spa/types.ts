@@ -107,6 +107,171 @@ export interface ProfileSummary {
   technicalSummary: string
 }
 
+// Role types
+
+export type RoleStatus = 'draft' | 'beautifying' | 'active' | 'paused' | 'closed'
+
+export interface BeautifiedRequirement {
+  text: string
+  category: 'essential' | 'nice_to_have'
+  caveat?: string // e.g. "we'd teach the right person" or "only matters at senior level"
+}
+
+export interface BeautifiedJD {
+  requirements: BeautifiedRequirement[]
+  team_context: string // what team they'd join, what the team does
+  working_vibe: string // day-to-day feel, pace, autonomy level
+  culture_check: string // honest "you'll thrive here if..." / "you won't enjoy this if..."
+}
+
+export interface DimensionWeights {
+  technical_skills: number
+  culture_fit: number
+  experience_level: number
+  growth_potential: number
+  collaboration: number
+}
+
+export interface DimensionWeightsRaw {
+  technical_skills: number
+  culture_fit: number
+  experience_level: number
+  growth_potential: number
+  collaboration: number
+}
+
+// JD feedback types
+
+export interface RequirementFeedback {
+  status: 'confirmed' | 'rejected' | null
+  note?: string
+}
+
+export interface ProseSectionFeedback {
+  sentiment: 'positive' | 'negative' | null
+  note?: string
+}
+
+export interface JDFeedback {
+  requirements: Record<number, RequirementFeedback>
+  team_context: ProseSectionFeedback
+  working_vibe: ProseSectionFeedback
+  culture_check: ProseSectionFeedback
+}
+
+export interface HiringRole {
+  id: string
+  hiring_profile_id: string
+  source_url: string | null
+  source_content: string | null
+  title: string
+  beautified_jd: BeautifiedJD | null
+  dimension_weights: DimensionWeights
+  dimension_weights_raw: DimensionWeightsRaw | null
+  jd_feedback: JDFeedback | null
+  challenge_enabled: boolean
+  challenge_prompt: string | null
+  status: RoleStatus
+  public_slug: string
+  created_at: string
+  updated_at: string
+}
+
+export interface JDPageView {
+  id: string
+  role_id: string
+  viewer_email: string
+  viewed_at: string
+}
+
+export interface ExtractedJD {
+  title: string
+  sections: { heading: string; content: string }[]
+  raw_text: string
+  source_platform?: string
+}
+
+// Engineer profile types
+
+export type EngineerProfileStatus = 'draft' | 'crawling' | 'questionnaire' | 'complete'
+
+export interface EngineerCrawlData {
+  github?: GitHubOrgData
+  linkedinUrl?: string
+  portfolioPages?: CrawledPage[]
+}
+
+export interface EngineerDNA {
+  topSkills: string[]
+  languages: string[]
+  frameworks: string[]
+  yearsOfExperience: string | null
+  senioritySignal: string
+  projectHighlights: string[]
+  publicWriting: string | null
+}
+
+export interface WorkPreferencesAnswers {
+  environment_type?: string
+  remote_preference?: string
+  ideal_team_dynamic?: string
+  management_style?: string
+}
+
+export interface CareerGrowthAnswers {
+  whats_next?: string
+  growth_areas?: string
+  exciting_problems?: string
+}
+
+export interface StrengthsAnswers {
+  genuinely_great_at?: string
+  colleagues_come_to_you_for?: string
+}
+
+export interface GrowthAreasAnswers {
+  actively_improving?: string
+  support_needed?: string
+}
+
+export interface DealBreakersAnswers {
+  non_negotiables?: string
+  would_make_you_leave?: string
+}
+
+export interface EngineerProfileSummary {
+  snapshot: string
+  technicalIdentity: string
+  workStyle: string
+  growthTrajectory: string
+  bestFitSignals: string[]
+  dealBreakers: string[]
+}
+
+export interface EngineerProfileSpa {
+  id: string
+  engineer_id: string | null
+  name: string
+  email: string
+  linkedin_url: string | null
+  resume_url: string | null
+  github_url: string | null
+  portfolio_url: string | null
+  crawl_data: EngineerCrawlData | null
+  crawl_error: string | null
+  crawl_completed_at: string | null
+  engineer_dna: EngineerDNA | null
+  work_preferences: WorkPreferencesAnswers | null
+  career_growth: CareerGrowthAnswers | null
+  strengths: StrengthsAnswers | null
+  growth_areas: GrowthAreasAnswers | null
+  deal_breakers: DealBreakersAnswers | null
+  profile_summary: EngineerProfileSummary | null
+  status: EngineerProfileStatus
+  created_at: string
+  updated_at: string
+}
+
 // Hiring profile status
 export type HiringProfileStatus = 'draft' | 'crawling' | 'questionnaire' | 'complete'
 
