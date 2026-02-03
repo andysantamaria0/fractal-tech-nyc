@@ -202,9 +202,9 @@ export default async function HiringSpaHome() {
           <p className="spa-body-muted">
             {profile?.crawl_error
               ? `Something went wrong: ${profile.crawl_error}. You can try again below.`
-              : "We\u2019re preparing to analyze your company\u2019s web presence. This should start automatically."}
+              : "Click below to analyze your company\u2019s web presence and discover open engineering roles."}
           </p>
-          {profile?.crawl_error && <RetryOnboardButton />}
+          <RetryOnboardButton label={profile?.crawl_error ? 'Retry Analysis' : 'Start Analysis'} />
         </div>
       )}
 

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function RetryOnboardButton() {
+export default function RetryOnboardButton({ label = 'Retry Analysis' }: { label?: string }) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -26,7 +26,7 @@ export default function RetryOnboardButton() {
       disabled={loading}
       style={{ marginTop: 16 }}
     >
-      {loading ? 'Retrying...' : 'Retry Analysis'}
+      {loading ? 'Starting...' : label}
     </button>
   )
 }
