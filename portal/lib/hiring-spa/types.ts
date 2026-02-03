@@ -380,8 +380,17 @@ export interface GreenhouseJobPost {
   job_id: number
 }
 
+// Discovered role from auto-crawl
+export interface DiscoveredRole {
+  url: string
+  title: string
+  raw_text: string
+  source_platform: string
+  confidence: number
+}
+
 // Hiring profile status
-export type HiringProfileStatus = 'draft' | 'crawling' | 'questionnaire' | 'complete'
+export type HiringProfileStatus = 'draft' | 'crawling' | 'discovering_roles' | 'questionnaire' | 'complete'
 
 export interface HiringProfile {
   id: string
@@ -396,6 +405,7 @@ export interface HiringProfile {
   mission_answers: MissionAnswers | null
   team_dynamics_answers: TeamDynamicsAnswers | null
   profile_summary: ProfileSummary | null
+  discovered_roles: DiscoveredRole[] | null
   status: HiringProfileStatus
   created_at: string
   updated_at: string

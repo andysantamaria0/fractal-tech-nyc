@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 export default function CompleteProfilePage() {
   const [name, setName] = useState('')
   const [companyLinkedin, setCompanyLinkedin] = useState('')
+  const [websiteUrl, setWebsiteUrl] = useState('')
   const [companyStage, setCompanyStage] = useState('')
   const [newsletterOptin, setNewsletterOptin] = useState(false)
   const [error, setError] = useState('')
@@ -55,14 +56,19 @@ export default function CompleteProfilePage() {
     }
 
     // Upsert profile to handle retries gracefully
-    const { error: profileError } = await supabase.from('profiles').upsert({
+    const profileData: Record<string, unknown> = {
       id: user.id,
       name,
       email: user.email!,
       company_linkedin: companyLinkedin,
       company_stage: companyStage,
       newsletter_optin: newsletterOptin,
-    })
+    }
+    if (websiteUrl) {
+      profileData.website_url = websiteUrl
+    }
+
+    const { error: profileError } = await supabase.from('profiles').upsert(profileData)
 
     if (profileError) {
       setError(profileError.message)
@@ -71,15 +77,11 @@ export default function CompleteProfilePage() {
     }
 
     // Trigger HubSpot sync (non-blocking)
-    try {
-      await fetch('/api/auth/hubspot-sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      })
-    } catch {
-      console.error('HubSpot sync failed')
-    }
+    fetch('/api/auth/hubspot-sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    }).catch(() => console.error('HubSpot sync failed'))
 
     // PostHog: identify user and track signup
     identifyUser(user.id, {
@@ -93,6 +95,21 @@ export default function CompleteProfilePage() {
       company_stage: companyStage,
       newsletter_optin: newsletterOptin,
     })
+
+    // Auto-trigger hiring spa onboarding
+    try {
+      const onboardRes = await fetch('/api/hiring-spa/onboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const onboardData = await onboardRes.json()
+      if (onboardRes.ok && onboardData.redirectTo) {
+        router.push(onboardData.redirectTo)
+        return
+      }
+    } catch {
+      console.error('Auto-onboard failed, falling back to dashboard')
+    }
 
     router.push('/dashboard')
   }
@@ -150,6 +167,21 @@ export default function CompleteProfilePage() {
                   onChange={(e) => setCompanyLinkedin(e.target.value)}
                   required
                 />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="websiteUrl">Company Website</label>
+                <input
+                  id="websiteUrl"
+                  type="url"
+                  className="form-input"
+                  placeholder="https://yourcompany.com"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                />
+                <small style={{ color: '#888', fontSize: 12 }}>
+                  Optional — we&apos;ll try to find this from your LinkedIn URL
+                </small>
               </div>
 
               <div className="form-group">

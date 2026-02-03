@@ -2,7 +2,9 @@ import Link from 'next/link'
 import ProfileSummary from '@/components/hiring-spa/ProfileSummary'
 import HiringSpaTracker from '@/components/hiring-spa/HiringSpaTracker'
 import RoleCard from '@/components/hiring-spa/RoleCard'
-import type { HiringProfile, HiringRole, ProfileSummary as ProfileSummaryType } from '@/lib/hiring-spa/types'
+import RoleSelectionForm from '@/components/hiring-spa/RoleSelectionForm'
+import RetryOnboardButton from '@/components/hiring-spa/RetryOnboardButton'
+import type { HiringProfile, HiringRole, DiscoveredRole, ProfileSummary as ProfileSummaryType } from '@/lib/hiring-spa/types'
 
 const isSupabaseConfigured =
   process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -193,13 +195,16 @@ export default async function HiringSpaHome() {
         <div className="spa-status-card">
           <p className="spa-label-emphasis" style={{ marginBottom: 16 }}>Getting Started</p>
           <p className="spa-heading-2" style={{ marginBottom: 12 }}>
-            Your profile hasn&apos;t been started yet
+            {profile?.crawl_error
+              ? "We couldn\u2019t analyze your website"
+              : "Setting up your profile"}
           </p>
           <p className="spa-body-muted">
-            An admin needs to run the initial web crawl to analyze your company&apos;s
-            online presence. Once that&apos;s complete, you&apos;ll be able to fill out
-            your hiring questionnaire here.
+            {profile?.crawl_error
+              ? `Something went wrong: ${profile.crawl_error}. You can try again below.`
+              : "We\u2019re preparing to analyze your company\u2019s web presence. This should start automatically."}
           </p>
+          {profile?.crawl_error && <RetryOnboardButton />}
         </div>
       )}
 
@@ -217,6 +222,25 @@ export default async function HiringSpaHome() {
           <div className="spa-progress-track" style={{ maxWidth: 300, margin: '24px auto 0' }}>
             <div className="spa-progress-fill" style={{ width: '60%' }} />
           </div>
+        </div>
+      )}
+
+      {/* Discovering Roles */}
+      {profile?.status === 'discovering_roles' && (
+        <div>
+          <div className="spa-card-accent" style={{ marginBottom: 32 }}>
+            <p className="spa-label-emphasis" style={{ marginBottom: 12 }}>Roles Found</p>
+            <p className="spa-heading-2" style={{ marginBottom: 8 }}>
+              We found open engineering roles on your careers page
+            </p>
+            <p className="spa-body-muted" style={{ marginBottom: 20 }}>
+              Select the roles you&apos;d like to bring into the Hiring Spa.
+              We&apos;ll beautify the job descriptions and start finding matching engineers.
+            </p>
+          </div>
+          <RoleSelectionForm
+            discoveredRoles={(profile.discovered_roles as DiscoveredRole[]) || []}
+          />
         </div>
       )}
 

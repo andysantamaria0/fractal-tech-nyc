@@ -3,6 +3,7 @@ import { discoverUrls } from './discover'
 import { crawlUrls } from './crawl'
 import { analyzeGitHubOrg } from './github-analysis'
 import { synthesizeCrawlData } from './synthesize'
+import { discoverRoles } from './role-discovery'
 import type { CrawlData } from './types'
 
 /**
@@ -54,7 +55,25 @@ export async function runCrawlPipeline(
     const synthesis = await synthesizeCrawlData(crawlData)
     console.log(`[hiring-spa] Synthesis complete (confidence: ${synthesis.confidence})`)
 
-    // 6. Save results
+    // 6. Discover roles from careers/jobs pages
+    console.log(`[hiring-spa] Discovering roles from careers pages`)
+    let discoveredRoles = null
+    try {
+      const roles = await discoverRoles(websiteUrl, crawledPages)
+      if (roles.length > 0) {
+        discoveredRoles = roles
+        console.log(`[hiring-spa] Found ${roles.length} potential engineering roles`)
+      } else {
+        console.log(`[hiring-spa] No engineering roles found on careers pages`)
+      }
+    } catch (err) {
+      // Role discovery failure is non-fatal — continue without roles
+      console.warn(`[hiring-spa] Role discovery failed:`, err instanceof Error ? err.message : err)
+    }
+
+    // 7. Save results — set status based on whether roles were found
+    const nextStatus = discoveredRoles ? 'discovering_roles' : 'questionnaire'
+
     const { error: saveError } = await serviceClient
       .from('hiring_profiles')
       .update({
@@ -63,7 +82,8 @@ export async function runCrawlPipeline(
         crawl_completed_at: new Date().toISOString(),
         company_dna: synthesis.companyDna,
         technical_environment: synthesis.technicalEnvironment,
-        status: 'questionnaire',
+        discovered_roles: discoveredRoles,
+        status: nextStatus,
       })
       .eq('company_id', companyId)
 
@@ -71,7 +91,7 @@ export async function runCrawlPipeline(
       throw new Error(`Failed to save results: ${saveError.message}`)
     }
 
-    console.log(`[hiring-spa] Pipeline complete for company ${companyId}`)
+    console.log(`[hiring-spa] Pipeline complete for company ${companyId} (status: ${nextStatus})`)
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown pipeline error'
     console.error(`[hiring-spa] Pipeline failed for company ${companyId}:`, errorMessage)
