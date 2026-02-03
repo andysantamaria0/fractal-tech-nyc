@@ -1,8 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type { Company } from '@/lib/types'
 import { labelStyle, COMPANY_STAGES } from '@/lib/constants'
+
+interface HiringProfileStatus {
+  id: string
+  status: string
+  crawl_error: string | null
+  crawl_completed_at: string | null
+  company_dna: Record<string, unknown> | null
+  technical_environment: Record<string, unknown> | null
+}
 
 interface CompanyDetailProps {
   companyId: string
@@ -21,6 +30,12 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
   const [companyLinkedin, setCompanyLinkedin] = useState('')
   const [companyStage, setCompanyStage] = useState('')
   const [newsletterOptin, setNewsletterOptin] = useState(false)
+  const [hasHiringSpaAccess, setHasHiringSpaAccess] = useState(false)
+  const [websiteUrl, setWebsiteUrl] = useState('')
+  const [githubOrg, setGithubOrg] = useState('')
+  const [crawling, setCrawling] = useState(false)
+  const [hiringProfile, setHiringProfile] = useState<HiringProfileStatus | null>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     loadCompany()
@@ -38,6 +53,9 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
         setCompanyLinkedin(co.company_linkedin || '')
         setCompanyStage(co.company_stage || '')
         setNewsletterOptin(co.newsletter_optin || false)
+        setHasHiringSpaAccess(co.has_hiring_spa_access || false)
+        setWebsiteUrl(co.website_url || '')
+        setGithubOrg(co.github_org || '')
       } else {
         setError('Failed to load company')
       }
@@ -45,6 +63,61 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
       setError('Failed to load company')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadHiringProfile = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/hiring-spa/status/${companyId}`)
+      if (res.ok) {
+        const { profile } = await res.json()
+        setHiringProfile(profile)
+        if (profile?.status === 'crawling') {
+          setCrawling(true)
+        } else {
+          setCrawling(false)
+          // Stop polling if we were polling
+          if (pollRef.current) {
+            clearInterval(pollRef.current)
+            pollRef.current = null
+          }
+        }
+      }
+    } catch {
+      // Silently fail — not critical
+    }
+  }, [companyId])
+
+  useEffect(() => {
+    loadHiringProfile()
+    return () => {
+      if (pollRef.current) {
+        clearInterval(pollRef.current)
+      }
+    }
+  }, [loadHiringProfile])
+
+  async function handleStartCrawl() {
+    setCrawling(true)
+    setError('')
+
+    try {
+      const res = await fetch('/api/admin/hiring-spa/crawl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to start crawl')
+      }
+
+      // Start polling for status
+      pollRef.current = setInterval(loadHiringProfile, 5000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Crawl failed')
+      setCrawling(false)
     }
   }
 
@@ -62,6 +135,9 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
           company_linkedin: companyLinkedin.trim() || null,
           company_stage: companyStage || null,
           newsletter_optin: newsletterOptin,
+          has_hiring_spa_access: hasHiringSpaAccess,
+          website_url: websiteUrl.trim() || null,
+          github_org: githubOrg.trim() || null,
         }),
       })
 
@@ -183,6 +259,88 @@ export default function CompanyDetail({ companyId, onClose, onSaved }: CompanyDe
               <span>Newsletter Opt-in</span>
             </label>
           </div>
+        </div>
+
+        {/* Hiring Spa section */}
+        <div className="admin-detail-section">
+          <div className="section-label">Hiring Spa</div>
+          <div className="form-group">
+            <label className="form-checkbox">
+              <input
+                type="checkbox"
+                checked={hasHiringSpaAccess}
+                onChange={(e) => setHasHiringSpaAccess(e.target.checked)}
+              />
+              <span>Hiring Spa Access</span>
+            </label>
+          </div>
+          <div className="form-group">
+            <label htmlFor="co-website-url" style={labelStyle}>Website URL</label>
+            <input
+              id="co-website-url"
+              type="url"
+              className="form-input"
+              value={websiteUrl}
+              onChange={(e) => setWebsiteUrl(e.target.value)}
+              placeholder="https://example.com"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="co-github-org" style={labelStyle}>GitHub Organization</label>
+            <input
+              id="co-github-org"
+              type="text"
+              className="form-input"
+              value={githubOrg}
+              onChange={(e) => setGithubOrg(e.target.value)}
+              placeholder="my-github-org"
+            />
+          </div>
+
+          {hasHiringSpaAccess && websiteUrl.trim() && (
+            <div style={{ marginTop: 'var(--space-3)' }}>
+              <button
+                className="btn-secondary"
+                onClick={handleStartCrawl}
+                disabled={crawling}
+                style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-2) var(--space-4)' }}
+              >
+                {crawling ? 'Crawling...' : hiringProfile ? 'Re-crawl' : 'Start Crawl'}
+              </button>
+
+              {hiringProfile && (
+                <div style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>
+                  <p style={{ color: 'var(--color-slate)' }}>
+                    <strong>Status:</strong>{' '}
+                    <span style={{
+                      color: hiringProfile.status === 'questionnaire' || hiringProfile.status === 'complete'
+                        ? 'var(--color-emerald)'
+                        : hiringProfile.crawl_error
+                          ? 'var(--color-coral)'
+                          : 'var(--color-slate)'
+                    }}>
+                      {hiringProfile.status}
+                    </span>
+                  </p>
+                  {hiringProfile.crawl_error && (
+                    <p style={{ color: 'var(--color-coral)', marginTop: 'var(--space-1)' }}>
+                      <strong>Error:</strong> {hiringProfile.crawl_error}
+                    </p>
+                  )}
+                  {hiringProfile.crawl_completed_at && (
+                    <p style={{ color: 'var(--color-slate)', marginTop: 'var(--space-1)' }}>
+                      <strong>Completed:</strong> {new Date(hiringProfile.crawl_completed_at).toLocaleString()}
+                    </p>
+                  )}
+                  {hiringProfile.company_dna && (
+                    <p style={{ color: 'var(--color-slate)', marginTop: 'var(--space-1)' }}>
+                      <strong>Industry:</strong> {(hiringProfile.company_dna as { industry?: string }).industry || 'N/A'}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <button
