@@ -1,9 +1,9 @@
 # Fractal Hiring Spa — Product Requirements Document
 
-**Version:** 1.2
-**Date:** February 2, 2026
+**Version:** 1.4
+**Date:** February 3, 2026
 **Owner:** Andy Santamaria
-**Status:** Phase 1a + 1b implemented
+**Status:** Phase 1a + 1b + 1c + 2a + 2b + 3-core implemented
 
 ---
 
@@ -334,14 +334,15 @@ The company user's only decisions:
 
 No pipelines, no stages, no drag-and-drop. The Hiring Spa handles orchestration.
 
-#### 6.6.3 Post-"Move Forward" Flow (Phase 1-2)
+#### 6.6.3 Post-"Move Forward" Flow
 
-1. Decision recorded in the database (`hiring_spa_matches` table, status updated).
+1. Decision recorded in the database (`hiring_spa_matches` table, decision + decision_at updated).
 2. Email sent to Fractal team with context: which company, which role, which engineer, match scores.
-3. Fractal manually confirms engineer interest, orchestrates the introduction.
-4. Engineer does **not** receive an automated email. Fractal mediates all introductions.
-
-This is intentionally high-touch for Phase 1-2. Automated engineer notification and two-sided consent flow is Phase 3+.
+3. Email sent to engineer with company name, role title, match score, and CTA link to the beautified JD page.
+4. Engineer views JD → consent card shown ("This company is interested in you. Would you like to be introduced?").
+5. Engineer responds "I'm Interested" or "Not for Me" → decision recorded on match.
+6. If interested → Fractal notified that both sides are ready for intro.
+7. Company match card shows engineer's consent status badge ("Engineer Interested" / "Engineer Declined" / "Awaiting Engineer").
 
 #### 6.6.4 Session Pacing
 
@@ -710,11 +711,12 @@ CREATE POLICY "Admin can read JD views" ON jd_page_views
 
 Email only. No in-app notification noise.
 
-| Event | Recipient | Method |
-|-------|-----------|--------|
-| New matches available | Company user | Email with link to portal |
-| Company clicks "Move Forward" | Fractal team | Email with full context |
-| Engineer matched to role | Engineer | Email with beautified JD link (sent by Fractal manually in Phase 1) |
+| Event | Recipient | Method | Status |
+|-------|-----------|--------|--------|
+| New matches available | Company user | Email with link to portal | Phase 4 |
+| Company clicks "Move Forward" | Fractal team | Email with full context | ✅ Phase 2b |
+| Company clicks "Move Forward" | Engineer | Automated email with JD link + match score | ✅ Phase 3 |
+| Engineer responds "Interested" | Fractal team | Email: both sides ready for intro | ✅ Phase 3 |
 
 ### 9.5 Routes
 
@@ -722,11 +724,11 @@ Email only. No in-app notification noise.
 |-------|---------|------|--------|--------|
 | `/hiring-spa` | Hiring Spa home (profile + roles + matches) | Yes | `has_hiring_spa_access = true` | ✅ Phase 1b |
 | `/hiring-spa/profile` | Company Hiring Profile creation/edit | Yes | `has_hiring_spa_access = true` | ✅ Phase 1b |
-| `/hiring-spa/roles` | Role list and submission | Yes | `has_hiring_spa_access = true` | Phase 1c |
-| `/hiring-spa/roles/[id]` | Single role with matches | Yes | `has_hiring_spa_access = true` | Phase 1c |
-| `/hiring-spa/roles/new` | New role submission + beautification flow | Yes | `has_hiring_spa_access = true` | Phase 1c |
-| `/jd/[slug]` | Public beautified JD page (email-gated) | No | Public (email gate) | Phase 1c |
-| `/admin/hiring-spa` | Admin overview of all Hiring Spa activity | Yes | Admin only | Phase 1c |
+| `/hiring-spa/roles` | Role list and submission | Yes | `has_hiring_spa_access = true` | ✅ Phase 1c |
+| `/hiring-spa/roles/[id]` | Single role with matches | Yes | `has_hiring_spa_access = true` | ✅ Phase 1c |
+| `/hiring-spa/roles/new` | New role submission + beautification flow | Yes | `has_hiring_spa_access = true` | ✅ Phase 1c |
+| `/jd/[slug]` | Public beautified JD page (email-gated) | No | Public (email gate) | ✅ Phase 1c |
+| `/admin/hiring-spa` | Admin overview of all Hiring Spa activity | Yes | Admin only | Phase 2b+ |
 
 **API Routes:**
 
@@ -737,6 +739,17 @@ Email only. No in-app notification noise.
 | `/api/hiring-spa/profile` | GET | Company reads own profile | ✅ Phase 1a |
 | `/api/hiring-spa/answers` | POST | Save section answers + contradiction detection | ✅ Phase 1b |
 | `/api/hiring-spa/summary` | POST | Generate profile summary, set status=complete | ✅ Phase 1b |
+| `/api/hiring-spa/roles` | GET/POST | List/create roles for company | ✅ Phase 1c |
+| `/api/hiring-spa/roles/[id]` | GET/PATCH | Get/update role | ✅ Phase 1c |
+| `/api/hiring-spa/roles/beautify` | POST | Trigger JD beautification | ✅ Phase 1c |
+| `/api/admin/hiring-spa/engineers` | GET/POST | List/create engineer profiles | ✅ Phase 2a |
+| `/api/admin/hiring-spa/engineers/[id]` | GET/PATCH | Get/update engineer profile | ✅ Phase 2a |
+| `/api/admin/hiring-spa/engineers/[id]/crawl` | POST | Trigger engineer crawl pipeline | ✅ Phase 2a |
+| `/api/admin/hiring-spa/engineers/[id]/summary` | POST | Generate engineer profile summary | ✅ Phase 2a |
+| `/api/hiring-spa/matches` | GET | List matches by role_id (with engineer + feedback join) | ✅ Phase 2b |
+| `/api/hiring-spa/matches/[id]/decision` | PATCH | Record match decision (moved_forward / passed) | ✅ Phase 2b |
+| `/api/hiring-spa/matches/[id]/feedback` | GET/POST | Fetch/upsert match quality feedback | ✅ Phase 3 |
+| `/api/jd/engineer-consent` | POST | Engineer responds to match (interested / not_interested) | ✅ Phase 3 |
 
 ---
 
@@ -839,53 +852,143 @@ The guided questionnaire, contradiction detection, and profile summary.
 - `ProfileSummary` — companySnapshot, cultureSignature[], workingEnvironment, whatGreatLooksLike, whatDoesntWork, technicalSummary
 - `HiringProfile` updated to use typed fields instead of `unknown`
 
-### Phase 1c — JD Beautification
+### Phase 1c — JD Beautification ✅ COMPLETE
 
 Role submission, AI-powered JD transformation, and the engineer-facing JD page.
 
-**Deliverables:**
+**Deliverables (all shipped):**
 - `/hiring-spa/roles/new` — role submission flow
-  - URL input (paste ATS job posting URL)
-  - JD content extraction from URL
-  - AI beautification (raw JD + hiring profile → structured beautified JD)
-  - Guided clarifying questions about 5 dimensions
-  - Dimension weight setting (sliders)
-  - Requirements with weight/caveat editing
-- `/hiring-spa/roles` — role list view
+  - URL input (paste ATS job posting URL) or raw text paste fallback
+  - JD content extraction from URL (`lib/hiring-spa/jd-extract.ts`)
+  - AI beautification (`lib/hiring-spa/beautify.ts` — raw JD + hiring profile → structured BeautifiedJD via Claude Sonnet)
+  - Dimension weight setting (sliders with raw 1-10 values normalized to percentages)
+  - Requirements with essential/nice-to-have categorization + caveats
+  - JD feedback UI (confirm/reject requirements, sentiment on prose sections)
+- `/hiring-spa/roles` — role list view with RoleCard components
+- `/hiring-spa/roles/[id]` — role detail with interactive JD editor (RoleDetailClient)
 - `/jd/[slug]` — public beautified JD page
-  - Email gate (enter email to view full content)
-  - Mobile-responsive
-  - Hiring Spa design system
+  - Email gate (EmailGate component — enter email to view full content)
+  - Mobile-responsive, Hiring Spa design system
+  - BeautifiedJDView component for rendering structured JD
 - `jd_page_views` tracking
 
-**Database:** `hiring_roles` table, `jd_page_views` table.
+**Database:** `hiring_roles` table (migration 012), `jd_page_views` table (migration 012), `dimension_weights_raw` + `jd_feedback` columns (migration 013).
 
-### Phase 2 — Matching
+**Components built:**
+- `RoleCard` — role list card with status badge
+- `RoleDetailClient` — main client component for role editing/viewing
+- `RoleSubmissionForm` — URL/text input + title for new roles
+- `BeautifiedJDView` — renders structured beautified JD
+- `InteractiveJDView` — JD with inline feedback (confirm/reject/notes)
+- `DimensionWeightSliders` — 5-dimension weight sliders with live normalization
+- `EmailGate` — email capture for public JD page
 
-Engineer profiling and the five-dimension matching engine.
+**Types added to `lib/hiring-spa/types.ts`:**
+- `RoleStatus`, `BeautifiedRequirement`, `BeautifiedJD`, `DimensionWeights`, `DimensionWeightsRaw`
+- `RequirementFeedback`, `ProseSectionFeedback`, `JDFeedback`
+- `HiringRole`, `JDPageView`, `ExtractedJD`
 
-**Deliverables:**
-- Engineer profiling pipeline (intelligence layer + questionnaire — admin-managed, Fractal-sourced)
-- Five-dimension matching engine (LLM-powered scoring)
-- Match computation (async, triggered on new data)
-- Company portal: engineer cards (collapsed + expanded states)
+### Phase 2a — Engineer Profiles ✅ COMPLETE
+
+Engineer crawl pipeline, synthesis, questionnaire definitions, and admin API — the backend for engineer profiling.
+
+**Deliverables (all shipped):**
+- Engineer crawl pipeline (`lib/hiring-spa/engineer-crawl.ts`)
+  - GitHub user analysis (adapted from org analysis for individual accounts)
+  - Portfolio/blog page crawling (reuses existing `crawlUrls`)
+  - Background execution via Next.js `after()` with error recovery
+- Engineer LLM synthesis (`lib/hiring-spa/engineer-synthesis.ts`)
+  - Claude Sonnet with structured JSON output
+  - Produces `EngineerDNA`: top skills, languages, frameworks, seniority signal, project highlights, public writing
+  - Confidence score based on data availability
+- Engineer question definitions (`lib/hiring-spa/engineer-questions.ts`)
+  - 5 sections, 13 questions: Work Preferences (4), Career & Growth (3), Strengths (2), Growth Areas (2), Deal Breakers (2)
+  - Prefill resolution from EngineerDNA
+  - No contradiction detection (engineers are honest about themselves)
+- Engineer summary generation (`lib/hiring-spa/engineer-summary.ts`)
+  - Claude Sonnet producing `EngineerProfileSummary`: snapshot, technical identity, work style, growth trajectory, best-fit signals, deal breakers
+- Admin API routes (all admin-only via `withAdmin()` wrapper):
+  - `GET/POST /api/admin/hiring-spa/engineers` — list (with status filter) / create
+  - `GET/PATCH /api/admin/hiring-spa/engineers/[id]` — get / update (questionnaire answers, status)
+  - `POST /api/admin/hiring-spa/engineers/[id]/crawl` — trigger crawl pipeline
+  - `POST /api/admin/hiring-spa/engineers/[id]/summary` — generate profile summary
+
+**Database:** `engineer_profiles_spa` table (migration 014) with FK to `engineers`, JSONB columns for crawl/DNA/answers/summary, status check constraint, indexes on engineer_id/status/email, admin-only RLS.
+
+**Types added to `lib/hiring-spa/types.ts`:**
+- `EngineerProfileStatus`, `EngineerCrawlData`, `EngineerDNA`
+- `WorkPreferencesAnswers`, `CareerGrowthAnswers`, `StrengthsAnswers`, `GrowthAreasAnswers`, `DealBreakersAnswers`
+- `EngineerProfileSummary`, `EngineerProfileSpa`
+
+### Phase 2b — Matching Engine ✅ COMPLETE
+
+Five-dimension matching engine and company-facing match presentation.
+
+**Deliverables (all shipped):**
+- Five-dimension matching engine (`lib/hiring-spa/matching.ts` — LLM-powered scoring via Claude Sonnet)
+  - Scores all complete engineers against a role across mission, technical, culture, environment, DNA
+  - Weighted composite using per-role `dimension_weights`
+  - Reasoning text per dimension + highlight quote
+  - Top matches stored with display rank
+  - Auto-triggered on beautification completion
+- Company portal: engineer match cards (EngineerMatchCard component)
+  - Collapsed: name, top skills, status badge, overall score
+  - Expanded: highlight quote, dimension breakdown with bars, reasoning
 - Move Forward / Pass interaction model
-- Post-match flow (DB record + email to Fractal)
-- Email notifications (new matches available → company)
+  - `PATCH /api/hiring-spa/matches/[id]/decision` — updates decision + decision_at
+  - Passed cards collapse to minimal view
+  - Moved Forward shows success badge
+- Post-match flow: DB record + fire-and-forget email to Fractal team via Resend
+- Challenge response flow on public JD page (accept/decline)
+- `GET /api/hiring-spa/matches` — fetch matches by role_id with engineer join
 
-**Database:** `engineer_profiles_spa` table, `hiring_spa_matches` table.
+**Database:** `hiring_spa_matches` table with RLS (company read/update own, admin full access). Challenge response columns added.
 
-### Phase 3 — Integration & Scale
+### Phase 3 Core — Notifications, Multi-Role, Feedback ✅ COMPLETE
 
-ATS API integration, challenge infrastructure, and automation.
+Three core Phase 3 features: automated engineer notifications, multi-role submission, and match quality feedback.
+
+**Deliverables (all shipped):**
+- Automated engineer notifications with two-sided consent:
+  - `EngineerMatchNotificationEmail` template (`emails/engineer-match-notification.tsx`) — brutalist design, CTA to JD page
+  - `notifyEngineerOfMatch()` in `lib/hiring-spa/notifications.ts` — sends email via Resend, marks `engineer_notified_at`
+  - Triggered fire-and-forget on company "Move Forward" decision (alongside existing Fractal notification)
+  - `POST /api/jd/engineer-consent` — engineer responds interested/not_interested, notifies Fractal when both sides ready
+  - `/api/jd/view` returns consent state (`engineer_decision`, `engineer_notified_at`)
+  - Consent UI on `/jd/[slug]` page — "I'm Interested" / "Not for Me" buttons, confirmation message
+  - Engineer consent badges on company match card: "Engineer Interested" (success), "Engineer Declined" (muted), "Awaiting Engineer" (honey)
+- Multi-role submission:
+  - `POST /api/hiring-spa/roles` accepts `{ urls: string[] }` for batch creation
+  - `POST /api/hiring-spa/roles/beautify` accepts `{ role_ids: string[] }` for batch beautification
+  - `RoleSubmissionForm` URL input changed to textarea (one URL per line)
+  - Batch preview with "Beautify All" button → redirect to roles list
+  - Single URL and text paste modes unchanged
+- Match quality feedback:
+  - `match_feedback` table (unique per match_id) with hired, rating 1-5, worked_well, didnt_work, would_use_again
+  - `GET/POST /api/hiring-spa/matches/[id]/feedback` — fetch and upsert feedback
+  - `MatchFeedbackForm` component — hired toggle, conditional fields (rating/notes if hired, "what didn't work" if not)
+  - Feedback summary on match card (hired badge, rating, notes)
+  - "Give Feedback" button on moved-forward matches without feedback
+  - Matches API and role detail page join `match_feedback` in queries
+
+**Database:** Migration 018 — `engineer_notified_at`, `engineer_decision`, `engineer_decision_at` columns on `hiring_spa_matches` + `match_feedback` table with RLS, indexes, updated_at trigger.
+
+**Types added to `lib/hiring-spa/types.ts`:**
+- `engineer_notified_at`, `engineer_decision`, `engineer_decision_at` on `HiringSpaMatch`
+- `MatchFeedback` interface
+- `feedback?: MatchFeedback` on `MatchWithEngineer`
+
+**Components built:**
+- `MatchFeedbackForm` — inline feedback form for moved-forward matches
+
+### Phase 3 Remaining — Integration & Scale
+
+ATS API integration, challenge infrastructure, and additional automation.
 
 **Deliverables:**
 - ATS API integration (Greenhouse, Lever, Ashby — OAuth, role sync)
 - Technical challenge infrastructure (upload, auto-grading pipeline, human review workflow)
-- Automated engineer notification flow (two-sided consent before intro)
 - Engineer self-signup / referral entry paths
-- Multi-role submission in single session
-- Match quality feedback loops (did the hire work out?)
 
 ### Phase 4 — Refinement
 
