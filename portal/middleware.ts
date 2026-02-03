@@ -6,16 +6,18 @@ const isSupabaseConfigured =
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('xxx.supabase.co')
 
 export async function middleware(request: NextRequest) {
-  // Dev bypass: skip auth in local dev
-  if (process.env.NODE_ENV !== 'production') {
-    return NextResponse.next()
-  }
+  const isDev = process.env.NODE_ENV !== 'production'
 
-  if (!isSupabaseConfigured) {
+  if (!isDev && !isSupabaseConfigured) {
     // Fail closed in production — redirect to an error state
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
+  }
+
+  // Always create Supabase client to refresh session cookies (even in dev)
+  if (!isSupabaseConfigured) {
+    return NextResponse.next()
   }
 
   let supabaseResponse = NextResponse.next({
@@ -48,6 +50,11 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  // Dev bypass: refresh session but skip access control
+  if (isDev) {
+    return supabaseResponse
+  }
 
   // Protected routes — redirect to login if not authenticated
   if (
