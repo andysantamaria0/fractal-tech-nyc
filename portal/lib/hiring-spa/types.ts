@@ -405,6 +405,7 @@ export interface HiringProfile {
   mission_answers: MissionAnswers | null
   team_dynamics_answers: TeamDynamicsAnswers | null
   profile_summary: ProfileSummary | null
+  questionnaire_drafts: Record<string, string> | null
   discovered_roles: DiscoveredRole[] | null
   status: HiringProfileStatus
   created_at: string

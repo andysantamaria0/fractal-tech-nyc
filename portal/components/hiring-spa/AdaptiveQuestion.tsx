@@ -8,8 +8,7 @@ import ContradictionAlert from './ContradictionAlert'
 interface AdaptiveQuestionProps {
   question: QuestionDefinition
   value: string
-  prefillValue: string
-  confidence: number
+  isDraft: boolean
   contradictions: Contradiction[]
   onChange: (value: string) => void
   onResolveContradiction: (questionId: string) => void
@@ -18,19 +17,15 @@ interface AdaptiveQuestionProps {
 export default function AdaptiveQuestion({
   question,
   value,
-  prefillValue,
-  confidence,
+  isDraft,
   contradictions,
   onChange,
   onResolveContradiction,
 }: AdaptiveQuestionProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const isHighConfidence = confidence >= 0.7
-  const isMediumConfidence = confidence >= 0.4
-
-  // Show short question if high confidence and pre-fill exists
-  const displayQuestion = isHighConfidence && prefillValue
+  // Show short question if draft value exists
+  const displayQuestion = isDraft
     ? question.shortQuestion
     : question.question
 
@@ -47,29 +42,22 @@ export default function AdaptiveQuestion({
     <div className="spa-question">
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 8 }}>
         <p className="spa-question-text">{displayQuestion}</p>
-        {isHighConfidence && prefillValue && (
-          <span className="spa-badge spa-badge-confidence">Based on your website</span>
-        )}
       </div>
-
-      {isMediumConfidence && !isHighConfidence && prefillValue && (
-        <div className="spa-question-hint">
-          {prefillValue}
-        </div>
-      )}
 
       <textarea
         ref={textareaRef}
         className="spa-textarea"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={
-          isHighConfidence && prefillValue
-            ? 'Edit or confirm the pre-filled answer above'
-            : 'Share your thoughts...'
-        }
+        placeholder="Share your thoughts..."
         rows={4}
       />
+
+      {isDraft && (
+        <p className="spa-body-small" style={{ color: '#888', marginTop: 4 }}>
+          Pre-filled from your website — edit to make it yours
+        </p>
+      )}
 
       {questionContradictions.map((c, i) => (
         <ContradictionAlert

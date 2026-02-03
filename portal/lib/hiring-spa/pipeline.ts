@@ -4,6 +4,7 @@ import { crawlUrls } from './crawl'
 import { analyzeGitHubOrg } from './github-analysis'
 import { synthesizeCrawlData } from './synthesize'
 import { discoverRoles } from './role-discovery'
+import { generateQuestionnaireDrafts } from './questionnaire-drafter'
 import type { CrawlData } from './types'
 
 /**
@@ -55,6 +56,17 @@ export async function runCrawlPipeline(
     const synthesis = await synthesizeCrawlData(crawlData)
     console.log(`[hiring-spa] Synthesis complete (confidence: ${synthesis.confidence})`)
 
+    // 5.5. Generate questionnaire drafts
+    console.log(`[hiring-spa] Generating questionnaire drafts`)
+    let questionnaireDrafts = null
+    try {
+      questionnaireDrafts = await generateQuestionnaireDrafts(synthesis, crawlData)
+      console.log(`[hiring-spa] Generated ${Object.keys(questionnaireDrafts).length} draft answers`)
+    } catch (err) {
+      // Non-fatal — questionnaire still works without drafts
+      console.warn(`[hiring-spa] Draft generation failed:`, err instanceof Error ? err.message : err)
+    }
+
     // 6. Discover roles from careers/jobs pages
     console.log(`[hiring-spa] Discovering roles from careers pages`)
     let discoveredRoles = null
@@ -82,6 +94,7 @@ export async function runCrawlPipeline(
         crawl_completed_at: new Date().toISOString(),
         company_dna: synthesis.companyDna,
         technical_environment: synthesis.technicalEnvironment,
+        questionnaire_drafts: questionnaireDrafts,
         discovered_roles: discoveredRoles,
         status: nextStatus,
       })
