@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import PostHogProvider from '@/components/PostHogProvider'
-import DarkMode from '@/components/DarkMode'
+import DarkModeProvider from '@/components/DarkMode'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -19,8 +19,9 @@ export default function RootLayout({
       <body>
         <Suspense fallback={null}>
           <PostHogProvider>
-            <DarkMode />
-            {children}
+            <DarkModeProvider>
+              {children}
+            </DarkModeProvider>
           </PostHogProvider>
         </Suspense>
       </body>
