@@ -39,11 +39,16 @@ export async function GET() {
         .select('id', { count: 'exact', head: true }),
     ])
 
-    const err = companiesErr || rolesErr || engineersErr || matchesErr || feedbackErr || jdViewsErr
-    if (err) {
-      console.error('Overview query error:', err)
+    // Core tables — fail if these are missing
+    const coreErr = companiesErr || rolesErr || engineersErr || matchesErr
+    if (coreErr) {
+      console.error('Overview query error:', coreErr)
       return NextResponse.json({ error: 'Failed to fetch overview data' }, { status: 500 })
     }
+
+    // Non-critical tables — log and continue with empty data
+    if (feedbackErr) console.warn('match_feedback query failed (table may not exist):', feedbackErr.message)
+    if (jdViewsErr) console.warn('jd_page_views query failed (table may not exist):', jdViewsErr.message)
 
     // --- Companies ---
     const companyByStatus: Record<string, number> = {}
