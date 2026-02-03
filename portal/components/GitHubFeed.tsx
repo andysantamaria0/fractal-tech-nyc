@@ -75,7 +75,11 @@ export default function GitHubFeed() {
               <button
                 key={f.value}
                 className={`feed-filter-btn${typeFilter === f.value ? ' feed-filter-active' : ''}`}
-                onClick={() => { setTypeFilter(f.value); setVisibleCount(PAGE_SIZE) }}
+                onClick={() => {
+                  trackEvent('github_feed_filtered', { filter_type: f.value, previous_filter: typeFilter })
+                  setTypeFilter(f.value)
+                  setVisibleCount(PAGE_SIZE)
+                }}
               >
                 {f.label}
               </button>

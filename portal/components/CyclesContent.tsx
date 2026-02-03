@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import EngineerCard from '@/components/EngineerCard'
+import { trackEvent } from '@/lib/posthog'
 import type { Engineer } from '@/lib/types'
 
 const PAGE_SIZE = 20
@@ -33,7 +34,11 @@ export default function CyclesContent({ engineers, interestedIds }: CyclesConten
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 'var(--space-3)', marginTop: 'var(--space-6)' }}>
           <button
             className="btn-secondary"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            onClick={() => {
+              const newPage = Math.max(1, page - 1)
+              setPage(newPage)
+              trackEvent('cycles_page_navigated', { page_number: newPage, direction: 'previous', total_pages: totalPages })
+            }}
             disabled={page === 1}
             style={{ padding: 'var(--space-2) var(--space-4)', fontSize: 'var(--text-sm)' }}
           >
@@ -44,7 +49,11 @@ export default function CyclesContent({ engineers, interestedIds }: CyclesConten
           </span>
           <button
             className="btn-secondary"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            onClick={() => {
+              const newPage = Math.min(totalPages, page + 1)
+              setPage(newPage)
+              trackEvent('cycles_page_navigated', { page_number: newPage, direction: 'next', total_pages: totalPages })
+            }}
             disabled={page === totalPages}
             style={{ padding: 'var(--space-2) var(--space-4)', fontSize: 'var(--text-sm)' }}
           >

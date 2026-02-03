@@ -24,6 +24,7 @@ export default function EarlyAccessPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    trackEvent('signup_form_submitted', { page: 'early-access' })
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -49,6 +50,7 @@ export default function EarlyAccessPage() {
   }
 
   async function handleGoogleSignup() {
+    trackEvent('google_oauth_clicked', { page: 'early-access' })
     setLoading(true)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

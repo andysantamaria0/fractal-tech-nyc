@@ -27,6 +27,7 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    trackEvent('login_attempted', { auth_method: 'email' })
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -49,6 +50,7 @@ export default function LoginPage() {
   }
 
   async function handleGoogleLogin() {
+    trackEvent('google_oauth_clicked', { page: 'login' })
     setLoading(true)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { trackEvent } from '@/lib/posthog'
 import Link from 'next/link'
 
 export default function ForgotPasswordPage() {
@@ -26,6 +27,7 @@ export default function ForgotPasswordPage() {
       return
     }
 
+    trackEvent('password_reset_requested')
     setLoading(false)
     setSent(true)
   }

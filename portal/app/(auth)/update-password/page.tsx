@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { trackEvent } from '@/lib/posthog'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -28,11 +29,13 @@ export default function UpdatePasswordPage() {
     const { error } = await supabase.auth.updateUser({ password })
 
     if (error) {
+      trackEvent('password_updated', { success: false })
       setError(error.message)
       setLoading(false)
       return
     }
 
+    trackEvent('password_updated', { success: true })
     setLoading(false)
     setSuccess(true)
     setTimeout(() => router.push('/dashboard'), 2000)

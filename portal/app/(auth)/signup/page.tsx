@@ -24,6 +24,7 @@ export default function SignupPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    trackEvent('signup_form_submitted', { page: 'signup' })
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -51,6 +52,7 @@ export default function SignupPage() {
   }
 
   async function handleGoogleSignup() {
+    trackEvent('google_oauth_clicked', { page: 'signup' })
     setLoading(true)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

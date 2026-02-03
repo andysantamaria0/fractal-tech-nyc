@@ -1,4 +1,5 @@
 import CyclesContent from '@/components/CyclesContent'
+import CyclesTracker from '@/components/CyclesTracker'
 import MySubmissions from '@/components/MySubmissions'
 import { demoEngineers } from '@/lib/constants'
 
@@ -36,6 +37,7 @@ export default async function CyclesPage() {
 
   return (
     <div className="dashboard">
+      <CyclesTracker engineerCount={engineers.length} />
       <div className="dashboard-grid">
         <div>
           <div className="section-label">Cycles</div>

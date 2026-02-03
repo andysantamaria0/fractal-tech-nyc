@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import ProfileSummary from '@/components/hiring-spa/ProfileSummary'
-import type { HiringProfile, ProfileSummary as ProfileSummaryType } from '@/lib/hiring-spa/types'
+import HiringSpaTracker from '@/components/hiring-spa/HiringSpaTracker'
+import RoleCard from '@/components/hiring-spa/RoleCard'
+import type { HiringProfile, HiringRole, ProfileSummary as ProfileSummaryType } from '@/lib/hiring-spa/types'
 
 const isSupabaseConfigured =
   process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -26,6 +28,24 @@ async function getProfile(): Promise<HiringProfile | null> {
   return profile as HiringProfile | null
 }
 
+async function getRecentRoles(profileId: string): Promise<HiringRole[]> {
+  if (!isSupabaseConfigured) {
+    return []
+  }
+
+  const { createClient } = await import('@/lib/supabase/server')
+  const supabase = await createClient()
+
+  const { data: roles } = await supabase
+    .from('hiring_roles')
+    .select('*')
+    .eq('hiring_profile_id', profileId)
+    .order('created_at', { ascending: false })
+    .limit(3)
+
+  return (roles as HiringRole[]) || []
+}
+
 function countSavedSections(profile: HiringProfile): number {
   let count = 0
   if (profile.culture_answers) count++
@@ -35,11 +55,68 @@ function countSavedSections(profile: HiringProfile): number {
   return count
 }
 
+async function RolesAndProfile({ profile }: { profile: HiringProfile }) {
+  const roles = await getRecentRoles(profile.id)
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24 }}>
+        <p className="spa-label-emphasis">Your Profile</p>
+        <Link href="/hiring-spa/profile" className="spa-btn-text" style={{ textDecoration: 'none' }}>
+          Edit questionnaire &rarr;
+        </Link>
+      </div>
+
+      <ProfileSummary summary={profile.profile_summary as ProfileSummaryType} />
+
+      {/* Open Roles */}
+      <div style={{ marginTop: 48 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 16 }}>
+          <p className="spa-label-emphasis">Open Roles</p>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <Link href="/hiring-spa/roles" className="spa-btn-text" style={{ textDecoration: 'none' }}>
+              View all &rarr;
+            </Link>
+            <Link href="/hiring-spa/roles/new" className="spa-btn-text" style={{ textDecoration: 'none' }}>
+              Add a Role &rarr;
+            </Link>
+          </div>
+        </div>
+
+        {roles.length === 0 ? (
+          <div className="spa-card" style={{ textAlign: 'center' }}>
+            <p className="spa-body-muted" style={{ marginBottom: 12 }}>No roles yet</p>
+            <Link href="/hiring-spa/roles/new" className="spa-btn spa-btn-secondary" style={{ textDecoration: 'none' }}>
+              Add Your First Role
+            </Link>
+          </div>
+        ) : (
+          <div className="spa-role-cards">
+            {roles.map(role => (
+              <RoleCard key={role.id} role={role} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Engineer Matches skeleton - Phase 2 */}
+      <div style={{ marginTop: 48 }}>
+        <p className="spa-label" style={{ marginBottom: 16 }}>Coming Soon</p>
+        <div className="spa-skeleton">
+          <p className="spa-heading-3" style={{ opacity: 0.5, marginBottom: 4 }}>Engineer Matches</p>
+          <div className="spa-skeleton-text" style={{ width: '45%' }} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default async function HiringSpaHome() {
   const profile = await getProfile()
 
   return (
     <div className="spa-page">
+      <HiringSpaTracker profileStatus={profile?.status ?? null} />
       <div style={{ marginBottom: 48 }}>
         <h1 className="spa-display" style={{ marginBottom: 8 }}>Hiring Spa</h1>
         <p className="spa-body-muted">Your company hiring profile, crafted with care.</p>
@@ -121,29 +198,7 @@ export default async function HiringSpaHome() {
 
       {/* Complete */}
       {profile?.status === 'complete' && profile.profile_summary && (
-        <div>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24 }}>
-            <p className="spa-label-emphasis">Your Profile</p>
-            <Link href="/hiring-spa/profile" className="spa-btn-text" style={{ textDecoration: 'none' }}>
-              Edit questionnaire &rarr;
-            </Link>
-          </div>
-
-          <ProfileSummary summary={profile.profile_summary as ProfileSummaryType} />
-
-          {/* Future sections skeleton */}
-          <div style={{ marginTop: 48 }}>
-            <p className="spa-label" style={{ marginBottom: 16 }}>Coming Soon</p>
-            <div className="spa-skeleton">
-              <p className="spa-heading-3" style={{ opacity: 0.5, marginBottom: 4 }}>Open Roles</p>
-              <div className="spa-skeleton-text" style={{ width: '60%' }} />
-            </div>
-            <div className="spa-skeleton">
-              <p className="spa-heading-3" style={{ opacity: 0.5, marginBottom: 4 }}>Engineer Matches</p>
-              <div className="spa-skeleton-text" style={{ width: '45%' }} />
-            </div>
-          </div>
-        </div>
+        <RolesAndProfile profile={profile} />
       )}
     </div>
   )

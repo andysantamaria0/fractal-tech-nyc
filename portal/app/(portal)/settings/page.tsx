@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { trackEvent } from '@/lib/posthog'
 import Link from 'next/link'
 
 export default function SettingsPage() {
@@ -12,6 +13,10 @@ export default function SettingsPage() {
   const [message, setMessage] = useState('')
   const [isError, setIsError] = useState(false)
   const supabase = createClient()
+
+  useEffect(() => {
+    trackEvent('settings_viewed')
+  }, [])
 
   useEffect(() => {
     async function loadProfile() {
@@ -61,9 +66,11 @@ export default function SettingsPage() {
     if (error) {
       setMessage('Failed to save settings')
       setIsError(true)
+      trackEvent('settings_saved', { newsletter_optin: newsletterOptin, success: false })
     } else {
       setMessage('Settings saved')
       setIsError(false)
+      trackEvent('settings_saved', { newsletter_optin: newsletterOptin, success: true })
     }
     setSaving(false)
   }

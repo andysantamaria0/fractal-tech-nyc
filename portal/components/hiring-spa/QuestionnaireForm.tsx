@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type {
   HiringProfile,
   Contradiction,
@@ -12,6 +12,7 @@ import type {
 } from '@/lib/hiring-spa/types'
 import { SECTIONS, resolvePrefill } from '@/lib/hiring-spa/questions'
 import type { SectionId } from '@/lib/hiring-spa/questions'
+import { trackEvent } from '@/lib/posthog'
 import QuestionSection from './QuestionSection'
 import AdaptiveQuestion from './AdaptiveQuestion'
 import TechEditor from './TechEditor'
@@ -79,6 +80,14 @@ export default function QuestionnaireForm({ profile }: QuestionnaireFormProps) {
   })
   const [generatingSummary, setGeneratingSummary] = useState(false)
   const [summaryError, setSummaryError] = useState('')
+  const hasTrackedStart = useRef(false)
+
+  useEffect(() => {
+    if (!hasTrackedStart.current) {
+      hasTrackedStart.current = true
+      trackEvent('questionnaire_started', { sections_already_saved: savedSections.size })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Pre-fill data
   const confidence = getCrawlConfidence(profile)
@@ -128,8 +137,15 @@ export default function QuestionnaireForm({ profile }: QuestionnaireFormProps) {
       })
     }
 
-    setSavedSections(prev => new Set([...prev, sectionId]))
-  }, [answers, techEnv])
+    const newSaved = new Set([...savedSections, sectionId])
+    setSavedSections(newSaved)
+
+    trackEvent('questionnaire_section_saved', {
+      section_id: sectionId,
+      sections_completed: newSaved.size,
+      had_contradictions: (data.contradictions?.length ?? 0) > 0,
+    })
+  }, [answers, techEnv, savedSections])
 
   const allSectionsSaved = SECTIONS.every(s => savedSections.has(s.id))
 
@@ -147,6 +163,7 @@ export default function QuestionnaireForm({ profile }: QuestionnaireFormProps) {
         throw new Error(data.error || 'Failed to generate summary')
       }
 
+      trackEvent('questionnaire_completed')
       // Reload to show the summary page
       window.location.href = '/hiring-spa'
     } catch (err) {
