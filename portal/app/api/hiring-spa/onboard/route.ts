@@ -26,7 +26,12 @@ export async function POST() {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
-    // 2. Check if crawl is already running or complete
+    // 2. Require hiring spa access (granted by admin)
+    if (!profile.has_hiring_spa_access) {
+      return NextResponse.json({ error: 'Hiring spa access not enabled for this account' }, { status: 403 })
+    }
+
+    // 3. Check if crawl is already running or complete
     const { data: existingProfile } = await serviceClient
       .from('hiring_profiles')
       .select('status')
@@ -40,7 +45,7 @@ export async function POST() {
       })
     }
 
-    // 3. Determine website URL
+    // 4. Determine website URL
     let websiteUrl = profile.website_url
     if (!websiteUrl && profile.company_linkedin) {
       websiteUrl = await extractDomainFromLinkedIn(profile.company_linkedin)
@@ -53,22 +58,15 @@ export async function POST() {
       )
     }
 
-    // 4. Auto-grant hiring spa access and save discovered website URL
-    const profileUpdates: Record<string, unknown> = {}
-    if (!profile.has_hiring_spa_access) {
-      profileUpdates.has_hiring_spa_access = true
-    }
+    // 5. Save discovered website URL if not already set
     if (!profile.website_url) {
-      profileUpdates.website_url = websiteUrl
-    }
-    if (Object.keys(profileUpdates).length > 0) {
       await serviceClient
         .from('profiles')
-        .update(profileUpdates)
+        .update({ website_url: websiteUrl })
         .eq('id', user.id)
     }
 
-    // 5. Upsert hiring_profiles row with status='crawling'
+    // 6. Upsert hiring_profiles row with status='crawling'
     const { error: upsertError } = await serviceClient
       .from('hiring_profiles')
       .upsert(
@@ -85,7 +83,7 @@ export async function POST() {
       return NextResponse.json({ error: 'Failed to create hiring profile' }, { status: 500 })
     }
 
-    // 6. Run pipeline in background
+    // 7. Run pipeline in background
     after(async () => {
       await runCrawlPipeline(
         user.id,
