@@ -12,6 +12,7 @@ export default async function PortalLayout({
 }) {
   let userName: string | undefined
   let isAdmin = false
+  let hasHiringSpaAccess = false
 
   if (isSupabaseConfigured) {
     const { createClient } = await import('@/lib/supabase/server')
@@ -24,16 +25,18 @@ export default async function PortalLayout({
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('name, is_admin')
+      .select('name, is_admin, has_hiring_spa_access')
       .eq('id', user.id)
       .single()
 
     userName = profile?.name
     isAdmin = profile?.is_admin === true
+    hasHiringSpaAccess = profile?.has_hiring_spa_access === true
   } else if (process.env.NODE_ENV !== 'production') {
     // Dev bypass — show pages without auth (local dev only)
     userName = 'Dev User'
     isAdmin = true
+    hasHiringSpaAccess = true
   } else {
     // Fail closed in production
     redirect('/login')
@@ -41,7 +44,7 @@ export default async function PortalLayout({
 
   return (
     <>
-      <Header userName={userName} isAdmin={isAdmin} />
+      <Header userName={userName} isAdmin={isAdmin} hasHiringSpaAccess={hasHiringSpaAccess} />
       <main>
         <div className="container">
           {children}

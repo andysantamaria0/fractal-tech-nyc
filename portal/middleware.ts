@@ -57,7 +57,8 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/settings') ||
       request.nextUrl.pathname.startsWith('/engineer') ||
       request.nextUrl.pathname.startsWith('/complete-profile') ||
-      request.nextUrl.pathname.startsWith('/admin'))
+      request.nextUrl.pathname.startsWith('/admin') ||
+      request.nextUrl.pathname.startsWith('/hiring-spa'))
   ) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
@@ -73,6 +74,21 @@ export async function middleware(request: NextRequest) {
       .single()
 
     if (!profile?.is_admin) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // Hiring Spa routes — check has_hiring_spa_access flag
+  if (user && request.nextUrl.pathname.startsWith('/hiring-spa')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('has_hiring_spa_access')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile?.has_hiring_spa_access) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
       return NextResponse.redirect(url)

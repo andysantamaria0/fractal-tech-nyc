@@ -1,0 +1,150 @@
+import Link from 'next/link'
+import ProfileSummary from '@/components/hiring-spa/ProfileSummary'
+import type { HiringProfile, ProfileSummary as ProfileSummaryType } from '@/lib/hiring-spa/types'
+
+const isSupabaseConfigured =
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('xxx.supabase.co')
+
+async function getProfile(): Promise<HiringProfile | null> {
+  if (!isSupabaseConfigured) {
+    return null
+  }
+
+  const { createClient } = await import('@/lib/supabase/server')
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return null
+
+  const { data: profile } = await supabase
+    .from('hiring_profiles')
+    .select('*')
+    .eq('company_id', user.id)
+    .single()
+
+  return profile as HiringProfile | null
+}
+
+function countSavedSections(profile: HiringProfile): number {
+  let count = 0
+  if (profile.culture_answers) count++
+  if (profile.mission_answers) count++
+  if (profile.team_dynamics_answers) count++
+  if (profile.technical_environment) count++
+  return count
+}
+
+export default async function HiringSpaHome() {
+  const profile = await getProfile()
+
+  return (
+    <div className="spa-page">
+      <div style={{ marginBottom: 48 }}>
+        <h1 className="spa-display" style={{ marginBottom: 8 }}>Hiring Spa</h1>
+        <p className="spa-body-muted">Your company hiring profile, crafted with care.</p>
+      </div>
+
+      {/* No profile or draft */}
+      {(!profile || profile.status === 'draft') && (
+        <div className="spa-status-card">
+          <p className="spa-label-emphasis" style={{ marginBottom: 16 }}>Getting Started</p>
+          <p className="spa-heading-2" style={{ marginBottom: 12 }}>
+            Your profile hasn&apos;t been started yet
+          </p>
+          <p className="spa-body-muted">
+            An admin needs to run the initial web crawl to analyze your company&apos;s
+            online presence. Once that&apos;s complete, you&apos;ll be able to fill out
+            your hiring questionnaire here.
+          </p>
+        </div>
+      )}
+
+      {/* Crawling */}
+      {profile?.status === 'crawling' && (
+        <div className="spa-status-card">
+          <p className="spa-label-emphasis" style={{ marginBottom: 16 }}>In Progress</p>
+          <p className="spa-heading-2" style={{ marginBottom: 12 }}>
+            We&apos;re analyzing your web presence
+          </p>
+          <p className="spa-body-muted">
+            We&apos;re crawling your website and GitHub to understand your company&apos;s
+            culture, tech stack, and values. This usually takes a few minutes.
+          </p>
+          <div className="spa-progress-track" style={{ maxWidth: 300, margin: '24px auto 0' }}>
+            <div className="spa-progress-fill" style={{ width: '60%' }} />
+          </div>
+        </div>
+      )}
+
+      {/* Questionnaire ready */}
+      {profile?.status === 'questionnaire' && (
+        <div>
+          <div className="spa-card-accent" style={{ marginBottom: 32 }}>
+            <p className="spa-label-emphasis" style={{ marginBottom: 12 }}>Ready for You</p>
+            <p className="spa-heading-2" style={{ marginBottom: 8 }}>
+              Complete your hiring questionnaire
+            </p>
+            <p className="spa-body-muted" style={{ marginBottom: 20 }}>
+              We&apos;ve pre-populated some answers from your web presence.
+              Review, refine, and add your perspective. Take your time.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <Link href="/hiring-spa/profile" className="spa-btn spa-btn-primary" style={{ textDecoration: 'none' }}>
+                Start Questionnaire
+              </Link>
+              <span className="spa-body-small">
+                {countSavedSections(profile)} of 4 sections complete
+              </span>
+            </div>
+            {countSavedSections(profile) > 0 && (
+              <div className="spa-progress-track" style={{ marginTop: 16 }}>
+                <div className="spa-progress-fill" style={{ width: `${(countSavedSections(profile) / 4) * 100}%` }} />
+              </div>
+            )}
+          </div>
+
+          {/* Future sections skeleton */}
+          <div style={{ marginTop: 48 }}>
+            <p className="spa-label" style={{ marginBottom: 16 }}>Coming Soon</p>
+            <div className="spa-skeleton">
+              <p className="spa-heading-3" style={{ opacity: 0.5, marginBottom: 4 }}>Open Roles</p>
+              <div className="spa-skeleton-text" style={{ width: '60%' }} />
+            </div>
+            <div className="spa-skeleton">
+              <p className="spa-heading-3" style={{ opacity: 0.5, marginBottom: 4 }}>Engineer Matches</p>
+              <div className="spa-skeleton-text" style={{ width: '45%' }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Complete */}
+      {profile?.status === 'complete' && profile.profile_summary && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24 }}>
+            <p className="spa-label-emphasis">Your Profile</p>
+            <Link href="/hiring-spa/profile" className="spa-btn-text" style={{ textDecoration: 'none' }}>
+              Edit questionnaire &rarr;
+            </Link>
+          </div>
+
+          <ProfileSummary summary={profile.profile_summary as ProfileSummaryType} />
+
+          {/* Future sections skeleton */}
+          <div style={{ marginTop: 48 }}>
+            <p className="spa-label" style={{ marginBottom: 16 }}>Coming Soon</p>
+            <div className="spa-skeleton">
+              <p className="spa-heading-3" style={{ opacity: 0.5, marginBottom: 4 }}>Open Roles</p>
+              <div className="spa-skeleton-text" style={{ width: '60%' }} />
+            </div>
+            <div className="spa-skeleton">
+              <p className="spa-heading-3" style={{ opacity: 0.5, marginBottom: 4 }}>Engineer Matches</p>
+              <div className="spa-skeleton-text" style={{ width: '45%' }} />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

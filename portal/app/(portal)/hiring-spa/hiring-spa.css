@@ -1,0 +1,603 @@
+/**
+ * Fractal Hiring Spa — Scoped Design System
+ * All styles scoped under .hiring-spa to avoid conflicts with portal globals.
+ * Intentionally does NOT support dark mode — warm palette is core to the experience.
+ */
+
+.hiring-spa {
+  /* Colors */
+  --spa-platinum: #E8E4DF;
+  --spa-fog: #F7F5F2;
+  --spa-parchment: #FAF8F5;
+  --spa-honey: #C9A86C;
+  --spa-stone: #A69B8D;
+  --spa-charcoal: #2C2C2C;
+  --spa-graphite: #5C5C5C;
+  --spa-mist: #9C9C9C;
+  --spa-success: #7A9E7A;
+  --spa-match: #8B7355;
+  --spa-honey-light: rgba(201, 168, 108, 0.20);
+  --spa-honey-subtle: rgba(201, 168, 108, 0.25);
+  --spa-honey-border: rgba(201, 168, 108, 0.30);
+  --spa-stone-light: rgba(166, 155, 141, 0.12);
+  --spa-stone-subtle: rgba(166, 155, 141, 0.15);
+  --spa-stone-medium: rgba(166, 155, 141, 0.25);
+  --spa-stone-border: rgba(166, 155, 141, 0.40);
+  --spa-success-light: rgba(122, 158, 122, 0.12);
+  --spa-success-subtle: rgba(122, 158, 122, 0.15);
+
+  /* Typography */
+  --spa-font-serif: Georgia, 'Times New Roman', serif;
+  --spa-font-mono: 'SF Mono', Monaco, Inconsolata, 'Fira Code', monospace;
+
+  /* Spacing */
+  --spa-space-1: 4px;
+  --spa-space-2: 8px;
+  --spa-space-3: 12px;
+  --spa-space-4: 16px;
+  --spa-space-5: 24px;
+  --spa-space-6: 32px;
+  --spa-space-7: 48px;
+  --spa-space-8: 64px;
+
+  /* Borders */
+  --spa-radius-sm: 4px;
+  --spa-radius: 6px;
+  --spa-radius-lg: 8px;
+  --spa-radius-xl: 12px;
+
+  /* Shadows */
+  --spa-shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --spa-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --spa-shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  /* Layout */
+  --spa-max-width: 800px;
+
+  /* Apply base styles */
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--spa-charcoal);
+  background-color: var(--spa-platinum);
+  min-height: calc(100vh - 200px);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Force light mode — ignore dark mode toggle */
+[data-theme="dark"] .hiring-spa {
+  color: var(--spa-charcoal);
+  background-color: var(--spa-platinum);
+}
+
+/* =========================================
+   PAGE LAYOUT
+   ========================================= */
+
+.hiring-spa .spa-page {
+  max-width: var(--spa-max-width);
+  margin: 0 auto;
+  padding: var(--spa-space-7);
+}
+
+/* =========================================
+   TYPOGRAPHY
+   ========================================= */
+
+.hiring-spa .spa-display {
+  font-family: var(--spa-font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--spa-charcoal);
+  margin: 0;
+}
+
+.hiring-spa .spa-heading-1 {
+  font-family: var(--spa-font-serif);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--spa-charcoal);
+  margin: 0;
+}
+
+.hiring-spa .spa-heading-2 {
+  font-family: var(--spa-font-serif);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--spa-charcoal);
+  margin: 0;
+}
+
+.hiring-spa .spa-heading-3 {
+  font-family: var(--spa-font-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--spa-charcoal);
+  margin: 0;
+}
+
+.hiring-spa .spa-body {
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.8;
+  color: var(--spa-charcoal);
+  margin: 0;
+}
+
+.hiring-spa .spa-body-muted {
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.8;
+  color: var(--spa-graphite);
+  margin: 0;
+}
+
+.hiring-spa .spa-body-small {
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--spa-graphite);
+  margin: 0;
+}
+
+.hiring-spa .spa-label {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--spa-mist);
+}
+
+.hiring-spa .spa-label-emphasis {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--spa-honey);
+}
+
+.hiring-spa .spa-system {
+  font-family: var(--spa-font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--spa-charcoal);
+}
+
+/* =========================================
+   CARDS
+   ========================================= */
+
+.hiring-spa .spa-card {
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-5) var(--spa-space-6);
+}
+
+.hiring-spa .spa-card-accent {
+  background-color: var(--spa-parchment);
+  border: 1px solid var(--spa-honey-border);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-5) var(--spa-space-6);
+}
+
+.hiring-spa .spa-card-elevated {
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-5) var(--spa-space-6);
+  box-shadow: var(--spa-shadow);
+}
+
+/* =========================================
+   BUTTONS
+   ========================================= */
+
+.hiring-spa .spa-btn {
+  font-family: var(--spa-font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--spa-radius-sm);
+  cursor: pointer;
+  transition: opacity 150ms ease;
+  padding: 14px 28px;
+}
+
+.hiring-spa .spa-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.hiring-spa .spa-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hiring-spa .spa-btn-primary {
+  background-color: var(--spa-charcoal);
+  color: var(--spa-parchment);
+}
+
+.hiring-spa .spa-btn-secondary {
+  background-color: transparent;
+  color: var(--spa-charcoal);
+  border: 1px solid var(--spa-stone-border);
+}
+
+.hiring-spa .spa-btn-text {
+  background: none;
+  border: none;
+  color: var(--spa-graphite);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--spa-stone-medium);
+  border-radius: 0;
+  font-family: var(--spa-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.hiring-spa .spa-btn-text:hover {
+  color: var(--spa-charcoal);
+}
+
+/* =========================================
+   FORM ELEMENTS
+   ========================================= */
+
+.hiring-spa .spa-input,
+.hiring-spa .spa-textarea {
+  width: 100%;
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--spa-charcoal);
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-sm);
+  padding: var(--spa-space-4);
+  outline: none;
+  transition: border-color 150ms ease;
+  box-sizing: border-box;
+}
+
+.hiring-spa .spa-input:focus,
+.hiring-spa .spa-textarea:focus {
+  border-color: var(--spa-honey-border);
+}
+
+.hiring-spa .spa-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.hiring-spa .spa-form-field {
+  margin-bottom: var(--spa-space-5);
+}
+
+.hiring-spa .spa-form-label {
+  display: block;
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--spa-mist);
+  margin-bottom: var(--spa-space-2);
+}
+
+/* =========================================
+   BADGES
+   ========================================= */
+
+.hiring-spa .spa-badge {
+  font-family: var(--spa-font-mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: var(--spa-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spa-space-2);
+}
+
+.hiring-spa .spa-badge-default {
+  background-color: var(--spa-stone-subtle);
+  color: var(--spa-graphite);
+}
+
+.hiring-spa .spa-badge-honey {
+  background-color: var(--spa-honey-light);
+  color: var(--spa-match);
+}
+
+.hiring-spa .spa-badge-success {
+  background-color: var(--spa-success-light);
+  color: var(--spa-graphite);
+}
+
+.hiring-spa .spa-badge-confidence {
+  background-color: var(--spa-honey-light);
+  color: var(--spa-match);
+  font-size: 9px;
+}
+
+/* =========================================
+   PROGRESS BAR
+   ========================================= */
+
+.hiring-spa .spa-progress-track {
+  height: 4px;
+  background-color: var(--spa-stone-light);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.hiring-spa .spa-progress-fill {
+  height: 100%;
+  background-color: var(--spa-honey);
+  border-radius: 2px;
+  transition: width 200ms ease;
+}
+
+/* =========================================
+   SECTIONS & DIVIDERS
+   ========================================= */
+
+.hiring-spa .spa-section {
+  margin-bottom: var(--spa-space-7);
+}
+
+.hiring-spa .spa-section-header {
+  margin-bottom: var(--spa-space-5);
+  padding-bottom: var(--spa-space-3);
+  border-bottom: 1px solid var(--spa-stone-light);
+}
+
+.hiring-spa .spa-divider {
+  border: none;
+  border-top: 1px solid var(--spa-stone-light);
+  margin: var(--spa-space-5) 0;
+}
+
+/* =========================================
+   CONTRADICTION ALERT
+   ========================================= */
+
+.hiring-spa .spa-contradiction {
+  background-color: var(--spa-parchment);
+  border: 1px solid var(--spa-honey-border);
+  border-left: 3px solid var(--spa-honey);
+  border-radius: var(--spa-radius);
+  padding: var(--spa-space-4) var(--spa-space-5);
+  margin-top: var(--spa-space-3);
+}
+
+.hiring-spa .spa-contradiction-resolved {
+  opacity: 0.6;
+  border-left-color: var(--spa-stone);
+}
+
+.hiring-spa .spa-contradiction .spa-contradiction-signal {
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--spa-graphite);
+  margin-bottom: var(--spa-space-3);
+  line-height: 1.6;
+}
+
+.hiring-spa .spa-contradiction .spa-contradiction-source {
+  font-family: var(--spa-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--spa-mist);
+  margin-bottom: var(--spa-space-3);
+}
+
+.hiring-spa .spa-contradiction .spa-contradiction-actions {
+  display: flex;
+  gap: var(--spa-space-3);
+  margin-top: var(--spa-space-3);
+}
+
+/* =========================================
+   TAG CHIPS (Tech Editor)
+   ========================================= */
+
+.hiring-spa .spa-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spa-space-2);
+  margin-bottom: var(--spa-space-3);
+}
+
+.hiring-spa .spa-tag {
+  font-family: var(--spa-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--spa-charcoal);
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-medium);
+  border-radius: var(--spa-radius-sm);
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spa-space-2);
+}
+
+.hiring-spa .spa-tag-remove {
+  background: none;
+  border: none;
+  color: var(--spa-mist);
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  transition: color 150ms ease;
+}
+
+.hiring-spa .spa-tag-remove:hover {
+  color: var(--spa-charcoal);
+}
+
+.hiring-spa .spa-tag-input {
+  font-family: var(--spa-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--spa-charcoal);
+  background: none;
+  border: 1px dashed var(--spa-stone-medium);
+  border-radius: var(--spa-radius-sm);
+  padding: 6px 12px;
+  outline: none;
+  min-width: 100px;
+}
+
+.hiring-spa .spa-tag-input::placeholder {
+  color: var(--spa-mist);
+}
+
+/* =========================================
+   PROFILE SUMMARY CARD
+   ========================================= */
+
+.hiring-spa .spa-summary-card {
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-6);
+}
+
+.hiring-spa .spa-summary-section {
+  margin-bottom: var(--spa-space-5);
+  padding-bottom: var(--spa-space-5);
+  border-bottom: 1px solid var(--spa-stone-light);
+}
+
+.hiring-spa .spa-summary-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.hiring-spa .spa-summary-traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spa-space-2);
+}
+
+.hiring-spa .spa-summary-trait {
+  font-family: var(--spa-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--spa-match);
+  background-color: var(--spa-honey-light);
+  border-radius: var(--spa-radius-sm);
+  padding: 6px 14px;
+}
+
+/* =========================================
+   STATUS STATES
+   ========================================= */
+
+.hiring-spa .spa-status-card {
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-6) var(--spa-space-7);
+  text-align: center;
+}
+
+.hiring-spa .spa-skeleton {
+  background-color: var(--spa-stone-light);
+  border-radius: var(--spa-radius);
+  padding: var(--spa-space-5) var(--spa-space-6);
+  margin-bottom: var(--spa-space-4);
+  opacity: 0.5;
+}
+
+.hiring-spa .spa-skeleton-text {
+  height: 12px;
+  background-color: var(--spa-stone-light);
+  border-radius: 2px;
+  margin-bottom: var(--spa-space-2);
+}
+
+/* =========================================
+   FOCUS STATES
+   ========================================= */
+
+.hiring-spa .spa-btn:focus-visible,
+.hiring-spa .spa-input:focus-visible,
+.hiring-spa .spa-textarea:focus-visible,
+.hiring-spa .spa-tag-input:focus-visible {
+  outline: 2px solid var(--spa-honey);
+  outline-offset: 2px;
+}
+
+/* =========================================
+   QUESTION LAYOUT
+   ========================================= */
+
+.hiring-spa .spa-question {
+  margin-bottom: var(--spa-space-6);
+}
+
+.hiring-spa .spa-question-text {
+  font-family: var(--spa-font-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--spa-charcoal);
+  margin-bottom: var(--spa-space-3);
+}
+
+.hiring-spa .spa-question-hint {
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--spa-graphite);
+  margin-bottom: var(--spa-space-3);
+  padding: var(--spa-space-3) var(--spa-space-4);
+  border-left: 2px solid var(--spa-stone-medium);
+}
+
+.hiring-spa .spa-section-save-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spa-space-4);
+  margin-top: var(--spa-space-4);
+}
+
+.hiring-spa .spa-save-status {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--spa-success);
+}
