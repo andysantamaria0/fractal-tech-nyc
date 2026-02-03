@@ -57,11 +57,11 @@
 
 /* Dark mode overrides (applied via .dark-mode class on <html>) */
 html.dark-mode {
-    --color-platinum: #2A2A2E;
-    --color-fog: #1A1A1E;
+    --color-platinum: #2E2E32;
+    --color-fog: #18181B;
     --color-charcoal: #E8E8E8;
     --color-slate: #9A9A9A;
-    --color-white: #242428;
+    --color-white: #222226;
     --color-line: #3A3A3E;
     --color-error: #FF6B6B;
     --color-accent: #E06B94;
@@ -79,6 +79,30 @@ html.dark-mode {
 
 html.dark-mode .form-select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23E8E8E8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+}
+
+html.dark-mode .feed-filter-btn {
+    background: var(--color-platinum);
+    color: var(--color-slate);
+}
+
+html.dark-mode .feed-filter-btn:hover {
+    background: var(--color-line);
+}
+
+html.dark-mode .feed-filter-active {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+}
+
+html.dark-mode .cohort-stat {
+    background: var(--color-white);
+    border-color: var(--color-line);
+}
+
+html.dark-mode .feed-icon {
+    background: var(--color-white);
+    border-color: var(--color-line);
 }
 
 /* ========================================
