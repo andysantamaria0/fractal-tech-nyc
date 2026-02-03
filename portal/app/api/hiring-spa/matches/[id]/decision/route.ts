@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { notifyMatchMovedForward } from '@/lib/hiring-spa/notifications'
+import { notifyMatchMovedForward, notifyEngineerOfMatch } from '@/lib/hiring-spa/notifications'
 import { createServiceClient } from '@/lib/supabase/server'
 import type { MatchDecision } from '@/lib/hiring-spa/types'
 
@@ -43,11 +43,14 @@ export async function PATCH(
       return NextResponse.json({ error: 'Match not found or update failed' }, { status: 404 })
     }
 
-    // On moved_forward, fire notification (fire-and-forget)
+    // On moved_forward, fire notifications (fire-and-forget)
     if (decision === 'moved_forward') {
       const serviceClient = await createServiceClient()
       notifyMatchMovedForward(id, serviceClient).catch((err) => {
         console.error('Failed to send move-forward notification:', err)
+      })
+      notifyEngineerOfMatch(id, serviceClient).catch((err) => {
+        console.error('Failed to send engineer notification:', err)
       })
     }
 

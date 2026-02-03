@@ -24,6 +24,8 @@ export default function PublicJDPage() {
   const [challenge, setChallenge] = useState<ChallengeData | null>(null)
   const [challengeResponse, setChallengeResponse] = useState<string | null>(null)
   const [challengeSubmitting, setChallengeSubmitting] = useState(false)
+  const [consentDecision, setConsentDecision] = useState<string | null>(null)
+  const [consentSubmitting, setConsentSubmitting] = useState(false)
   const [viewerEmail, setViewerEmail] = useState('')
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -56,7 +58,28 @@ export default function PublicJDPage() {
     if (matchData?.challenge_response) {
       setChallengeResponse(matchData.challenge_response)
     }
+    if (matchData?.engineer_decision) {
+      setConsentDecision(matchData.engineer_decision)
+    }
   }, [])
+
+  const handleConsentResponse = useCallback(async (decision: 'interested' | 'not_interested') => {
+    setConsentSubmitting(true)
+    try {
+      const res = await fetch('/api/jd/engineer-consent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, email: viewerEmail, decision }),
+      })
+      if (res.ok) {
+        setConsentDecision(decision)
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setConsentSubmitting(false)
+    }
+  }, [slug, viewerEmail])
 
   const handleChallengeResponse = useCallback(async (response: 'accepted' | 'declined') => {
     setChallengeSubmitting(true)
@@ -118,6 +141,41 @@ export default function PublicJDPage() {
             <div className="jd-match-banner">
               <span className="jd-match-banner-score">{match.overall_score}%</span>
               <span className="jd-match-banner-text">match for this role</span>
+            </div>
+          )}
+
+          {/* Consent card — shown when engineer was notified but hasn't decided */}
+          {match && match.engineer_notified_at && !consentDecision && (
+            <div className="jd-challenge-card">
+              <p className="spa-label-emphasis" style={{ marginBottom: 12 }}>This company is interested in you</p>
+              <p className="spa-body" style={{ marginBottom: 16 }}>Would you like to be introduced?</p>
+              <div className="jd-challenge-actions">
+                <button
+                  className="spa-btn spa-btn-primary"
+                  onClick={() => handleConsentResponse('interested')}
+                  disabled={consentSubmitting}
+                >
+                  {consentSubmitting ? 'Submitting...' : "I'm Interested"}
+                </button>
+                <button
+                  className="spa-btn spa-btn-secondary"
+                  onClick={() => handleConsentResponse('not_interested')}
+                  disabled={consentSubmitting}
+                >
+                  Not for Me
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Consent response confirmation */}
+          {consentDecision && (
+            <div className="jd-challenge-confirmation">
+              <p className="spa-body">
+                {consentDecision === 'interested'
+                  ? "Great! We'll facilitate an introduction."
+                  : 'No worries — thanks for considering.'}
+              </p>
             </div>
           )}
 

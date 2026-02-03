@@ -9,6 +9,8 @@ export interface MatchData {
   dimension_scores: DimensionWeights
   highlight_quote: string | null
   challenge_response: string | null
+  engineer_decision: 'interested' | 'not_interested' | null
+  engineer_notified_at: string | null
 }
 
 export interface ChallengeData {

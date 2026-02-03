@@ -24,7 +24,54 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { role_id, feedback } = body as { role_id: string; feedback?: JDFeedback }
+    const { role_id, role_ids, feedback } = body as { role_id?: string; role_ids?: string[]; feedback?: JDFeedback }
+
+    // Batch mode
+    if (role_ids && role_ids.length > 0) {
+      const roles: HiringRole[] = []
+      for (const rid of role_ids) {
+        const { data: batchRole, error: batchRoleError } = await supabase
+          .from('hiring_roles')
+          .select('*')
+          .eq('id', rid)
+          .single()
+
+        if (batchRoleError || !batchRole) continue
+        const typedBatchRole = batchRole as HiringRole
+        if (!typedBatchRole.source_content) continue
+
+        await supabase.from('hiring_roles').update({ status: 'beautifying' }).eq('id', rid)
+
+        const { data: batchProfile } = await supabase
+          .from('hiring_profiles')
+          .select('company_dna, technical_environment, profile_summary')
+          .eq('id', typedBatchRole.hiring_profile_id)
+          .single()
+
+        const batchExtracted = await extractFromText(typedBatchRole.title, typedBatchRole.source_content)
+        const batchBeautified = await beautifyJD({
+          extractedJD: batchExtracted,
+          profileSummary: (batchProfile?.profile_summary as ProfileSummary) || null,
+          companyDna: (batchProfile?.company_dna as CompanyDNA) || null,
+          technicalEnvironment: (batchProfile?.technical_environment as TechnicalEnvironment) || null,
+          feedback: null,
+          previousBeautifiedJD: null,
+        })
+
+        const { data: updatedBatchRole } = await supabase
+          .from('hiring_roles')
+          .update({ beautified_jd: batchBeautified, status: 'active', jd_feedback: null })
+          .eq('id', rid)
+          .select('*')
+          .single()
+
+        if (updatedBatchRole) {
+          roles.push(updatedBatchRole as HiringRole)
+          createServiceClient().then(sc => computeMatchesForRole(rid, sc)).catch(console.error)
+        }
+      }
+      return NextResponse.json({ roles })
+    }
 
     if (!role_id) {
       return NextResponse.json({ error: 'role_id is required' }, { status: 400 })

@@ -49,6 +49,8 @@ export async function POST(request: Request) {
       dimension_scores: DimensionWeights
       highlight_quote: string | null
       challenge_response: string | null
+      engineer_decision: 'interested' | 'not_interested' | null
+      engineer_notified_at: string | null
     } | null = null
 
     const { data: engineer } = await supabase
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
     if (engineer) {
       const { data: match } = await supabase
         .from('hiring_spa_matches')
-        .select('id, overall_score, dimension_scores, highlight_quote, challenge_response')
+        .select('id, overall_score, dimension_scores, highlight_quote, challenge_response, engineer_decision, engineer_notified_at')
         .eq('role_id', role.id)
         .eq('engineer_id', engineer.id)
         .single()
@@ -72,6 +74,8 @@ export async function POST(request: Request) {
           dimension_scores: match.dimension_scores as DimensionWeights,
           highlight_quote: match.highlight_quote,
           challenge_response: match.challenge_response,
+          engineer_decision: match.engineer_decision,
+          engineer_notified_at: match.engineer_notified_at,
         }
       }
     }

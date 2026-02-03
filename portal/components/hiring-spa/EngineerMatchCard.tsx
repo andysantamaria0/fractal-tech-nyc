@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import type { MatchWithEngineer, MatchDecision, DimensionWeights, MatchReasoning } from '@/lib/hiring-spa/types'
+import type { MatchWithEngineer, MatchDecision, MatchFeedback, DimensionWeights, MatchReasoning } from '@/lib/hiring-spa/types'
+import MatchFeedbackForm from './MatchFeedbackForm'
 
 const DIMENSION_LABELS: Record<keyof DimensionWeights, string> = {
   mission: 'Mission',
@@ -23,6 +24,8 @@ interface Props {
 export default function EngineerMatchCard({ match, onDecision }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [deciding, setDeciding] = useState(false)
+  const [feedback, setFeedback] = useState<MatchFeedback | undefined>(match.feedback)
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false)
 
   const engineer = match.engineer
   const topSkills = engineer.engineer_dna?.topSkills?.slice(0, 3) || []
@@ -141,9 +144,70 @@ export default function EngineerMatchCard({ match, onDecision }: Props) {
           )}
 
           {match.decision === 'moved_forward' && (
-            <div className="spa-match-actions">
-              <span className="spa-badge spa-badge-success">Moved Forward</span>
-            </div>
+            <>
+              <div className="spa-match-actions">
+                <span className="spa-badge spa-badge-success">Moved Forward</span>
+                {match.engineer_decision === 'interested' && (
+                  <span className="spa-badge spa-badge-success">Engineer Interested</span>
+                )}
+                {match.engineer_decision === 'not_interested' && (
+                  <span className="spa-badge spa-badge-default">Engineer Declined</span>
+                )}
+                {match.engineer_decision === null && (
+                  <span className="spa-badge spa-badge-honey">Awaiting Engineer</span>
+                )}
+              </div>
+
+              {/* Feedback section */}
+              {feedback ? (
+                <div style={{ marginTop: 16, padding: 12, background: 'var(--spa-fog, #F7F5F2)', borderRadius: 6 }}>
+                  <p className="spa-label" style={{ marginBottom: 8 }}>Feedback</p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                    <span className={`spa-badge ${feedback.hired ? 'spa-badge-success' : 'spa-badge-default'}`}>
+                      {feedback.hired ? 'Hired' : 'Not Hired'}
+                    </span>
+                    {feedback.rating && (
+                      <span className="spa-badge spa-badge-honey">Rating: {feedback.rating}/5</span>
+                    )}
+                    {feedback.would_use_again !== null && (
+                      <span className="spa-badge spa-badge-default">
+                        {feedback.would_use_again ? 'Would use again' : 'Would not use again'}
+                      </span>
+                    )}
+                  </div>
+                  {feedback.worked_well && (
+                    <p className="spa-body-small" style={{ marginBottom: 4 }}>
+                      <strong>Worked well:</strong> {feedback.worked_well}
+                    </p>
+                  )}
+                  {feedback.didnt_work && (
+                    <p className="spa-body-small">
+                      <strong>Didn&apos;t work:</strong> {feedback.didnt_work}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {!showFeedbackForm ? (
+                    <button
+                      className="spa-btn spa-btn-secondary"
+                      onClick={() => setShowFeedbackForm(true)}
+                      style={{ marginTop: 12, fontSize: 12 }}
+                    >
+                      Give Feedback
+                    </button>
+                  ) : (
+                    <MatchFeedbackForm
+                      matchId={match.id}
+                      onSubmit={(fb) => {
+                        setFeedback(fb)
+                        setShowFeedbackForm(false)
+                      }}
+                    />
+                  )}
+                </>
+              )}
+            </>
           )}
         </div>
       )}
