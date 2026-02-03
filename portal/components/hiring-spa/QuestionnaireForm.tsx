@@ -54,13 +54,12 @@ function getInitialAnswers(profile: HiringProfile): AllAnswers {
 
 function getInitialTech(profile: HiringProfile): TechnicalEnvironment {
   const te = profile.technical_environment
-  if (te) return te
   return {
-    primaryLanguages: [],
-    frameworks: [],
-    infrastructure: [],
-    devPractices: [],
-    openSourceInvolvement: '',
+    primaryLanguages: te?.primaryLanguages ?? [],
+    frameworks: te?.frameworks ?? [],
+    infrastructure: te?.infrastructure ?? [],
+    devPractices: te?.devPractices ?? [],
+    openSourceInvolvement: te?.openSourceInvolvement ?? '',
   }
 }
 
