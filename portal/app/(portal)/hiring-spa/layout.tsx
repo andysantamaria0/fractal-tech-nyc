@@ -11,7 +11,8 @@ export default async function HiringSpaLayout({
   children: React.ReactNode
 }) {
   // Defense-in-depth: verify access even though middleware checks too
-  if (isSupabaseConfigured) {
+  // In dev mode, skip access check (matches middleware dev bypass)
+  if (process.env.NODE_ENV === 'production' && isSupabaseConfigured) {
     const { createClient } = await import('@/lib/supabase/server')
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -29,6 +30,8 @@ export default async function HiringSpaLayout({
     if (!profile?.has_hiring_spa_access) {
       redirect('/dashboard')
     }
+  } else if (process.env.NODE_ENV === 'production') {
+    redirect('/login')
   }
 
   return (
