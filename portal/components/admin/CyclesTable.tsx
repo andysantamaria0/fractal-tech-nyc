@@ -20,7 +20,7 @@ function getFlags(submission: Submission): { label: string; color: string }[] {
   if (submission.hours_budget && submission.hours_logged) {
     const pct = submission.hours_logged / submission.hours_budget
     if (pct >= 0.9) {
-      flags.push({ label: 'HOURS WARNING', color: '#D97706' })
+      flags.push({ label: 'HOURS WARNING', color: 'var(--color-warning, #D97706)' })
     }
   }
 
@@ -34,7 +34,7 @@ function getFlags(submission: Submission): { label: string; color: string }[] {
   }
 
   if (submission.is_hiring) {
-    flags.push({ label: 'HIRING', color: '#059669' })
+    flags.push({ label: 'HIRING', color: '#34D399' })
   }
 
   return flags

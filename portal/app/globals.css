@@ -16,6 +16,16 @@
     --color-line: #D0D0D0;
     --color-error: #8B0000;
     --color-accent: #C7547C;
+    --color-ink: #2C2C2C;
+    --color-mid: #888888;
+    --color-red: #CC0000;
+    --color-warning: #E67E22;
+    --color-border: #E2E2E2;
+    --color-primary: #2563EB;
+    --color-silver: #D0D0D0;
+    --color-on-accent: #FFFFFF;
+    --color-error-bg: #FFF5F5;
+    --color-admin-header: #2C2C2C;
 
     /* Typography */
     --font-primary: "Geneva", "Chicago", -apple-system, BlinkMacSystemFont, sans-serif;
@@ -43,6 +53,32 @@
 
     /* Layout */
     --max-width: 960px;
+}
+
+/* Dark mode overrides (applied via .dark-mode class on <html>) */
+html.dark-mode {
+    --color-platinum: #2A2A2E;
+    --color-fog: #1A1A1E;
+    --color-charcoal: #E8E8E8;
+    --color-slate: #9A9A9A;
+    --color-white: #242428;
+    --color-line: #3A3A3E;
+    --color-error: #FF6B6B;
+    --color-accent: #E06B94;
+    --color-ink: #E8E8E8;
+    --color-mid: #6E6E72;
+    --color-red: #FF6B6B;
+    --color-warning: #F5A623;
+    --color-border: #3A3A3E;
+    --color-primary: #5B9BF7;
+    --color-silver: #3A3A3E;
+    --color-on-accent: #FFFFFF;
+    --color-error-bg: #3D1F1F;
+    --color-admin-header: #111114;
+}
+
+html.dark-mode .form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23E8E8E8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
 }
 
 /* ========================================
@@ -142,7 +178,7 @@ a {
    5. BUTTONS
    ======================================== */
 .btn-primary {
-    background-color: white;
+    background-color: var(--color-white);
     color: var(--color-accent);
     border: 3px solid var(--color-accent);
     padding: 16px 32px;
@@ -159,11 +195,11 @@ a {
 
 .btn-primary:hover {
     background-color: var(--color-accent);
-    color: white;
+    color: var(--color-on-accent);
 }
 
 .btn-primary:active {
-    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.5);
     transform: translate(1px, 1px);
 }
 
@@ -182,7 +218,7 @@ a {
     padding: 12px 24px;
     font-size: var(--text-lg);
     font-weight: 700;
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
     text-decoration: none;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -197,7 +233,7 @@ a {
 }
 
 .btn-secondary:active {
-    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.5);
     transform: translate(1px, 1px);
 }
 
@@ -212,7 +248,7 @@ a {
 .window {
     background: var(--color-white);
     border: 2px solid var(--color-charcoal);
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.15);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
     margin-bottom: var(--space-7);
 }
 
@@ -243,7 +279,7 @@ a {
 .hero-window {
     background: var(--color-white);
     border: 3px solid var(--color-charcoal);
-    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5);
 }
 
 .hero-title-bar {
@@ -298,7 +334,7 @@ a {
 
 .form-input:focus {
     outline: none;
-    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.3);
 }
 
 .form-input::placeholder {
@@ -323,7 +359,7 @@ a {
 
 .form-select:focus {
     outline: none;
-    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.3);
 }
 
 .form-checkbox {
@@ -358,7 +394,7 @@ a {
 .form-group.error .form-input,
 .form-group.error .form-select {
     border-color: var(--color-error);
-    background: #FFF5F5;
+    background: var(--color-error-bg);
 }
 
 /* ========================================
@@ -533,7 +569,7 @@ a {
 .engineer-card {
     background: var(--color-white);
     border: 2px solid var(--color-charcoal);
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.15);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
 }
 
 .engineer-card-title {
@@ -742,7 +778,8 @@ a {
     align-items: center;
     justify-content: center;
     gap: var(--space-3);
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+    color: var(--color-charcoal);
 }
 
 .google-btn:hover {
@@ -750,7 +787,7 @@ a {
 }
 
 .google-btn:active {
-    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.5);
     transform: translate(1px, 1px);
 }
 
@@ -805,7 +842,7 @@ a {
 
 .alert-error {
     border-color: var(--color-error);
-    background: #FFF5F5;
+    background: var(--color-error-bg);
     color: var(--color-error);
 }
 
@@ -865,7 +902,7 @@ a {
 
 /* Admin Header */
 .admin-header {
-    background: var(--color-charcoal);
+    background: var(--color-admin-header);
 }
 
 .admin-header .logo,
@@ -958,7 +995,7 @@ a {
 }
 
 .admin-row-error td {
-    background: #FFF5F5;
+    background: var(--color-error-bg);
     color: var(--color-error);
 }
 

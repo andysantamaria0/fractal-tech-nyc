@@ -22,11 +22,11 @@ export const STATUS_OPTIONS = [
 export function getStatusColor(status: string): string {
   switch (status) {
     case 'submitted': return 'var(--color-slate)'
-    case 'reviewing': return '#6B7280'
-    case 'posted': return '#2563EB'
-    case 'matched': return '#7C3AED'
-    case 'in_progress': return '#D97706'
-    case 'completed': return '#059669'
+    case 'reviewing': return 'var(--color-mid, #6B7280)'
+    case 'posted': return 'var(--color-primary, #2563EB)'
+    case 'matched': return '#A78BFA'
+    case 'in_progress': return 'var(--color-warning, #D97706)'
+    case 'completed': return '#34D399'
     case 'cancelled': return 'var(--color-error)'
     default: return 'var(--color-charcoal)'
   }

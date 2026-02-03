@@ -346,7 +346,7 @@ export default function EngineerImport({ onImported }: { onImported?: () => void
           <>
             <div style={{ display: 'flex', gap: 'var(--space-4)', marginBottom: 'var(--space-5)' }}>
               <div className="cohort-stat">{rows.length} Total</div>
-              <div className="cohort-stat" style={{ borderColor: 'green' }}>{validCount} Valid</div>
+              <div className="cohort-stat" style={{ borderColor: '#34D399' }}>{validCount} Valid</div>
               {invalidCount > 0 && (
                 <div className="cohort-stat" style={{ borderColor: 'var(--color-error)' }}>{invalidCount} Invalid</div>
               )}
