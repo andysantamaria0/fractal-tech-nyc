@@ -5,28 +5,39 @@ import { useRouter } from 'next/navigation'
 
 export default function RetryOnboardButton({ label = 'Retry Analysis' }: { label?: string }) {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
 
   const retry = async () => {
     setLoading(true)
+    setError('')
     try {
-      await fetch('/api/hiring-spa/onboard', { method: 'POST' })
+      const res = await fetch('/api/hiring-spa/onboard', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Something went wrong')
+        return
+      }
       router.refresh()
     } catch {
-      // Best effort
+      setError('Network error — please try again')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <button
-      className="spa-btn spa-btn-primary"
-      onClick={retry}
-      disabled={loading}
-      style={{ marginTop: 16 }}
-    >
-      {loading ? 'Starting...' : label}
-    </button>
+    <div style={{ marginTop: 16 }}>
+      <button
+        className="spa-btn spa-btn-primary"
+        onClick={retry}
+        disabled={loading}
+      >
+        {loading ? 'Starting...' : label}
+      </button>
+      {error && (
+        <p className="spa-body-small" style={{ color: '#c0392b', marginTop: 8 }}>{error}</p>
+      )}
+    </div>
   )
 }
