@@ -601,3 +601,653 @@
   text-transform: uppercase;
   color: var(--spa-success);
 }
+
+/* =========================================
+   ROLE CARDS
+   ========================================= */
+
+.hiring-spa .spa-role-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spa-space-4);
+}
+
+.hiring-spa .spa-role-card {
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-5) var(--spa-space-6);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.hiring-spa .spa-role-card:hover {
+  border-color: var(--spa-honey-border);
+  box-shadow: var(--spa-shadow-subtle);
+}
+
+.hiring-spa .spa-role-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spa-space-2);
+}
+
+.hiring-spa .spa-role-card-title {
+  font-family: var(--spa-font-serif);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--spa-charcoal);
+  margin: 0;
+}
+
+.hiring-spa .spa-role-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spa-space-4);
+}
+
+.hiring-spa .spa-role-card-source {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--spa-mist);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.hiring-spa .spa-role-card-date {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--spa-mist);
+}
+
+/* Status badges for roles */
+.hiring-spa .spa-badge-draft {
+  background-color: var(--spa-stone-subtle);
+  color: var(--spa-graphite);
+}
+
+.hiring-spa .spa-badge-beautifying {
+  background-color: var(--spa-honey-light);
+  color: var(--spa-match);
+}
+
+.hiring-spa .spa-badge-active {
+  background-color: var(--spa-success-light);
+  color: var(--spa-success);
+}
+
+.hiring-spa .spa-badge-paused {
+  background-color: var(--spa-stone-subtle);
+  color: var(--spa-mist);
+}
+
+.hiring-spa .spa-badge-closed {
+  background-color: var(--spa-stone-light);
+  color: var(--spa-mist);
+}
+
+/* =========================================
+   DIMENSION WEIGHT SLIDERS
+   ========================================= */
+
+.hiring-spa .spa-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spa-space-4);
+}
+
+.hiring-spa .spa-slider-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spa-space-4);
+}
+
+.hiring-spa .spa-slider-label {
+  font-family: var(--spa-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--spa-charcoal);
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.hiring-spa .spa-slider-input {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--spa-stone-light);
+  border-radius: 2px;
+  outline: none;
+}
+
+.hiring-spa .spa-slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--spa-charcoal);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.hiring-spa .spa-slider-input::-webkit-slider-thumb:hover {
+  background: var(--spa-honey);
+}
+
+.hiring-spa .spa-slider-input::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--spa-charcoal);
+  cursor: pointer;
+  border: none;
+}
+
+.hiring-spa .spa-slider-value {
+  font-family: var(--spa-font-mono);
+  font-size: 12px;
+  color: var(--spa-graphite);
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.hiring-spa .spa-slider-total {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spa-space-3);
+  margin-top: var(--spa-space-3);
+  padding-top: var(--spa-space-3);
+  border-top: 1px solid var(--spa-stone-light);
+}
+
+.hiring-spa .spa-slider-total-value {
+  font-family: var(--spa-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.hiring-spa .spa-slider-total-valid {
+  color: var(--spa-success);
+}
+
+.hiring-spa .spa-slider-total-invalid {
+  color: #c0392b;
+}
+
+/* =========================================
+   BEAUTIFIED JD VIEW
+   ========================================= */
+
+.hiring-spa .spa-jd-section {
+  margin-bottom: var(--spa-space-6);
+}
+
+.hiring-spa .spa-jd-section-title {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--spa-honey);
+  margin-bottom: var(--spa-space-4);
+}
+
+.hiring-spa .spa-jd-requirements {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spa-space-3);
+}
+
+.hiring-spa .spa-jd-requirement {
+  padding: var(--spa-space-3) var(--spa-space-4);
+  border-radius: var(--spa-radius);
+  border-left: 3px solid transparent;
+}
+
+.hiring-spa .spa-jd-requirement-essential {
+  background-color: var(--spa-fog);
+  border-left-color: var(--spa-charcoal);
+}
+
+.hiring-spa .spa-jd-requirement-nice {
+  background-color: var(--spa-parchment);
+  border-left-color: var(--spa-honey);
+}
+
+.hiring-spa .spa-jd-requirement-text {
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--spa-charcoal);
+  margin: 0;
+}
+
+.hiring-spa .spa-jd-requirement-caveat {
+  font-family: var(--spa-font-serif);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--spa-graphite);
+  margin: var(--spa-space-1) 0 0;
+}
+
+.hiring-spa .spa-jd-category-label {
+  font-family: var(--spa-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--spa-mist);
+  margin-bottom: var(--spa-space-3);
+  display: block;
+}
+
+.hiring-spa .spa-jd-prose {
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--spa-charcoal);
+}
+
+/* =========================================
+   EMAIL GATE OVERLAY
+   ========================================= */
+
+.hiring-spa .spa-email-gate {
+  position: fixed;
+  inset: 0;
+  background: rgba(232, 228, 223, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+.hiring-spa .spa-email-gate-card {
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-xl);
+  padding: var(--spa-space-7);
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--spa-shadow-elevated);
+}
+
+.hiring-spa .spa-email-gate-title {
+  font-family: var(--spa-font-serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--spa-charcoal);
+  margin: 0 0 var(--spa-space-2);
+}
+
+.hiring-spa .spa-email-gate-subtitle {
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  color: var(--spa-graphite);
+  margin: 0 0 var(--spa-space-6);
+}
+
+.hiring-spa .spa-email-gate-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spa-space-3);
+}
+
+.hiring-spa .spa-email-gate-input {
+  width: 100%;
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--spa-charcoal);
+  background-color: white;
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-sm);
+  padding: var(--spa-space-3) var(--spa-space-4);
+  outline: none;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.hiring-spa .spa-email-gate-input:focus {
+  border-color: var(--spa-honey-border);
+}
+
+.hiring-spa .spa-email-gate-error {
+  font-family: var(--spa-font-mono);
+  font-size: 11px;
+  color: #c0392b;
+}
+
+/* =========================================
+   ROLE DETAIL LAYOUT
+   ========================================= */
+
+.hiring-spa .spa-role-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--spa-space-6);
+}
+
+.hiring-spa .spa-role-detail-actions {
+  display: flex;
+  gap: var(--spa-space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.hiring-spa .spa-role-detail-section {
+  margin-bottom: var(--spa-space-7);
+}
+
+.hiring-spa .spa-inline-actions {
+  display: flex;
+  gap: var(--spa-space-3);
+  align-items: center;
+  margin-top: var(--spa-space-4);
+}
+
+.hiring-spa .spa-copy-link {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--spa-graphite);
+  background: none;
+  border: 1px solid var(--spa-stone-medium);
+  border-radius: var(--spa-radius-sm);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.hiring-spa .spa-copy-link:hover {
+  color: var(--spa-charcoal);
+  border-color: var(--spa-charcoal);
+}
+
+.hiring-spa .spa-select {
+  font-family: var(--spa-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--spa-charcoal);
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-sm);
+  padding: 8px 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.hiring-spa .spa-select:focus {
+  border-color: var(--spa-honey-border);
+}
+
+/* Challenge toggle */
+.hiring-spa .spa-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spa-space-3);
+}
+
+.hiring-spa .spa-toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background-color: var(--spa-stone-light);
+  border-radius: 11px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+  padding: 0;
+}
+
+.hiring-spa .spa-toggle-active {
+  background-color: var(--spa-honey);
+}
+
+.hiring-spa .spa-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 150ms ease;
+}
+
+.hiring-spa .spa-toggle-active .spa-toggle-knob {
+  transform: translateX(18px);
+}
+
+/* =========================================
+   SLIDER ENDCAPS & SUMMARY (Feature 1)
+   ========================================= */
+
+.hiring-spa .spa-slider-endcap {
+  font-family: var(--spa-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  color: var(--spa-mist);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.hiring-spa .spa-slider-summary {
+  font-family: var(--spa-font-serif);
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.7;
+  color: var(--spa-graphite);
+  background-color: var(--spa-parchment);
+  border-left: 3px solid var(--spa-honey);
+  border-radius: var(--spa-radius);
+  padding: var(--spa-space-3) var(--spa-space-4);
+  margin-top: var(--spa-space-4);
+}
+
+.hiring-spa .spa-slider-status {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--spa-success);
+  margin-top: var(--spa-space-3);
+}
+
+/* =========================================
+   INTERACTIVE JD FEEDBACK (Feature 2)
+   ========================================= */
+
+.hiring-spa .spa-jd-req-confirmed {
+  border-left-color: var(--spa-success) !important;
+  background-color: var(--spa-success-light) !important;
+}
+
+.hiring-spa .spa-jd-req-rejected {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.hiring-spa .spa-jd-req-actions,
+.hiring-spa .spa-jd-prose-actions {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spa-space-2);
+  flex-shrink: 0;
+  margin-top: var(--spa-space-2);
+}
+
+.hiring-spa .spa-jd-action-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--spa-graphite);
+  transition: background-color 150ms ease, border-color 150ms ease;
+  padding: 0;
+}
+
+.hiring-spa .spa-jd-action-btn:hover {
+  border-color: var(--spa-stone-border);
+  background-color: var(--spa-stone-light);
+}
+
+.hiring-spa .spa-jd-action-active {
+  background-color: var(--spa-success-light);
+  border-color: var(--spa-success);
+  color: var(--spa-success);
+}
+
+.hiring-spa .spa-jd-action-active-reject {
+  background-color: rgba(192, 57, 43, 0.1);
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+.hiring-spa .spa-jd-note-display {
+  font-family: var(--spa-font-serif);
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--spa-graphite);
+  background-color: var(--spa-parchment);
+  border-left: 3px solid var(--spa-honey);
+  border-radius: var(--spa-radius);
+  padding: var(--spa-space-2) var(--spa-space-3);
+  margin-top: var(--spa-space-2);
+}
+
+.hiring-spa .spa-jd-regenerate {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--spa-space-5);
+  margin-top: var(--spa-space-5);
+  border-top: 1px solid var(--spa-stone-light);
+}
+
+/* =========================================
+   ENGINEER MATCH CARDS
+   ========================================= */
+
+.hiring-spa .spa-match-card {
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-lg);
+  overflow: hidden;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.hiring-spa .spa-match-card:hover {
+  border-color: var(--spa-honey-border);
+}
+
+.hiring-spa .spa-match-card-expanded {
+  box-shadow: var(--spa-shadow);
+}
+
+.hiring-spa .spa-match-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spa-space-4) var(--spa-space-5);
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.hiring-spa .spa-match-card-header:hover {
+  background-color: var(--spa-stone-light);
+}
+
+.hiring-spa .spa-match-score-badge {
+  font-family: var(--spa-font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--spa-match);
+  background-color: var(--spa-honey-light);
+  padding: 6px 14px;
+  border-radius: var(--spa-radius-sm);
+  flex-shrink: 0;
+}
+
+.hiring-spa .spa-match-card-detail {
+  padding: 0 var(--spa-space-5) var(--spa-space-5);
+  border-top: 1px solid var(--spa-stone-light);
+}
+
+.hiring-spa .spa-match-highlight {
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.7;
+  color: var(--spa-graphite);
+  background-color: var(--spa-parchment);
+  border-left: 3px solid var(--spa-honey);
+  border-radius: var(--spa-radius);
+  padding: var(--spa-space-3) var(--spa-space-4);
+  margin-top: var(--spa-space-4);
+}
+
+.hiring-spa .spa-match-dimension-row {
+  margin-bottom: var(--spa-space-4);
+}
+
+.hiring-spa .spa-match-dimension-bar {
+  height: 6px;
+  background-color: var(--spa-stone-light);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.hiring-spa .spa-match-dimension-bar-fill {
+  height: 100%;
+  background-color: var(--spa-honey);
+  border-radius: 3px;
+  transition: width 300ms ease;
+}
+
+.hiring-spa .spa-match-actions {
+  display: flex;
+  gap: var(--spa-space-3);
+  align-items: center;
+  margin-top: var(--spa-space-5);
+  padding-top: var(--spa-space-4);
+  border-top: 1px solid var(--spa-stone-light);
+}
+
+.hiring-spa .spa-match-passed {
+  opacity: 0.5;
+}
+
+.hiring-spa .spa-match-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spa-space-4);
+}

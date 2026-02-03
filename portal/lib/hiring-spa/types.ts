@@ -125,19 +125,52 @@ export interface BeautifiedJD {
 }
 
 export interface DimensionWeights {
-  technical_skills: number
-  culture_fit: number
-  experience_level: number
-  growth_potential: number
-  collaboration: number
+  mission: number
+  technical: number
+  culture: number
+  environment: number
+  dna: number
 }
 
 export interface DimensionWeightsRaw {
-  technical_skills: number
-  culture_fit: number
-  experience_level: number
-  growth_potential: number
-  collaboration: number
+  mission: number
+  technical: number
+  culture: number
+  environment: number
+  dna: number
+}
+
+// Match types
+
+export type MatchDecision = 'moved_forward' | 'passed'
+
+export type ChallengeStatus = 'not_sent' | 'sent' | 'submitted' | 'reviewed'
+
+export interface MatchReasoning {
+  mission: string
+  technical: string
+  culture: string
+  environment: string
+  dna: string
+}
+
+export interface HiringSpaMatch {
+  id: string
+  role_id: string
+  engineer_id: string
+  overall_score: number
+  dimension_scores: DimensionWeights
+  reasoning: MatchReasoning
+  highlight_quote: string | null
+  display_rank: number
+  decision: MatchDecision | null
+  decision_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface MatchWithEngineer extends HiringSpaMatch {
+  engineer: EngineerProfileSpa
 }
 
 // JD feedback types

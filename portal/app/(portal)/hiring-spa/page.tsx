@@ -46,6 +46,48 @@ async function getRecentRoles(profileId: string): Promise<HiringRole[]> {
   return (roles as HiringRole[]) || []
 }
 
+async function getPendingMatchCount(profileId: string): Promise<{ total: number; byRole: { roleId: string; roleTitle: string; count: number }[] }> {
+  if (!isSupabaseConfigured) {
+    return { total: 0, byRole: [] }
+  }
+
+  const { createClient } = await import('@/lib/supabase/server')
+  const supabase = await createClient()
+
+  // Get roles for this profile
+  const { data: roles } = await supabase
+    .from('hiring_roles')
+    .select('id, title')
+    .eq('hiring_profile_id', profileId)
+
+  if (!roles || roles.length === 0) {
+    return { total: 0, byRole: [] }
+  }
+
+  const roleIds = roles.map(r => r.id)
+
+  // Get pending matches (no decision yet)
+  const { data: matches } = await supabase
+    .from('hiring_spa_matches')
+    .select('id, role_id')
+    .in('role_id', roleIds)
+    .is('decision', null)
+
+  if (!matches || matches.length === 0) {
+    return { total: 0, byRole: [] }
+  }
+
+  const byRole = roles
+    .map(r => ({
+      roleId: r.id,
+      roleTitle: r.title,
+      count: matches.filter(m => m.role_id === r.id).length,
+    }))
+    .filter(r => r.count > 0)
+
+  return { total: matches.length, byRole }
+}
+
 function countSavedSections(profile: HiringProfile): number {
   let count = 0
   if (profile.culture_answers) count++
@@ -57,6 +99,7 @@ function countSavedSections(profile: HiringProfile): number {
 
 async function RolesAndProfile({ profile }: { profile: HiringProfile }) {
   const roles = await getRecentRoles(profile.id)
+  const matchInfo = await getPendingMatchCount(profile.id)
 
   return (
     <div>
@@ -99,13 +142,36 @@ async function RolesAndProfile({ profile }: { profile: HiringProfile }) {
         )}
       </div>
 
-      {/* Engineer Matches skeleton - Phase 2 */}
+      {/* Engineer Matches */}
       <div style={{ marginTop: 48 }}>
-        <p className="spa-label" style={{ marginBottom: 16 }}>Coming Soon</p>
-        <div className="spa-skeleton">
-          <p className="spa-heading-3" style={{ opacity: 0.5, marginBottom: 4 }}>Engineer Matches</p>
-          <div className="spa-skeleton-text" style={{ width: '45%' }} />
-        </div>
+        <p className="spa-label-emphasis" style={{ marginBottom: 16 }}>Engineer Matches</p>
+        {matchInfo.total === 0 ? (
+          <div className="spa-card" style={{ textAlign: 'center' }}>
+            <p className="spa-body-muted">No pending matches yet. Matches will appear here once they&apos;re computed for your roles.</p>
+          </div>
+        ) : (
+          <div className="spa-card-accent">
+            <p className="spa-heading-3" style={{ marginBottom: 8 }}>
+              {matchInfo.total} pending {matchInfo.total === 1 ? 'match' : 'matches'}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {matchInfo.byRole.map(r => (
+                <Link
+                  key={r.roleId}
+                  href={`/hiring-spa/roles/${r.roleId}`}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span className="spa-body-small">{r.roleTitle}</span>
+                    <span className="spa-badge spa-badge-honey">
+                      {r.count} {r.count === 1 ? 'match' : 'matches'}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
