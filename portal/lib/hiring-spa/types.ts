@@ -165,6 +165,8 @@ export interface HiringSpaMatch {
   display_rank: number
   decision: MatchDecision | null
   decision_at: string | null
+  challenge_response: 'accepted' | 'declined' | null
+  challenge_response_at: string | null
   created_at: string
   updated_at: string
 }

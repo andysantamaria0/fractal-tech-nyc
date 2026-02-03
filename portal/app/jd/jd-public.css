@@ -1,0 +1,165 @@
+/**
+ * Public JD Page — Standalone stylesheet
+ * Imports design tokens from hiring-spa scope.
+ * Minimal layout for unauthenticated viewers.
+ */
+
+.jd-public {
+  /* Reuse spa design tokens */
+  --spa-platinum: #E8E4DF;
+  --spa-fog: #F7F5F2;
+  --spa-parchment: #FAF8F5;
+  --spa-honey: #C9A86C;
+  --spa-stone: #A69B8D;
+  --spa-charcoal: #2C2C2C;
+  --spa-graphite: #5C5C5C;
+  --spa-mist: #9C9C9C;
+  --spa-success: #7A9E7A;
+  --spa-match: #8B7355;
+  --spa-honey-light: rgba(201, 168, 108, 0.20);
+  --spa-honey-subtle: rgba(201, 168, 108, 0.25);
+  --spa-honey-border: rgba(201, 168, 108, 0.30);
+  --spa-stone-light: rgba(166, 155, 141, 0.12);
+  --spa-stone-subtle: rgba(166, 155, 141, 0.15);
+  --spa-stone-medium: rgba(166, 155, 141, 0.25);
+  --spa-stone-border: rgba(166, 155, 141, 0.40);
+
+  --spa-font-serif: Georgia, 'Times New Roman', serif;
+  --spa-font-mono: 'SF Mono', Monaco, Inconsolata, 'Fira Code', monospace;
+
+  --spa-space-1: 4px;
+  --spa-space-2: 8px;
+  --spa-space-3: 12px;
+  --spa-space-4: 16px;
+  --spa-space-5: 24px;
+  --spa-space-6: 32px;
+  --spa-space-7: 48px;
+  --spa-space-8: 64px;
+
+  --spa-radius-sm: 4px;
+  --spa-radius: 6px;
+  --spa-radius-lg: 8px;
+  --spa-radius-xl: 12px;
+
+  --spa-shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --spa-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --spa-shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--spa-charcoal);
+  background-color: var(--spa-platinum);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Force light mode */
+[data-theme="dark"] .jd-public {
+  color: var(--spa-charcoal);
+  background-color: var(--spa-platinum);
+}
+
+.jd-public-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: var(--spa-space-7);
+}
+
+.jd-public-header {
+  margin-bottom: var(--spa-space-7);
+  text-align: center;
+}
+
+.jd-public-company {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--spa-honey);
+  margin-bottom: var(--spa-space-2);
+}
+
+.jd-public-title {
+  font-family: var(--spa-font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--spa-charcoal);
+  margin: 0;
+}
+
+.jd-public-powered {
+  font-family: var(--spa-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--spa-mist);
+  text-align: center;
+  margin-top: var(--spa-space-8);
+  padding-top: var(--spa-space-5);
+  border-top: 1px solid var(--spa-stone-light);
+}
+
+/* =========================================
+   MATCH PERCENTAGE BANNER
+   ========================================= */
+
+.jd-match-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--spa-space-3);
+  background-color: var(--spa-parchment);
+  border: 1px solid var(--spa-honey-border);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-4) var(--spa-space-5);
+  margin-bottom: var(--spa-space-6);
+}
+
+.jd-match-banner-score {
+  font-family: var(--spa-font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--spa-match);
+  letter-spacing: -0.02em;
+}
+
+.jd-match-banner-text {
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  color: var(--spa-graphite);
+}
+
+/* =========================================
+   CHALLENGE CARD
+   ========================================= */
+
+.jd-challenge-card {
+  background-color: var(--spa-fog);
+  border: 1px solid var(--spa-stone-light);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-5) var(--spa-space-6);
+  margin-top: var(--spa-space-7);
+}
+
+.jd-challenge-prompt {
+  font-family: var(--spa-font-serif);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--spa-charcoal);
+  margin: 0 0 var(--spa-space-5);
+}
+
+.jd-challenge-actions {
+  display: flex;
+  gap: var(--spa-space-3);
+}
+
+.jd-challenge-confirmation {
+  background-color: var(--spa-parchment);
+  border: 1px solid var(--spa-honey-border);
+  border-radius: var(--spa-radius-lg);
+  padding: var(--spa-space-4) var(--spa-space-5);
+  margin-top: var(--spa-space-7);
+  text-align: center;
+}

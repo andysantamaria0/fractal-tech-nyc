@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { computeMatchesForRole } from '@/lib/hiring-spa/matching'
 import type { HiringRole, DimensionWeights, DimensionWeightsRaw, RoleStatus, JDFeedback } from '@/lib/hiring-spa/types'
 
 const VALID_STATUSES: RoleStatus[] = ['draft', 'beautifying', 'active', 'paused', 'closed']
@@ -198,6 +199,11 @@ export async function PATCH(
     if (error) {
       console.error('Error updating role:', error)
       return NextResponse.json({ error: 'Failed to update role' }, { status: 500 })
+    }
+
+    // If dimension weights changed, recompute matches in background
+    if (dimension_weights) {
+      createServiceClient().then(sc => computeMatchesForRole(id, sc)).catch(console.error)
     }
 
     return NextResponse.json({ role: role as HiringRole })
