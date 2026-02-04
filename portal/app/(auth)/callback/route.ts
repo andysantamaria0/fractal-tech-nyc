@@ -12,6 +12,10 @@ export async function GET(request: Request) {
 
   if (code) {
     const cookieStore = await cookies()
+    // Buffer cookies so we can apply them to the redirect response directly.
+    // Relying solely on cookieStore.set() can silently fail to attach cookies
+    // to NextResponse.redirect(), causing the session to be lost on redirect.
+    const cookieBuffer: { name: string; value: string; options?: Record<string, unknown> }[] = []
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,13 +26,14 @@ export async function GET(request: Request) {
             return cookieStore.getAll()
           },
           setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieBuffer.push({ name, value, options })
+              try {
                 cookieStore.set(name, value, options)
-              )
-            } catch {
-              // Ignore — called from Server Component
-            }
+              } catch {
+                // Ignore — called from Server Component
+              }
+            })
           },
         },
       }
@@ -41,6 +46,8 @@ export async function GET(request: Request) {
     }
 
     if (!error) {
+      let redirectPath = next
+
       // Check if user has a profile already
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -52,11 +59,15 @@ export async function GET(request: Request) {
 
         // If no profile, redirect to profile completion
         if (!profile) {
-          return buildRedirect(request, origin, '/complete-profile')
+          redirectPath = '/complete-profile'
         }
       }
 
-      return buildRedirect(request, origin, next)
+      const response = buildRedirect(request, origin, redirectPath)
+      cookieBuffer.forEach(({ name, value, options }) => {
+        response.cookies.set(name, value, options as Record<string, unknown>)
+      })
+      return response
     }
   }
 
