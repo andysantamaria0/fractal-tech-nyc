@@ -44,7 +44,7 @@ export default function AdminEngineersPage() {
   // Filters
   const [search, setSearch] = useState('')
   const [focusFilter, setFocusFilter] = useState('')
-  const [cohortFilter, setCohortFilter] = useState('')
+  const [cohortFilter, setCohortFilter] = useState('sp2026')
   const [availableOnly, setAvailableOnly] = useState(false)
 
   // AMA state
