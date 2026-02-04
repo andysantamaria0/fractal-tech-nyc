@@ -327,6 +327,7 @@ export interface EngineerProfileSummary {
 export interface EngineerProfileSpa {
   id: string
   engineer_id: string | null
+  auth_user_id: string | null
   name: string
   email: string
   linkedin_url: string | null
@@ -343,9 +344,62 @@ export interface EngineerProfileSpa {
   growth_areas: GrowthAreasAnswers | null
   deal_breakers: DealBreakersAnswers | null
   profile_summary: EngineerProfileSummary | null
+  priority_ratings: PriorityRatings | null
   status: EngineerProfileStatus
   created_at: string
   updated_at: string
+}
+
+// Priority ratings for engineer job matching
+export interface PriorityRatings {
+  work_life_balance: number // 1-5
+  culture: number // 1-5
+  mission_driven: number // 1-5
+  technical_challenges: number // 1-5
+}
+
+// Scanned jobs from job-jr
+
+export interface ScannedJob {
+  id: string
+  company_name: string
+  company_domain: string
+  job_title: string
+  job_url: string
+  job_board_source: string | null
+  location: string | null
+  date_posted: string | null
+  description: string | null
+  hubspot_link: string | null
+  is_active: boolean
+  first_seen_at: string
+  last_seen_at: string
+}
+
+// Engineer job feedback types
+
+export type EngineerJobFeedback = 'not_a_fit' | 'applied'
+
+export interface EngineerJobMatch {
+  id: string
+  engineer_profile_id: string
+  scanned_job_id: string
+  overall_score: number
+  dimension_scores: DimensionWeights
+  reasoning: MatchReasoning
+  highlight_quote: string | null
+  display_rank: number | null
+  feedback: EngineerJobFeedback | null
+  feedback_reason: string | null
+  feedback_at: string | null
+  applied_at: string | null
+  batch_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface EngineerJobMatchWithJob extends EngineerJobMatch {
+  scanned_job: ScannedJob
 }
 
 // ATS types

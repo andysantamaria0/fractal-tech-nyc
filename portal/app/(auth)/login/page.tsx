@@ -46,6 +46,17 @@ export default function LoginPage() {
       trackEvent('user_logged_in', { auth_method: 'email' })
     }
 
+    // Determine redirect based on user type
+    try {
+      const res = await fetch('/api/auth/user-type')
+      const { userType } = await res.json()
+      if (userType === 'engineer') {
+        router.push('/engineer/dashboard')
+        return
+      }
+    } catch {
+      // Fall through to default
+    }
     router.push('/dashboard')
   }
 

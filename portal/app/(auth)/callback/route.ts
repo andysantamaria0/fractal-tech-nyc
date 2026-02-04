@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
@@ -48,18 +49,54 @@ export async function GET(request: Request) {
     if (!error) {
       let redirectPath = next
 
-      // Check if user has a profile already
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', user.id)
+        // Use service client to check engineer tables (bypasses RLS)
+        const serviceClient = createSupabaseJsClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        )
+
+        // Check engineer_profiles_spa by auth_user_id or email
+        const { data: engineerProfile } = await serviceClient
+          .from('engineer_profiles_spa')
+          .select('id, auth_user_id')
+          .or(`auth_user_id.eq.${user.id},email.eq.${user.email}`)
+          .limit(1)
           .single()
 
-        // If no profile, redirect to profile completion
-        if (!profile) {
-          redirectPath = '/complete-profile'
+        if (engineerProfile) {
+          // Link auth_user_id if not already set
+          if (!engineerProfile.auth_user_id) {
+            await serviceClient
+              .from('engineer_profiles_spa')
+              .update({ auth_user_id: user.id })
+              .eq('id', engineerProfile.id)
+          }
+          redirectPath = '/engineer/dashboard'
+        } else {
+          // Check engineers table by email (needs onboarding)
+          const { data: engineer } = await serviceClient
+            .from('engineers')
+            .select('id')
+            .eq('email', user.email!)
+            .limit(1)
+            .single()
+
+          if (engineer) {
+            redirectPath = '/engineer/onboard'
+          } else {
+            // Company flow: check for existing profile
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('id', user.id)
+              .single()
+
+            if (!profile) {
+              redirectPath = '/complete-profile'
+            }
+          }
         }
       }
 

@@ -111,7 +111,21 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname === '/signup' ||
       request.nextUrl.pathname === '/early-access')
   ) {
-    // Check if user has a profile — if not, send them to complete it
+    // Check if user is an engineer first
+    const { data: engineerProfile } = await supabase
+      .from('engineer_profiles_spa')
+      .select('id')
+      .eq('auth_user_id', user.id)
+      .limit(1)
+      .single()
+
+    if (engineerProfile) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/engineer/dashboard'
+      return NextResponse.redirect(url)
+    }
+
+    // Check if user has a company profile — if not, send them to complete it
     const { data: profile } = await supabase
       .from('profiles')
       .select('id')

@@ -133,7 +133,7 @@ export default function SettingsPage() {
               <p style={{ color: 'var(--color-slate)', marginBottom: 'var(--space-5)' }}>
                 If you&apos;re a Fractal engineer, manage your public profile that companies see.
               </p>
-              <Link href="/engineer/profile" className="btn-secondary">
+              <Link href="/engineer/legacy-profile" className="btn-secondary">
                 Edit Engineer Profile
               </Link>
             </div>
