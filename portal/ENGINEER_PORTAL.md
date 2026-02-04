@@ -87,3 +87,26 @@ We'd rather show you 8 real fits than 50 middling jobs. Every match clears a qua
 - Feedback improves future matches — the system learns from you
 - Matches update when your preferences change
 - From sign-up to matched in ~10 minutes
+
+---
+
+### Analytics — PostHog Event Tracking
+
+Server-side event tracking via `posthog-node` across all engineer API routes. Events use the Supabase auth `user.id` as the PostHog distinct ID.
+
+| Event | Trigger | Properties |
+|-------|---------|------------|
+| `engineer_onboarded` | Engineer completes onboarding form | name, email, has_github, has_portfolio, has_linkedin, has_resume |
+| `engineer_questionnaire_submitted` | Engineer submits or edits questionnaire | engineer_profile_id, is_editing, crawl_pending |
+| `engineer_applied` | Engineer marks a match as "I Applied" | match_id, engineer_profile_id |
+| `engineer_not_a_fit` | Engineer marks a match as "Not a Fit" | match_id, engineer_profile_id, category, reason |
+| `engineer_profile_updated` | Engineer updates profile links | fields_updated, urls_changed |
+| `engineer_preference_added` | Engineer adds an exclusion rule | type, value |
+| `engineer_preference_removed` | Engineer removes an exclusion rule | type, value |
+
+**Funnel stages:** login → `engineer_onboarded` → `engineer_questionnaire_submitted` → `engineer_applied` / `engineer_not_a_fit`
+
+**Additional integrations:**
+- **Discord webhooks** — real-time notifications for new signups and matches computed
+- **Discord slash commands** — `/status [email]` and `/stats` for querying engineer data
+- **Admin dashboard** at `/admin/hiring-spa` — aggregate stats, match metrics, needs-attention alerts
