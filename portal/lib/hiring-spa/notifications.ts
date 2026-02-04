@@ -183,7 +183,7 @@ export async function notifyEngineerMatchesReady(
     throw new Error(`No email for engineer profile: ${engineerProfileId}`)
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://partners.fractaltech.nyc'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://eng.fractaltech.nyc'
   const dashboardUrl = `${baseUrl}/engineer/matches`
 
   const html = MatchesReadyEmail({
