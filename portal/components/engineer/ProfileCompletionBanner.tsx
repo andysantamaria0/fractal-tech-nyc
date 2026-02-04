@@ -34,8 +34,8 @@ export default function ProfileCompletionBanner({ profile }: Props) {
             </div>
           )}
         </div>
-        <Link href="/engineer/profile" className="btn-primary" style={{ whiteSpace: 'nowrap' }}>
-          Edit Profile
+        <Link href={profile.status === 'draft' ? '/engineer/onboard' : '/engineer/profile'} className="btn-primary" style={{ whiteSpace: 'nowrap' }}>
+          {profile.status === 'draft' ? 'Complete Profile' : 'Edit Profile'}
         </Link>
       </div>
     )

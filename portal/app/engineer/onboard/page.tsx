@@ -35,11 +35,11 @@ export default function EngineerOnboardPage() {
         return
       }
 
-      // Check if already has profile
+      // Check if already has profile — only redirect if past onboarding
       const res = await fetch('/api/engineer/me')
       if (res.ok) {
         const data = await res.json()
-        if (data.profile) {
+        if (data.profile && data.profile.status !== 'draft') {
           router.push('/engineer/dashboard')
           return
         }
@@ -115,7 +115,7 @@ export default function EngineerOnboardPage() {
   }
 
   return (
-    <div className="auth-page">
+    <div className="auth-page engineer-onboard-page">
       <div className="auth-window">
         <div className="hero-window">
           <div className="hero-title-bar">ENGINEER ONBOARDING</div>

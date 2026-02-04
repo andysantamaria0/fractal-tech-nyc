@@ -1944,8 +1944,12 @@ a {
 /* Onboard Page */
 .engineer-onboard-page {
     padding: var(--space-7) 0;
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
+}
+
+.engineer-onboard-page .auth-window {
+    max-width: 720px;
 }
 
 .engineer-onboard-page h1 {
