@@ -1,6 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { runEngineerCrawlPipeline } from '@/lib/hiring-spa/engineer-crawl'
+
+export const maxDuration = 60
 
 export async function POST(request: Request) {
   try {
@@ -23,28 +25,68 @@ export async function POST(request: Request) {
     // Check if profile already exists for this auth user
     const { data: existing } = await serviceClient
       .from('engineer_profiles_spa')
-      .select('id')
+      .select('id, status, github_url, portfolio_url')
       .eq('auth_user_id', user.id)
       .single()
 
     if (existing) {
+      // Update URLs and trigger crawl if needed
+      const needsCrawl = (github_url || portfolio_url) &&
+        !existing.github_url && !existing.portfolio_url &&
+        existing.status === 'draft'
+
+      await serviceClient
+        .from('engineer_profiles_spa')
+        .update({
+          name: name.trim(),
+          linkedin_url: linkedin_url || null,
+          github_url: github_url || null,
+          portfolio_url: portfolio_url || null,
+          resume_url: resume_url || null,
+          ...(needsCrawl ? { status: 'crawling' } : {}),
+        })
+        .eq('id', existing.id)
+
+      if (needsCrawl) {
+        after(async () => {
+          await runEngineerCrawlPipeline(existing.id, github_url || null, portfolio_url || null)
+        })
+      }
+
       return NextResponse.json({ profile: { id: existing.id } })
     }
 
     // Check if profile exists by email (link it)
     const { data: emailMatch } = await serviceClient
       .from('engineer_profiles_spa')
-      .select('id, auth_user_id')
+      .select('id, auth_user_id, status, github_url, portfolio_url')
       .eq('email', user.email!)
       .single()
 
     if (emailMatch) {
-      if (!emailMatch.auth_user_id) {
-        await serviceClient
-          .from('engineer_profiles_spa')
-          .update({ auth_user_id: user.id })
-          .eq('id', emailMatch.id)
+      const needsCrawl = (github_url || portfolio_url) &&
+        !emailMatch.github_url && !emailMatch.portfolio_url &&
+        emailMatch.status === 'draft'
+
+      await serviceClient
+        .from('engineer_profiles_spa')
+        .update({
+          auth_user_id: user.id,
+          name: name.trim(),
+          linkedin_url: linkedin_url || null,
+          github_url: github_url || null,
+          portfolio_url: portfolio_url || null,
+          resume_url: resume_url || null,
+          ...(needsCrawl ? { status: 'crawling' } : {}),
+        })
+        .eq('id', emailMatch.id)
+
+      if (needsCrawl) {
+        after(async () => {
+          await runEngineerCrawlPipeline(emailMatch.id, github_url || null, portfolio_url || null)
+        })
       }
+
       return NextResponse.json({ profile: { id: emailMatch.id } })
     }
 
@@ -77,9 +119,9 @@ export async function POST(request: Request) {
         .update({ status: 'crawling' })
         .eq('id', profile.id)
 
-      runEngineerCrawlPipeline(profile.id, github_url || null, portfolio_url || null).catch(
-        err => console.error('[engineer/onboard] Crawl error:', err),
-      )
+      after(async () => {
+        await runEngineerCrawlPipeline(profile.id, github_url || null, portfolio_url || null)
+      })
     } else {
       await serviceClient
         .from('engineer_profiles_spa')
