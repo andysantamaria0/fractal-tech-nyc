@@ -7,6 +7,14 @@ const isSupabaseConfigured =
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('xxx.supabase.co')
 
 export async function middleware(request: NextRequest) {
+  // Engineer subdomain: redirect root to engineer login
+  const host = request.headers.get('host') || ''
+  if (host.startsWith('eng.') && request.nextUrl.pathname === '/') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/engineer/login'
+    return NextResponse.redirect(url)
+  }
+
   const isDev = process.env.NODE_ENV !== 'production'
 
   if (!isDev && !isSupabaseConfigured) {
