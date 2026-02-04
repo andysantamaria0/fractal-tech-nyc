@@ -106,6 +106,15 @@ Server-side event tracking via `posthog-node` across all engineer API routes. Ev
 
 **Funnel stages:** login → `engineer_onboarded` → `engineer_questionnaire_submitted` → `engineer_applied` / `engineer_not_a_fit`
 
+**PostHog Dashboard:** [Engineer Portal Dashboard](https://us.posthog.com/project/302478/dashboard/1207101)
+
+Includes 5 insights:
+1. **Engineer Onboarding Funnel** — onboarded → questionnaire → applied conversion
+2. **Match Feedback — Applied vs Not a Fit** — weekly trends
+3. **Not a Fit — Reasons Breakdown** — by category (wrong location, company, seniority, etc.)
+4. **Profile & Preference Activity** — link updates and exclusion rule changes
+5. **Weekly Active Engineers** — unique users per event per week
+
 **Additional integrations:**
 - **Discord webhooks** — real-time notifications for new signups and matches computed
 - **Discord slash commands** — `/status [email]` and `/stats` for querying engineer data
