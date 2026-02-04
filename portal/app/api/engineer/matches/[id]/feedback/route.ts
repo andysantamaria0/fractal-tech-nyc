@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { trackServerEvent } from '@/lib/posthog-server'
 
 export async function POST(
   request: Request,
@@ -68,6 +69,12 @@ export async function POST(
       console.error('[engineer/matches/feedback] Update error:', updateError)
       return NextResponse.json({ error: 'Failed to record feedback' }, { status: 500 })
     }
+
+    trackServerEvent(user.id, feedback === 'applied' ? 'engineer_applied' : 'engineer_not_a_fit', {
+      match_id: matchId,
+      engineer_profile_id: profile.id,
+      ...(feedback === 'not_a_fit' && { category, reason: reason || undefined }),
+    })
 
     return NextResponse.json({ success: true })
   } catch (err) {

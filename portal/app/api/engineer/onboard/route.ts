@@ -1,6 +1,8 @@
 import { NextResponse, after } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { runEngineerCrawlPipeline } from '@/lib/hiring-spa/engineer-crawl'
+import { notifyDiscordEngineerSignup } from '@/lib/discord'
+import { trackServerEvent } from '@/lib/posthog-server'
 
 export const maxDuration = 60
 
@@ -111,6 +113,24 @@ export async function POST(request: Request) {
       console.error('[engineer/onboard] Insert error:', insertError)
       return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 })
     }
+
+    // Track onboard event
+    trackServerEvent(user.id, 'engineer_onboarded', {
+      name: name.trim(),
+      email: user.email,
+      has_github: !!github_url,
+      has_portfolio: !!portfolio_url,
+      has_linkedin: !!linkedin_url,
+      has_resume: !!resume_url,
+    })
+
+    // Notify Discord of new signup (fire-and-forget)
+    notifyDiscordEngineerSignup({
+      name: name.trim(),
+      email: user.email!,
+      githubUrl: github_url,
+      linkedinUrl: linkedin_url,
+    }).catch(err => console.error('[engineer/onboard] Discord notify error:', err))
 
     // Trigger crawl if URLs provided
     if (github_url || portfolio_url) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { MatchingPreferences } from '@/lib/hiring-spa/types'
+import { trackServerEvent } from '@/lib/posthog-server'
 
 const VALID_TYPES: (keyof MatchingPreferences)[] = [
   'excluded_locations',
@@ -106,6 +107,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to save preference' }, { status: 500 })
     }
 
+    trackServerEvent(user.id, 'engineer_preference_added', { type, value: trimmed })
+
     return NextResponse.json({ success: true, preferences: prefs })
   } catch (err) {
     console.error('[engineer/preferences] POST error:', err)
@@ -164,6 +167,8 @@ export async function DELETE(request: Request) {
       console.error('[engineer/preferences] Delete error:', updateError)
       return NextResponse.json({ error: 'Failed to remove preference' }, { status: 500 })
     }
+
+    trackServerEvent(user.id, 'engineer_preference_removed', { type, value })
 
     return NextResponse.json({ success: true, preferences: prefs })
   } catch (err) {

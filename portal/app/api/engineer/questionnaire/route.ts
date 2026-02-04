@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { notifyDiscordMatchesComputed } from '@/lib/discord'
 import { generateEngineerProfileSummary } from '@/lib/hiring-spa/engineer-summary'
 import { computeMatchesForEngineer } from '@/lib/hiring-spa/job-matching'
 import { notifyEngineerMatchesReady } from '@/lib/hiring-spa/notifications'
+import { trackServerEvent } from '@/lib/posthog-server'
 
 export async function POST(request: Request) {
   try {
@@ -32,7 +34,7 @@ export async function POST(request: Request) {
     // Fetch profile
     const { data: profile } = await serviceClient
       .from('engineer_profiles_spa')
-      .select('id, status, engineer_dna')
+      .select('id, name, status, engineer_dna')
       .eq('auth_user_id', user.id)
       .single()
 
@@ -114,10 +116,20 @@ export async function POST(request: Request) {
     computeMatchesForEngineer(profile.id, serviceClient)
       .then(result => {
         if (result.matches.length > 0) {
+          notifyDiscordMatchesComputed({
+            engineerName: profile.name || 'Unknown',
+            matchCount: result.matches.length,
+          }).catch(err => console.error('[engineer/questionnaire] Discord notify error:', err))
           return notifyEngineerMatchesReady(profile.id, result.matches.length, serviceClient)
         }
       })
       .catch(err => console.error('[engineer/questionnaire] Match/notify error:', err))
+
+    trackServerEvent(user.id, 'engineer_questionnaire_submitted', {
+      engineer_profile_id: profile.id,
+      is_editing: profile.status === 'complete',
+      crawl_pending: !crawlDone,
+    })
 
     return NextResponse.json({ success: true })
   } catch (err) {

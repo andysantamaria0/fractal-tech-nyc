@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { runEngineerCrawlPipeline } from '@/lib/hiring-spa/engineer-crawl'
+import { trackServerEvent } from '@/lib/posthog-server'
 
 export async function GET() {
   try {
@@ -71,6 +72,11 @@ export async function PATCH(request: Request) {
     if (updateError) {
       return NextResponse.json({ error: 'Failed to update' }, { status: 500 })
     }
+
+    trackServerEvent(user.id, 'engineer_profile_updated', {
+      fields_updated: Object.keys(updateData),
+      urls_changed: urlsChanged,
+    })
 
     // Re-trigger crawl if URLs changed
     if (urlsChanged) {
