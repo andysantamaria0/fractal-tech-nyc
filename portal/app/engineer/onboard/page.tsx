@@ -92,7 +92,7 @@ export default function EngineerOnboardPage() {
         throw new Error(data.error || 'Failed to create profile')
       }
 
-      router.push('/engineer/dashboard')
+      router.push('/engineer/questionnaire')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setSubmitting(false)

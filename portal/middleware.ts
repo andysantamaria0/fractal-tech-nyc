@@ -72,7 +72,8 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/cycles') ||
       request.nextUrl.pathname.startsWith('/settings') ||
       (request.nextUrl.pathname.startsWith('/engineer') &&
-        !request.nextUrl.pathname.startsWith('/engineer/apply')) ||
+        !request.nextUrl.pathname.startsWith('/engineer/apply') &&
+        !request.nextUrl.pathname.startsWith('/engineer/login')) ||
       request.nextUrl.pathname.startsWith('/complete-profile') ||
       request.nextUrl.pathname.startsWith('/admin') ||
       request.nextUrl.pathname.startsWith('/hiring-spa'))
@@ -119,6 +120,7 @@ export async function middleware(request: NextRequest) {
     user &&
     (request.nextUrl.pathname === '/' ||
       request.nextUrl.pathname === '/login' ||
+      request.nextUrl.pathname === '/engineer/login' ||
       request.nextUrl.pathname === '/signup' ||
       request.nextUrl.pathname === '/early-access')
   ) {

@@ -21,7 +21,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY || !ANTHROPIC_API_KEY) {
 // Set for the scoring function
 process.env.ANTHROPIC_API_KEY = ANTHROPIC_API_KEY
 
-const PROFILE_ID = '5076e614-228b-4f60-8508-a1fd13451ddc'
+const PROFILE_ID = 'ddf45719-ff4c-440c-9dab-5a1dd820082c'
 const TOP_N = 10
 const MIN_DIMENSION_SCORE = 40
 

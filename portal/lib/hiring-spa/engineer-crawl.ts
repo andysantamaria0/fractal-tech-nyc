@@ -1,6 +1,8 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { crawlUrls } from './crawl'
 import { synthesizeEngineerData } from './engineer-synthesis'
+import { generateEngineerProfileSummary } from './engineer-summary'
+import { computeMatchesForEngineer } from './job-matching'
 import type { EngineerCrawlData, GitHubOrgData, GitHubRepoSummary } from './types'
 
 const GITHUB_API = 'https://api.github.com'
@@ -51,7 +53,16 @@ export async function runEngineerCrawlPipeline(
     const { engineerDna, confidence } = await synthesizeEngineerData(crawlData)
     console.log(`[engineer-crawl] Synthesis complete (confidence: ${confidence})`)
 
-    // 4. Save results
+    // 4. Check if questionnaire was already completed while we were crawling
+    const { data: currentProfile } = await serviceClient
+      .from('engineer_profiles_spa')
+      .select('questionnaire_completed_at, priority_ratings, work_preferences, career_growth, strengths, growth_areas, deal_breakers')
+      .eq('id', engineerProfileId)
+      .single()
+
+    const questionnaireAlreadyDone = !!currentProfile?.questionnaire_completed_at
+
+    // 5. Save results — advance to 'complete' if questionnaire is already done
     const { error: saveError } = await serviceClient
       .from('engineer_profiles_spa')
       .update({
@@ -59,7 +70,7 @@ export async function runEngineerCrawlPipeline(
         crawl_error: null,
         crawl_completed_at: new Date().toISOString(),
         engineer_dna: engineerDna,
-        status: 'questionnaire',
+        status: questionnaireAlreadyDone ? 'complete' : 'questionnaire',
       })
       .eq('id', engineerProfileId)
 
@@ -68,6 +79,31 @@ export async function runEngineerCrawlPipeline(
     }
 
     console.log(`[engineer-crawl] Pipeline complete for engineer profile ${engineerProfileId}`)
+
+    // 6. If questionnaire was done while crawling, generate summary and trigger matches
+    if (questionnaireAlreadyDone && currentProfile) {
+      console.log(`[engineer-crawl] Questionnaire already completed — generating summary and computing matches`)
+      try {
+        const summary = await generateEngineerProfileSummary({
+          engineerDna,
+          workPreferences: currentProfile.work_preferences,
+          careerGrowth: currentProfile.career_growth,
+          strengths: currentProfile.strengths,
+          growthAreas: currentProfile.growth_areas,
+          dealBreakers: currentProfile.deal_breakers,
+        })
+        await serviceClient
+          .from('engineer_profiles_spa')
+          .update({ profile_summary: summary })
+          .eq('id', engineerProfileId)
+      } catch (summaryErr) {
+        console.error('[engineer-crawl] Summary generation failed:', summaryErr)
+      }
+
+      computeMatchesForEngineer(engineerProfileId, serviceClient).catch(
+        err => console.error('[engineer-crawl] Match computation error:', err),
+      )
+    }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown pipeline error'
     console.error(`[engineer-crawl] Pipeline failed for ${engineerProfileId}:`, errorMessage)

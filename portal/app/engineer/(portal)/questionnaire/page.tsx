@@ -18,6 +18,7 @@ export default async function EngineerQuestionnairePage() {
   if (!profile) redirect('/engineer/onboard')
 
   const isEditing = profile.status === 'complete'
+  const isCrawling = profile.status === 'crawling'
 
   return (
     <div className="engineer-questionnaire-page">
@@ -29,6 +30,13 @@ export default async function EngineerQuestionnairePage() {
             : 'Step 2 of 3 — Tell us what matters to you so we can find jobs that actually fit. This takes about 5 minutes.'}
         </p>
       </div>
+
+      {isCrawling && (
+        <div className="engineer-crawling-banner">
+          <strong>We&apos;re analyzing your profile in the background.</strong>
+          <p>We&apos;re scanning your GitHub and portfolio to build your technical DNA. In the meantime, help us understand you better through this questionnaire. You&apos;re already beautiful and you earned the spa.</p>
+        </div>
+      )}
 
       {isEditing && (
         <div className="engineer-reanalysis-warning">

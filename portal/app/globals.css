@@ -2040,6 +2040,66 @@ a {
     color: var(--color-warning);
 }
 
+/* Engineer Magic Link Login */
+.engineer-magic-link-sent {
+    text-align: center;
+    padding: var(--space-5) 0;
+}
+
+.engineer-magic-link-sent h1 {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    margin-bottom: var(--space-4);
+}
+
+.engineer-magic-link-sent p {
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--color-slate);
+    margin-bottom: var(--space-4);
+}
+
+.engineer-magic-link-hint {
+    font-size: var(--text-sm) !important;
+    color: var(--color-slate) !important;
+}
+
+.engineer-magic-link-resend {
+    background: none;
+    border: none;
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    color: var(--color-charcoal);
+    padding: 0;
+}
+
+.engineer-magic-link-resend:hover {
+    color: var(--color-accent);
+}
+
+/* Crawling Banner (shown on questionnaire while crawl runs) */
+.engineer-crawling-banner {
+    background: var(--color-white);
+    border: 2px solid var(--color-accent);
+    padding: var(--space-5) var(--space-6);
+    margin-bottom: var(--space-6);
+    line-height: 1.5;
+}
+
+.engineer-crawling-banner strong {
+    display: block;
+    font-size: var(--text-base);
+    margin-bottom: var(--space-2);
+}
+
+.engineer-crawling-banner p {
+    font-size: var(--text-sm);
+    color: var(--color-slate);
+}
+
 /* Profile Questionnaire Link */
 .engineer-profile-questionnaire-link {
     background: var(--color-white);
