@@ -10,6 +10,19 @@ import type {
 } from '@/lib/hiring-spa/types'
 import { FEEDBACK_CATEGORIES } from '@/lib/hiring-spa/types'
 
+const c = {
+  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C',
+  honey: '#C9A86C', match: '#8B7355', stone: '#A69B8D',
+  parchment: '#FAF8F5', fog: '#F7F5F2',
+  stoneLight: 'rgba(166, 155, 141, 0.12)',
+  honeyBorder: 'rgba(201, 168, 108, 0.30)',
+  honeyLight: 'rgba(201, 168, 108, 0.20)',
+}
+const f = {
+  serif: 'Georgia, "Times New Roman", serif',
+  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
+}
+
 const DIMENSION_LABELS: Record<keyof DimensionWeights, string> = {
   mission: 'Mission',
   technical: 'Technical',
@@ -42,6 +55,7 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
   const [addRule, setAddRule] = useState(true)
   const [acting, setActing] = useState(false)
   const [applied, setApplied] = useState(!!match.applied_at)
+  const [reasonFocused, setReasonFocused] = useState(false)
 
   const job = match.scanned_job
 
@@ -105,84 +119,135 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
   }, [])
 
   return (
-    <div className={`engineer-match-card ${expanded ? 'engineer-match-card-expanded' : ''}`}>
+    <div style={{
+      backgroundColor: c.fog, border: `1px solid ${expanded ? c.honeyBorder : c.stoneLight}`,
+      borderRadius: 8, overflow: 'hidden', transition: 'border-color 200ms ease',
+    }}>
       <button
-        className="engineer-match-card-header"
         onClick={() => setExpanded(!expanded)}
         type="button"
+        style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          width: '100%', padding: '20px 24px', border: 'none', backgroundColor: 'transparent',
+          cursor: 'pointer', textAlign: 'left',
+        }}
       >
-        <div className="engineer-match-card-info">
-          <h3>{job.job_title}</h3>
-          <div className="engineer-match-card-company">{job.company_name}</div>
+        <div>
+          <h3 style={{ fontFamily: f.serif, fontSize: 17, fontWeight: 400, color: c.charcoal, margin: '0 0 2px 0' }}>
+            {job.job_title}
+          </h3>
+          <div style={{ fontFamily: f.mono, fontSize: 11, color: c.graphite, letterSpacing: '0.03em' }}>
+            {job.company_name}
+          </div>
           {job.location && (
-            <div className="engineer-match-card-location">{job.location}</div>
+            <div style={{ fontFamily: f.mono, fontSize: 10, color: c.mist, marginTop: 2 }}>
+              {job.location}
+            </div>
           )}
         </div>
-        <div className="engineer-match-score">
+        <div style={{
+          fontFamily: f.mono, fontSize: 22, fontWeight: 500, color: c.match,
+          minWidth: 60, textAlign: 'right',
+        }}>
           {match.overall_score}%
         </div>
       </button>
 
       {expanded && (
-        <div className="engineer-match-card-body">
+        <div style={{ padding: '0 24px 24px 24px' }}>
           {match.highlight_quote && (
-            <div className="engineer-match-highlight">
+            <div style={{
+              fontFamily: f.serif, fontSize: 14, fontStyle: 'italic', color: c.graphite,
+              borderLeft: `3px solid ${c.honey}`, paddingLeft: 16, marginBottom: 24, lineHeight: 1.6,
+            }}>
               {match.highlight_quote}
             </div>
           )}
 
-          <div className="engineer-dimensions">
+          <div style={{ marginBottom: 24 }}>
             {DIMENSION_ORDER.map(key => {
               const score = (match.dimension_scores as DimensionWeights)[key]
               const matchReasoning = (match.reasoning as MatchReasoning)[key]
               return (
-                <div key={key} className="engineer-dimension">
-                  <div className="engineer-dimension-label">
-                    <span>{DIMENSION_LABELS[key]}</span>
-                    <span className="engineer-dimension-score">{score}</span>
+                <div key={key} style={{ marginBottom: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                    <span style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.charcoal }}>
+                      {DIMENSION_LABELS[key]}
+                    </span>
+                    <span style={{ fontFamily: f.mono, fontSize: 11, color: c.match }}>
+                      {score}
+                    </span>
                   </div>
-                  <div className="engineer-dimension-bar">
-                    <div
-                      className="engineer-dimension-fill"
-                      style={{ width: `${score}%` }}
-                    />
+                  <div style={{
+                    height: 4, backgroundColor: c.stoneLight, borderRadius: 2, overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      height: '100%', width: `${score}%`, backgroundColor: c.honey,
+                      borderRadius: 2, transition: 'width 300ms ease',
+                    }} />
                   </div>
                   {matchReasoning && (
-                    <div className="engineer-dimension-reasoning">{matchReasoning}</div>
+                    <div style={{ fontFamily: f.serif, fontSize: 13, color: c.mist, marginTop: 4, lineHeight: 1.5 }}>
+                      {matchReasoning}
+                    </div>
                   )}
                 </div>
               )
             })}
           </div>
 
-          <div style={{ marginBottom: 'var(--space-4)' }}>
-            <a href={job.job_url} target="_blank" rel="noopener noreferrer" className="engineer-match-job-link">
+          <div style={{ marginBottom: 24 }}>
+            <a
+              href={job.job_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontFamily: f.mono, fontSize: 11, letterSpacing: '0.05em',
+                color: c.honey, textDecoration: 'none',
+                borderBottom: `1px solid ${c.honeyBorder}`,
+                paddingBottom: 1,
+              }}
+            >
               View Job Posting
             </a>
             {job.job_board_source && (
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-slate)', marginLeft: 8 }}>via {job.job_board_source}</span>
+              <span style={{ fontFamily: f.mono, fontSize: 10, color: c.mist, marginLeft: 8 }}>
+                via {job.job_board_source}
+              </span>
             )}
           </div>
 
           {feedbackStep === 'picking_category' && (
-            <div className="engineer-feedback-categories">
-              <div className="engineer-feedback-categories-label">Why isn&apos;t this a fit?</div>
-              <div className="engineer-feedback-categories-row">
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontFamily: f.mono, fontSize: 11, letterSpacing: '0.05em', color: c.charcoal, marginBottom: 10 }}>
+                Why isn&apos;t this a fit?
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
                 {FEEDBACK_CATEGORIES.map(cat => (
                   <button
                     key={cat.value}
-                    className="engineer-feedback-category-btn"
                     onClick={() => handleCategorySelect(cat.value)}
                     type="button"
+                    style={{
+                      fontFamily: f.mono, fontSize: 10, letterSpacing: '0.05em',
+                      color: c.graphite, backgroundColor: c.parchment,
+                      border: `1px solid ${c.stoneLight}`, borderRadius: 4,
+                      padding: '8px 14px', cursor: 'pointer',
+                      transition: '150ms ease',
+                    }}
                   >
                     {cat.label}
                   </button>
                 ))}
               </div>
               <button
-                className="engineer-feedback-cancel"
                 onClick={handleCancelFeedback}
                 type="button"
+                style={{
+                  fontFamily: f.mono, fontSize: 10, color: c.mist,
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  padding: 0, textDecoration: 'underline',
+                }}
               >
                 Cancel
               </button>
@@ -190,53 +255,82 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
           )}
 
           {feedbackStep === 'confirming' && (
-            <div className="engineer-feedback-confirm">
-              <div className="engineer-feedback-selected-category">
-                {FEEDBACK_CATEGORIES.find(c => c.value === selectedCategory)?.label}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{
+                fontFamily: f.mono, fontSize: 10, letterSpacing: '0.05em', color: c.honey,
+                backgroundColor: c.honeyLight, display: 'inline-block',
+                borderRadius: 4, padding: '4px 10px', marginBottom: 12,
+              }}>
+                {FEEDBACK_CATEGORIES.find(cat => cat.value === selectedCategory)?.label}
               </div>
 
               {ruleSuggestion && (
-                <label className="engineer-rule-suggestion">
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={addRule}
                     onChange={e => setAddRule(e.target.checked)}
+                    style={{ accentColor: c.honey }}
                   />
-                  <span>{ruleSuggestion.label}</span>
+                  <span style={{ fontFamily: f.serif, fontSize: 13, color: c.graphite }}>
+                    {ruleSuggestion.label}
+                  </span>
                 </label>
               )}
 
-              <div className="engineer-not-a-fit-reason">
-                <textarea
-                  className="form-input"
-                  rows={2}
-                  placeholder="Additional details (optional)"
-                  value={reason}
-                  onChange={e => setReason(e.target.value)}
-                />
-              </div>
+              <textarea
+                rows={2}
+                placeholder="Additional details (optional)"
+                value={reason}
+                onChange={e => setReason(e.target.value)}
+                onFocus={() => setReasonFocused(true)}
+                onBlur={() => setReasonFocused(false)}
+                style={{
+                  width: '100%', boxSizing: 'border-box' as const,
+                  fontFamily: f.serif, fontSize: 14, color: c.charcoal,
+                  backgroundColor: c.parchment,
+                  border: `1px solid ${reasonFocused ? c.honey : c.stoneLight}`,
+                  borderRadius: 6, padding: '10px 14px', outline: 'none',
+                  resize: 'vertical' as const, lineHeight: 1.5,
+                  transition: 'border-color 200ms ease',
+                }}
+              />
             </div>
           )}
 
-          <div className="engineer-match-actions">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {applied ? (
-              <span className="btn-applied">
+              <span style={{
+                fontFamily: f.mono, fontSize: 11, letterSpacing: '0.05em',
+                color: c.match, backgroundColor: c.honeyLight,
+                borderRadius: 4, padding: '10px 20px',
+              }}>
                 &#10003; Applied
               </span>
             ) : (
               <button
-                className="btn-primary"
                 onClick={handleApplied}
                 disabled={acting}
+                style={{
+                  fontFamily: f.mono, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+                  backgroundColor: acting ? c.mist : c.charcoal, color: c.parchment,
+                  border: 'none', borderRadius: 4, padding: '12px 24px',
+                  cursor: acting ? 'not-allowed' : 'pointer', transition: '150ms ease',
+                }}
               >
                 {acting ? 'Saving...' : 'I Applied'}
               </button>
             )}
             {!applied && feedbackStep === 'idle' && (
               <button
-                className="btn-secondary"
                 onClick={handleNotAFit}
                 disabled={acting}
+                style={{
+                  fontFamily: f.mono, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+                  backgroundColor: 'transparent', color: c.graphite,
+                  border: `1px solid ${c.stone}`, borderRadius: 4, padding: '11px 24px',
+                  cursor: acting ? 'not-allowed' : 'pointer', transition: '150ms ease',
+                }}
               >
                 Not a Fit
               </button>
@@ -244,16 +338,25 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
             {!applied && feedbackStep === 'confirming' && (
               <>
                 <button
-                  className="btn-secondary"
                   onClick={handleConfirm}
                   disabled={acting}
+                  style={{
+                    fontFamily: f.mono, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+                    backgroundColor: 'transparent', color: c.graphite,
+                    border: `1px solid ${c.stone}`, borderRadius: 4, padding: '11px 24px',
+                    cursor: acting ? 'not-allowed' : 'pointer', transition: '150ms ease',
+                  }}
                 >
                   {acting ? 'Saving...' : 'Confirm Not a Fit'}
                 </button>
                 <button
-                  className="engineer-feedback-cancel"
                   onClick={handleCancelFeedback}
                   type="button"
+                  style={{
+                    fontFamily: f.mono, fontSize: 10, color: c.mist,
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: 0, textDecoration: 'underline',
+                  }}
                 >
                   Cancel
                 </button>

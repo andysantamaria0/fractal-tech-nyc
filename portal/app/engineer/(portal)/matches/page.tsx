@@ -1,7 +1,14 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import type { EngineerProfileSpa, EngineerJobMatchWithJob } from '@/lib/hiring-spa/types'
+import type { EngineerJobMatchWithJob } from '@/lib/hiring-spa/types'
 import JobMatchList from '@/components/engineer/JobMatchList'
+
+const c = {
+  charcoal: '#2C2C2C', graphite: '#5C5C5C',
+}
+const f = {
+  serif: 'Georgia, "Times New Roman", serif',
+}
 
 export default async function EngineerMatchesPage() {
   const supabase = await createClient()
@@ -30,10 +37,12 @@ export default async function EngineerMatchesPage() {
     .limit(10)
 
   return (
-    <div className="engineer-matches-page">
-      <div className="engineer-page-header">
-        <h1>Your Job Matches</h1>
-        <p className="engineer-section-desc">
+    <div>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontFamily: f.serif, fontSize: 24, fontWeight: 400, color: c.charcoal, margin: '0 0 8px 0' }}>
+          Your Job Matches
+        </h1>
+        <p style={{ fontFamily: f.serif, fontSize: 15, color: c.graphite, margin: 0, lineHeight: 1.8 }}>
           Top matches based on your profile and preferences. Scored across 5 dimensions.
         </p>
       </div>

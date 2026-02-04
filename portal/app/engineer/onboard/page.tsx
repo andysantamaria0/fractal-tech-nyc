@@ -14,6 +14,43 @@ interface EngineerData {
   resume_url: string | null
 }
 
+const c = {
+  platinum: '#E8E4DF',
+  fog: '#F7F5F2',
+  parchment: '#FAF8F5',
+  honey: '#C9A86C',
+  charcoal: '#2C2C2C',
+  graphite: '#5C5C5C',
+  mist: '#9C9C9C',
+  stoneLight: 'rgba(166, 155, 141, 0.12)',
+  honeyBorder: 'rgba(201, 168, 108, 0.30)',
+}
+const f = {
+  serif: 'Georgia, "Times New Roman", serif',
+  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
+}
+
+function FocusInput({ id, type = 'text', value, onChange, placeholder, required = false }: {
+  id: string; type?: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string; required?: boolean
+}) {
+  const [focused, setFocused] = useState(false)
+  return (
+    <input
+      id={id} type={type} value={value} onChange={onChange} placeholder={placeholder}
+      required={required}
+      onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+      style={{
+        width: '100%', fontFamily: f.serif, fontSize: 14, lineHeight: 1.7,
+        color: c.charcoal, backgroundColor: c.fog,
+        border: `1px solid ${focused ? c.honeyBorder : c.stoneLight}`,
+        borderRadius: 4, padding: 16, outline: 'none', transition: '150ms ease',
+        boxSizing: 'border-box' as const,
+      }}
+    />
+  )
+}
+
 export default function EngineerOnboardPage() {
   const [engineer, setEngineer] = useState<EngineerData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -35,7 +72,6 @@ export default function EngineerOnboardPage() {
         return
       }
 
-      // Check if already has profile — only redirect if past onboarding
       const res = await fetch('/api/engineer/me')
       if (res.ok) {
         const data = await res.json()
@@ -45,7 +81,6 @@ export default function EngineerOnboardPage() {
         }
       }
 
-      // Load from engineers table
       const { data: eng } = await supabase
         .from('engineers')
         .select('id, name, email, github_url, linkedin_url, portfolio_url, resume_url')
@@ -60,7 +95,6 @@ export default function EngineerOnboardPage() {
         setPortfolioUrl(eng.portfolio_url || '')
         setResumeUrl(eng.resume_url || '')
       } else {
-        // No engineer record — pre-fill from auth
         setName(user.user_metadata?.full_name || user.email?.split('@')[0] || '')
       }
       setLoading(false)
@@ -99,126 +133,128 @@ export default function EngineerOnboardPage() {
     }
   }
 
+  const label: React.CSSProperties = {
+    display: 'block', fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em',
+    textTransform: 'uppercase', color: c.graphite, marginBottom: 8,
+  }
+  const hint: React.CSSProperties = {
+    fontFamily: f.serif, fontSize: 13, color: c.mist, marginTop: 6,
+  }
+
   if (loading) {
     return (
-      <div className="auth-page">
-        <div className="auth-window">
-          <div className="hero-window">
-            <div className="hero-title-bar">LOADING</div>
-            <div className="window-content">
-              <p>Loading your information...</p>
-            </div>
-          </div>
-        </div>
+      <div style={{ minHeight: '100vh', backgroundColor: c.platinum, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ fontFamily: f.serif, fontSize: 15, color: c.graphite }}>Loading your information...</p>
       </div>
     )
   }
 
+  const steps = [
+    { num: 1, title: 'Share your links', desc: "We'll analyze your GitHub, portfolio, and LinkedIn to build your technical profile.", active: true },
+    { num: 2, title: 'Quick questionnaire', desc: "Tell us what you're looking for in your next role (5 min).", active: false },
+    { num: 3, title: 'Get matched', desc: 'We score hundreds of jobs against your profile and show your top 10.', active: false },
+  ]
+
   return (
-    <div className="auth-page engineer-onboard-page">
-      <div className="auth-window">
-        <div className="hero-window">
-          <div className="hero-title-bar">ENGINEER ONBOARDING</div>
-          <div className="window-content">
-            <div className="auth-header">
-              <h1>Welcome to Fractal</h1>
-              <p>We&apos;ll match you with your best-fit jobs in 3 steps:</p>
+    <div style={{ minHeight: '100vh', backgroundColor: c.platinum, fontFamily: f.serif, WebkitFontSmoothing: 'antialiased' }}>
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: 48 }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <h1 style={{
+            fontFamily: f.serif, fontSize: 28, fontWeight: 400, lineHeight: 1.3,
+            letterSpacing: '-0.01em', color: c.charcoal, margin: '0 0 8px 0',
+          }}>
+            Welcome to Fractal
+          </h1>
+          <p style={{ fontFamily: f.serif, fontSize: 15, lineHeight: 1.8, color: c.graphite, margin: 0 }}>
+            We&apos;ll match you with your best-fit jobs in 3 steps.
+          </p>
+        </div>
+
+        {/* Steps */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40 }}>
+          {steps.map(s => (
+            <div key={s.num} style={{
+              display: 'flex', gap: 16, alignItems: 'flex-start',
+              backgroundColor: s.active ? c.parchment : c.fog,
+              border: `1px solid ${s.active ? c.honeyBorder : c.stoneLight}`,
+              borderRadius: 8, padding: '16px 20px',
+              opacity: s.active ? 1 : 0.7,
+            }}>
+              <span style={{
+                fontFamily: f.mono, fontSize: 11, fontWeight: 500, color: s.active ? c.honey : c.mist,
+                width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: '50%', border: `1.5px solid ${s.active ? c.honey : c.mist}`, flexShrink: 0,
+              }}>
+                {s.num}
+              </span>
+              <div>
+                <div style={{ fontFamily: f.serif, fontSize: 15, fontWeight: 500, color: c.charcoal, marginBottom: 2 }}>
+                  {s.title}
+                </div>
+                <div style={{ fontFamily: f.serif, fontSize: 13, color: c.graphite, lineHeight: 1.6 }}>
+                  {s.desc}
+                </div>
+              </div>
             </div>
+          ))}
+        </div>
 
-            <div className="engineer-onboard-steps">
-              <div className="engineer-onboard-step engineer-onboard-step-active">
-                <span className="engineer-step-number">1</span>
-                <div>
-                  <strong>Share your links</strong>
-                  <span className="engineer-step-desc">We&apos;ll analyze your GitHub, portfolio, and LinkedIn to build your technical profile.</span>
-                </div>
-              </div>
-              <div className="engineer-onboard-step">
-                <span className="engineer-step-number">2</span>
-                <div>
-                  <strong>Quick questionnaire</strong>
-                  <span className="engineer-step-desc">Tell us what you&apos;re looking for in your next role (5 min).</span>
-                </div>
-              </div>
-              <div className="engineer-onboard-step">
-                <span className="engineer-step-number">3</span>
-                <div>
-                  <strong>Get matched</strong>
-                  <span className="engineer-step-desc">We score hundreds of jobs against your profile and show your top 10.</span>
-                </div>
-              </div>
-            </div>
-
-            {error && <div className="alert alert-error">{error}</div>}
-
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="name">Name</label>
-                <input
-                  id="name"
-                  type="text"
-                  className="form-input"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="github">GitHub URL</label>
-                <input
-                  id="github"
-                  type="url"
-                  className="form-input"
-                  placeholder="https://github.com/..."
-                  value={githubUrl}
-                  onChange={(e) => setGithubUrl(e.target.value)}
-                />
-                <span className="form-hint">We&apos;ll analyze your repos to understand your technical strengths.</span>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="linkedin">LinkedIn URL</label>
-                <input
-                  id="linkedin"
-                  type="url"
-                  className="form-input"
-                  placeholder="https://linkedin.com/in/..."
-                  value={linkedinUrl}
-                  onChange={(e) => setLinkedinUrl(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="portfolio">Portfolio / Personal Site</label>
-                <input
-                  id="portfolio"
-                  type="url"
-                  className="form-input"
-                  placeholder="https://..."
-                  value={portfolioUrl}
-                  onChange={(e) => setPortfolioUrl(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="resume">Resume URL</label>
-                <input
-                  id="resume"
-                  type="url"
-                  className="form-input"
-                  placeholder="https://drive.google.com/... or direct link to PDF"
-                  value={resumeUrl}
-                  onChange={(e) => setResumeUrl(e.target.value)}
-                />
-                <span className="form-hint">Link to your resume (Google Drive, Dropbox, or direct PDF link). If we can&apos;t find one on your portfolio, we&apos;ll ask for it later.</span>
-              </div>
-
-              <button type="submit" className="btn-primary btn-full" disabled={submitting}>
-                {submitting ? 'Analyzing your profile...' : 'Continue'}
-              </button>
-            </form>
+        {/* Error */}
+        {error && (
+          <div style={{
+            padding: '12px 16px', backgroundColor: 'rgba(200, 50, 50, 0.08)',
+            border: '1px solid rgba(200, 50, 50, 0.2)', borderRadius: 6,
+            fontFamily: f.mono, fontSize: 11, color: '#8B3030', marginBottom: 24,
+          }}>
+            {error}
           </div>
+        )}
+
+        {/* Form */}
+        <div style={{
+          backgroundColor: c.fog, border: `1px solid ${c.stoneLight}`,
+          borderRadius: 8, padding: 32,
+        }}>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: 24 }}>
+              <label htmlFor="name" style={label}>Name</label>
+              <FocusInput id="name" value={name} onChange={e => setName(e.target.value)} required />
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <label htmlFor="github" style={label}>GitHub URL</label>
+              <FocusInput id="github" type="url" value={githubUrl} onChange={e => setGithubUrl(e.target.value)} placeholder="https://github.com/..." />
+              <p style={hint}>We&apos;ll analyze your repos to understand your technical strengths.</p>
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <label htmlFor="linkedin" style={label}>LinkedIn URL</label>
+              <FocusInput id="linkedin" type="url" value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/..." />
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <label htmlFor="portfolio" style={label}>Portfolio / Personal Site</label>
+              <FocusInput id="portfolio" type="url" value={portfolioUrl} onChange={e => setPortfolioUrl(e.target.value)} placeholder="https://..." />
+            </div>
+
+            <div style={{ marginBottom: 32 }}>
+              <label htmlFor="resume" style={label}>Resume URL</label>
+              <FocusInput id="resume" type="url" value={resumeUrl} onChange={e => setResumeUrl(e.target.value)} placeholder="https://drive.google.com/... or direct link to PDF" />
+              <p style={hint}>Link to your resume (Google Drive, Dropbox, or direct PDF link).</p>
+            </div>
+
+            <button type="submit" disabled={submitting} style={{
+              width: '100%', fontFamily: f.mono, fontSize: 11, fontWeight: 400,
+              letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+              backgroundColor: c.charcoal, color: c.parchment, border: 'none',
+              borderRadius: 4, padding: '14px 28px',
+              cursor: submitting ? 'not-allowed' : 'pointer',
+              opacity: submitting ? 0.5 : 1, transition: '150ms ease',
+            }}>
+              {submitting ? 'Analyzing your profile...' : 'Continue'}
+            </button>
+          </form>
         </div>
       </div>
     </div>

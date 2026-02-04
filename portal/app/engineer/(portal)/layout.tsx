@@ -7,6 +7,15 @@ export const metadata: Metadata = {
   description: 'Intelligent job matching for Fractal engineers — build your EngineerDNA, get matched to roles that fit your skills, culture, and career goals.',
 }
 
+const c = {
+  platinum: '#E8E4DF',
+  mist: '#9C9C9C',
+  stoneLight: 'rgba(166, 155, 141, 0.12)',
+}
+const f = {
+  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
+}
+
 export default async function EngineerPortalLayout({
   children,
 }: {
@@ -27,7 +36,6 @@ export default async function EngineerPortalLayout({
       redirect('/login')
     }
 
-    // Check engineer_profiles_spa for linked profile
     const { data: engineerProfile } = await supabase
       .from('engineer_profiles_spa')
       .select('id, name')
@@ -46,20 +54,22 @@ export default async function EngineerPortalLayout({
   }
 
   return (
-    <>
+    <div style={{ minHeight: '100vh', backgroundColor: c.platinum, WebkitFontSmoothing: 'antialiased' }}>
       <EngineerHeader engineerName={engineerName} />
-      <main>
-        <div className="container">
-          {children}
-        </div>
+      <main style={{ maxWidth: 900, margin: '0 auto', padding: 48 }}>
+        {children}
       </main>
-      <footer className="portal-footer">
-        <div className="container">
-          <div className="footer-text">
-            <p><a href="https://fractaltech.nyc">fractaltech.nyc</a></p>
-          </div>
-        </div>
+      <footer style={{
+        textAlign: 'center', padding: '24px 48px',
+        borderTop: `1px solid ${c.stoneLight}`,
+      }}>
+        <a href="https://fractaltech.nyc" style={{
+          fontFamily: f.mono, fontSize: 10, letterSpacing: '0.05em',
+          color: c.mist, textDecoration: 'none',
+        }}>
+          fractaltech.nyc
+        </a>
       </footer>
-    </>
+    </div>
   )
 }

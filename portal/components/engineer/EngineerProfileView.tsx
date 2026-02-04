@@ -4,6 +4,37 @@ import { useState } from 'react'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import { useRouter } from 'next/navigation'
 
+const c = {
+  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C',
+  honey: '#C9A86C', stone: '#A69B8D', match: '#8B7355',
+  parchment: '#FAF8F5', fog: '#F7F5F2',
+  stoneLight: 'rgba(166, 155, 141, 0.12)',
+  honeyLight: 'rgba(201, 168, 108, 0.20)',
+}
+const f = {
+  serif: 'Georgia, "Times New Roman", serif',
+  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
+}
+
+function FocusInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  const [focused, setFocused] = useState(false)
+  return (
+    <input
+      {...props}
+      onFocus={e => { setFocused(true); props.onFocus?.(e) }}
+      onBlur={e => { setFocused(false); props.onBlur?.(e) }}
+      style={{
+        width: '100%', boxSizing: 'border-box' as const,
+        fontFamily: f.serif, fontSize: 15, color: c.charcoal,
+        backgroundColor: c.fog, border: `1px solid ${focused ? c.honey : c.stoneLight}`,
+        borderRadius: 6, padding: '12px 16px', outline: 'none',
+        transition: 'border-color 200ms ease',
+        ...props.style,
+      }}
+    />
+  )
+}
+
 interface Props {
   profile: EngineerProfileSpa
 }
@@ -48,37 +79,62 @@ export default function EngineerProfileView({ profile }: Props) {
   const dna = profile.engineer_dna
 
   return (
-    <div className="engineer-profile-card">
-      <div className="engineer-profile-info">
-        <h2>{profile.name}</h2>
-        <p className="engineer-profile-email">{profile.email}</p>
+    <div style={{
+      backgroundColor: c.fog, border: `1px solid ${c.stoneLight}`,
+      borderRadius: 8, padding: '28px 32px',
+    }}>
+      <div style={{ marginBottom: 28 }}>
+        <h2 style={{ fontFamily: f.serif, fontSize: 20, fontWeight: 400, color: c.charcoal, margin: '0 0 4px 0' }}>
+          {profile.name}
+        </h2>
+        <p style={{ fontFamily: f.mono, fontSize: 12, color: c.mist, margin: 0 }}>
+          {profile.email}
+        </p>
 
         {dna && (
-          <div className="engineer-dna-summary">
-            <div className="engineer-tag-list">
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {dna.topSkills.map(skill => (
-                <span key={skill} className="engineer-tag">{skill}</span>
+                <span key={skill} style={{
+                  fontFamily: f.mono, fontSize: 10, letterSpacing: '0.05em',
+                  color: c.match, backgroundColor: c.honeyLight,
+                  borderRadius: 4, padding: '4px 10px',
+                }}>
+                  {skill}
+                </span>
               ))}
             </div>
             {dna.senioritySignal && (
-              <p className="engineer-dna-detail">Seniority: {dna.senioritySignal}</p>
+              <p style={{ fontFamily: f.mono, fontSize: 11, color: c.graphite, margin: '10px 0 0 0' }}>
+                Seniority: {dna.senioritySignal}
+              </p>
             )}
             {dna.yearsOfExperience && (
-              <p className="engineer-dna-detail">Experience: {dna.yearsOfExperience}</p>
+              <p style={{ fontFamily: f.mono, fontSize: 11, color: c.graphite, margin: '4px 0 0 0' }}>
+                Experience: {dna.yearsOfExperience}
+              </p>
             )}
           </div>
         )}
 
         {profile.profile_summary && (
-          <div className="engineer-summary-section">
-            <h3>Profile Summary</h3>
-            <p>{profile.profile_summary.snapshot}</p>
+          <div style={{ marginTop: 20, paddingTop: 20, borderTop: `1px solid ${c.stoneLight}` }}>
+            <h3 style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist, margin: '0 0 8px 0' }}>
+              Profile Summary
+            </h3>
+            <p style={{ fontFamily: f.serif, fontSize: 15, color: c.graphite, margin: 0, lineHeight: 1.8 }}>
+              {profile.profile_summary.snapshot}
+            </p>
             {profile.profile_summary.bestFitSignals.length > 0 && (
-              <div style={{ marginTop: 8 }}>
-                <strong>Best Fit Signals:</strong>
-                <ul>
+              <div style={{ marginTop: 12 }}>
+                <span style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.05em', color: c.mist }}>
+                  Best Fit Signals:
+                </span>
+                <ul style={{ margin: '6px 0 0 0', paddingLeft: 20 }}>
                   {profile.profile_summary.bestFitSignals.map((signal, i) => (
-                    <li key={i}>{signal}</li>
+                    <li key={i} style={{ fontFamily: f.serif, fontSize: 14, color: c.graphite, lineHeight: 1.6 }}>
+                      {signal}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -87,60 +143,117 @@ export default function EngineerProfileView({ profile }: Props) {
         )}
       </div>
 
-      <div className="engineer-profile-links">
-        <h3>Links {!editing && (
-          <button onClick={() => setEditing(true)} className="engineer-edit-btn" type="button">Edit</button>
-        )}</h3>
+      <div style={{ borderTop: `1px solid ${c.stoneLight}`, paddingTop: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h3 style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist, margin: 0 }}>
+            Links
+          </h3>
+          {!editing && (
+            <button
+              onClick={() => setEditing(true)}
+              type="button"
+              style={{
+                fontFamily: f.mono, fontSize: 10, letterSpacing: '0.05em',
+                color: c.honey, background: 'none', border: 'none',
+                cursor: 'pointer', padding: 0, textDecoration: 'underline',
+              }}
+            >
+              Edit
+            </button>
+          )}
+        </div>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && (
+          <div style={{
+            fontFamily: f.mono, fontSize: 13, color: '#8B3A3A',
+            backgroundColor: 'rgba(139, 58, 58, 0.08)', border: '1px solid rgba(139, 58, 58, 0.2)',
+            borderRadius: 6, padding: '10px 14px', marginBottom: 16,
+          }}>
+            {error}
+          </div>
+        )}
 
         {editing ? (
-          <div className="engineer-edit-form">
-            <div className="form-group">
-              <label>LinkedIn</label>
-              <input className="form-input" value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/..." />
-            </div>
-            <div className="form-group">
-              <label>GitHub</label>
-              <input className="form-input" value={githubUrl} onChange={e => setGithubUrl(e.target.value)} placeholder="https://github.com/..." />
-            </div>
-            <div className="form-group">
-              <label>Portfolio</label>
-              <input className="form-input" value={portfolioUrl} onChange={e => setPortfolioUrl(e.target.value)} placeholder="https://..." />
-            </div>
-            <div className="form-group">
-              <label>Resume URL</label>
-              <input className="form-input" value={resumeUrl} onChange={e => setResumeUrl(e.target.value)} placeholder="https://..." />
-            </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <button onClick={handleSave} className="btn-primary" disabled={saving}>
+          <div>
+            {[
+              { label: 'LinkedIn', value: linkedinUrl, set: setLinkedinUrl, placeholder: 'https://linkedin.com/in/...' },
+              { label: 'GitHub', value: githubUrl, set: setGithubUrl, placeholder: 'https://github.com/...' },
+              { label: 'Portfolio', value: portfolioUrl, set: setPortfolioUrl, placeholder: 'https://...' },
+              { label: 'Resume URL', value: resumeUrl, set: setResumeUrl, placeholder: 'https://...' },
+            ].map(field => (
+              <div key={field.label} style={{ marginBottom: 16 }}>
+                <label style={{
+                  display: 'block', fontFamily: f.mono, fontSize: 10,
+                  letterSpacing: '0.05em', color: c.charcoal, marginBottom: 6,
+                }}>
+                  {field.label}
+                </label>
+                <FocusInput
+                  value={field.value}
+                  onChange={e => field.set(e.target.value)}
+                  placeholder={field.placeholder}
+                />
+              </div>
+            ))}
+            <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                style={{
+                  fontFamily: f.mono, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+                  backgroundColor: saving ? c.mist : c.charcoal, color: c.parchment,
+                  border: 'none', borderRadius: 4, padding: '12px 24px',
+                  cursor: saving ? 'not-allowed' : 'pointer', transition: '150ms ease',
+                }}
+              >
                 {saving ? 'Saving...' : 'Save'}
               </button>
-              <button onClick={() => setEditing(false)} className="btn-secondary" type="button">Cancel</button>
+              <button
+                onClick={() => setEditing(false)}
+                type="button"
+                style={{
+                  fontFamily: f.mono, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+                  backgroundColor: 'transparent', color: c.graphite,
+                  border: `1px solid ${c.stone}`, borderRadius: 4, padding: '12px 24px',
+                  cursor: 'pointer', transition: '150ms ease',
+                }}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         ) : (
-          <div className="engineer-links-list">
-            <LinkRow label="LinkedIn" url={profile.linkedin_url} />
-            <LinkRow label="GitHub" url={profile.github_url} />
-            <LinkRow label="Portfolio" url={profile.portfolio_url} />
-            <LinkRow label="Resume" url={profile.resume_url} />
+          <div>
+            {[
+              { label: 'LinkedIn', url: profile.linkedin_url },
+              { label: 'GitHub', url: profile.github_url },
+              { label: 'Portfolio', url: profile.portfolio_url },
+              { label: 'Resume', url: profile.resume_url },
+            ].map(link => (
+              <div key={link.label} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '10px 0', borderBottom: `1px solid ${c.stoneLight}`,
+              }}>
+                <span style={{ fontFamily: f.mono, fontSize: 11, color: c.mist }}>
+                  {link.label}
+                </span>
+                {link.url ? (
+                  <a href={link.url} target="_blank" rel="noopener noreferrer" style={{
+                    fontFamily: f.mono, fontSize: 11, color: c.honey, textDecoration: 'none',
+                    maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {link.url}
+                  </a>
+                ) : (
+                  <span style={{ fontFamily: f.mono, fontSize: 11, color: c.mist, fontStyle: 'italic' }}>
+                    Not set
+                  </span>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-function LinkRow({ label, url }: { label: string; url: string | null }) {
-  return (
-    <div className="engineer-link-row">
-      <span className="engineer-link-label">{label}</span>
-      {url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="engineer-link-value">{url}</a>
-      ) : (
-        <span className="engineer-link-missing">Not set</span>
-      )}
     </div>
   )
 }

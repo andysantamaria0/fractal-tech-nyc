@@ -3,6 +3,17 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { MatchingPreferences } from '@/lib/hiring-spa/types'
 
+const c = {
+  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C',
+  match: '#8B7355', fog: '#F7F5F2',
+  stoneLight: 'rgba(166, 155, 141, 0.12)',
+  honeyLight: 'rgba(201, 168, 108, 0.20)',
+}
+const f = {
+  serif: 'Georgia, "Times New Roman", serif',
+  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
+}
+
 const SECTION_LABELS: Record<keyof MatchingPreferences, string> = {
   excluded_locations: 'Excluded Locations',
   excluded_companies: 'Excluded Companies',
@@ -67,44 +78,72 @@ export default function MatchingPreferencesEditor() {
 
   if (loading) {
     return (
-      <div className="engineer-preferences-section">
-        <h3>Matching Preferences</h3>
-        <div className="loading-text">Loading preferences...</div>
+      <div style={{
+        backgroundColor: c.fog, border: `1px solid ${c.stoneLight}`,
+        borderRadius: 8, padding: '24px 28px',
+      }}>
+        <h3 style={{ fontFamily: f.serif, fontSize: 17, fontWeight: 400, color: c.charcoal, margin: '0 0 8px 0' }}>
+          Matching Preferences
+        </h3>
+        <p style={{ fontFamily: f.mono, fontSize: 12, color: c.mist }}>Loading preferences...</p>
       </div>
     )
   }
 
   return (
-    <div className="engineer-preferences-section">
-      <h3>Matching Preferences</h3>
-      <p className="engineer-preferences-desc">
+    <div style={{
+      backgroundColor: c.fog, border: `1px solid ${c.stoneLight}`,
+      borderRadius: 8, padding: '24px 28px',
+    }}>
+      <h3 style={{ fontFamily: f.serif, fontSize: 17, fontWeight: 400, color: c.charcoal, margin: '0 0 6px 0' }}>
+        Matching Preferences
+      </h3>
+      <p style={{ fontFamily: f.serif, fontSize: 14, color: c.graphite, margin: '0 0 20px 0', lineHeight: 1.6 }}>
         These rules filter out jobs before matching. They&apos;re created when you mark a job as &quot;Not a Fit&quot; and accept the suggested rule.
       </p>
 
       {!hasAnyRules ? (
-        <div className="engineer-preferences-empty">
+        <div style={{
+          fontFamily: f.serif, fontSize: 14, color: c.mist,
+          fontStyle: 'italic', padding: '12px 0',
+        }}>
           No filter rules yet. When you mark jobs as &quot;Not a Fit,&quot; you&apos;ll be offered rules to automatically filter similar jobs in the future.
         </div>
       ) : (
-        <div className="engineer-preferences-groups">
+        <div>
           {SECTION_ORDER.map(key => {
             const values = prefs[key] || []
             if (values.length === 0) return null
             return (
-              <div key={key} className="engineer-preferences-group">
-                <div className="engineer-preferences-group-label">{SECTION_LABELS[key]}</div>
-                <div className="engineer-preferences-pills">
+              <div key={key} style={{ marginBottom: 16 }}>
+                <div style={{
+                  fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em',
+                  textTransform: 'uppercase', color: c.mist, marginBottom: 8,
+                }}>
+                  {SECTION_LABELS[key]}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {values.map(value => {
                     const deleteKey = `${key}:${value}`
                     return (
-                      <span key={value} className="engineer-preferences-pill">
+                      <span key={value} style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        fontFamily: f.mono, fontSize: 11,
+                        color: c.match, backgroundColor: c.honeyLight,
+                        borderRadius: 4, padding: '5px 10px',
+                      }}>
                         <span>{value}</span>
                         <button
-                          className="engineer-preferences-pill-delete"
                           onClick={() => handleDelete(key, value)}
                           disabled={deleting === deleteKey}
                           type="button"
                           aria-label={`Remove ${value}`}
+                          style={{
+                            fontFamily: f.mono, fontSize: 13, lineHeight: 1,
+                            color: c.mist, background: 'none', border: 'none',
+                            cursor: deleting === deleteKey ? 'not-allowed' : 'pointer',
+                            padding: 0, marginLeft: 2,
+                          }}
                         >
                           {deleting === deleteKey ? '...' : '\u00D7'}
                         </button>

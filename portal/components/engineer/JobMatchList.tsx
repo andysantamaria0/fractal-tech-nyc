@@ -4,6 +4,15 @@ import { useState, useCallback } from 'react'
 import type { EngineerJobMatchWithJob, FeedbackCategory, MatchingPreferences } from '@/lib/hiring-spa/types'
 import JobMatchCard from './JobMatchCard'
 
+const c = {
+  charcoal: '#2C2C2C', mist: '#9C9C9C',
+  fog: '#F7F5F2',
+  stoneLight: 'rgba(166, 155, 141, 0.12)',
+}
+const f = {
+  serif: 'Georgia, "Times New Roman", serif',
+}
+
 interface Props {
   matches: EngineerJobMatchWithJob[]
 }
@@ -29,10 +38,8 @@ export default function JobMatchList({ matches: initialMatches }: Props) {
     }
 
     if (feedback === 'not_a_fit') {
-      // Remove from list
       setMatches(prev => prev.filter(m => m.id !== matchId))
     } else {
-      // Update in list
       setMatches(prev => prev.map(m =>
         m.id === matchId
           ? { ...m, feedback: 'applied', applied_at: new Date().toISOString() }
@@ -59,15 +66,22 @@ export default function JobMatchList({ matches: initialMatches }: Props) {
 
   if (matches.length === 0) {
     return (
-      <div className="engineer-empty-state">
-        <h3>No matches to show</h3>
-        <p>All matches have been reviewed, or matches haven&apos;t been computed yet.</p>
+      <div style={{
+        backgroundColor: c.fog, border: `1px solid ${c.stoneLight}`,
+        borderRadius: 8, padding: 40, textAlign: 'center',
+      }}>
+        <h3 style={{ fontFamily: f.serif, fontSize: 18, fontWeight: 400, color: c.charcoal, margin: '0 0 8px 0' }}>
+          No matches to show
+        </h3>
+        <p style={{ fontFamily: f.serif, fontSize: 15, color: c.mist, margin: 0 }}>
+          All matches have been reviewed, or matches haven&apos;t been computed yet.
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="engineer-matches-list">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {matches.map(match => (
         <JobMatchCard
           key={match.id}

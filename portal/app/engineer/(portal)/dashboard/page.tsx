@@ -1,8 +1,20 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import type { EngineerProfileSpa, EngineerJobMatch } from '@/lib/hiring-spa/types'
+import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import ProfileCompletionBanner from '@/components/engineer/ProfileCompletionBanner'
 import WeeklyAppCounter from '@/components/engineer/WeeklyAppCounter'
+
+const c = {
+  fog: '#F7F5F2', parchment: '#FAF8F5', charcoal: '#2C2C2C', graphite: '#5C5C5C',
+  mist: '#9C9C9C', honey: '#C9A86C', match: '#8B7355',
+  stoneLight: 'rgba(166, 155, 141, 0.12)',
+  honeyBorder: 'rgba(201, 168, 108, 0.30)',
+  honeyLight: 'rgba(201, 168, 108, 0.20)',
+}
+const f = {
+  serif: 'Georgia, "Times New Roman", serif',
+  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
+}
 
 export default async function EngineerDashboardPage() {
   const supabase = await createClient()
@@ -21,7 +33,6 @@ export default async function EngineerDashboardPage() {
 
   const typedProfile = profile as EngineerProfileSpa
 
-  // Fetch match count and weekly applications
   const { data: matches } = await supabase
     .from('engineer_job_matches')
     .select('id, feedback, applied_at')
@@ -35,49 +46,84 @@ export default async function EngineerDashboardPage() {
 
   const totalMatches = (matches || []).filter(m => m.feedback !== 'not_a_fit').length
 
+  const statCard: React.CSSProperties = {
+    backgroundColor: c.fog, border: `1px solid ${c.stoneLight}`,
+    borderRadius: 8, padding: '24px 32px', textAlign: 'center',
+  }
+
   return (
-    <div className="engineer-dashboard">
-      <div className="engineer-page-header">
-        <h1>Dashboard</h1>
+    <div>
+      {/* Page header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <h1 style={{ fontFamily: f.serif, fontSize: 24, fontWeight: 400, color: c.charcoal, margin: 0 }}>
+          Dashboard
+        </h1>
         <WeeklyAppCounter count={weeklyApps} />
       </div>
 
       <ProfileCompletionBanner profile={typedProfile} />
 
-      <div className="engineer-stats-grid">
-        <div className="engineer-stat-card">
-          <div className="engineer-stat-value">{totalMatches}</div>
-          <div className="engineer-stat-label">Job Matches</div>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
+        <div style={statCard}>
+          <div style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 500, color: c.match, marginBottom: 4 }}>
+            {totalMatches}
+          </div>
+          <div style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
+            Job Matches
+          </div>
         </div>
-        <div className="engineer-stat-card">
-          <div className="engineer-stat-value">{weeklyApps}</div>
-          <div className="engineer-stat-label">Applied This Week</div>
+        <div style={statCard}>
+          <div style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 500, color: c.match, marginBottom: 4 }}>
+            {weeklyApps}
+          </div>
+          <div style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
+            Applied This Week
+          </div>
         </div>
-        <div className="engineer-stat-card">
-          <div className="engineer-stat-value">{typedProfile.status}</div>
-          <div className="engineer-stat-label">Profile Status</div>
+        <div style={statCard}>
+          <div style={{ fontFamily: f.mono, fontSize: 14, fontWeight: 500, color: c.charcoal, marginBottom: 4 }}>
+            {typedProfile.status}
+          </div>
+          <div style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
+            Profile Status
+          </div>
         </div>
       </div>
 
+      {/* Matches CTA */}
       {typedProfile.status === 'complete' && totalMatches > 0 && (
-        <div className="engineer-section">
-          <h2>Your Matches</h2>
-          <p className="engineer-section-desc">
+        <div style={{ marginBottom: 32 }}>
+          <h2 style={{ fontFamily: f.serif, fontSize: 18, fontWeight: 400, color: c.charcoal, margin: '0 0 8px 0' }}>
+            Your Matches
+          </h2>
+          <p style={{ fontFamily: f.serif, fontSize: 15, color: c.graphite, margin: '0 0 16px 0' }}>
             View your top job matches ranked by fit score.
           </p>
-          <a href="/engineer/matches" className="btn-primary" style={{ display: 'inline-block', marginTop: 12 }}>
+          <a href="/engineer/matches" style={{
+            display: 'inline-block', fontFamily: f.mono, fontSize: 11,
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+            backgroundColor: c.charcoal, color: c.parchment, textDecoration: 'none',
+            borderRadius: 4, padding: '14px 28px', transition: '150ms ease',
+          }}>
             View All Matches
           </a>
         </div>
       )}
 
+      {/* Computing state */}
       {typedProfile.status === 'complete' && totalMatches === 0 && (
-        <div className="engineer-matches-computing">
-          <h2>We&apos;re finding your matches</h2>
-          <p>
+        <div style={{
+          backgroundColor: c.parchment, border: `1px solid ${c.honeyBorder}`,
+          borderRadius: 8, padding: 32, textAlign: 'center',
+        }}>
+          <h2 style={{ fontFamily: f.serif, fontSize: 18, fontWeight: 400, color: c.charcoal, margin: '0 0 12px 0' }}>
+            We&apos;re finding your matches
+          </h2>
+          <p style={{ fontFamily: f.serif, fontSize: 15, color: c.graphite, margin: '0 0 12px 0', lineHeight: 1.8 }}>
             We&apos;re scoring hundreds of jobs against your profile right now. This happens in the background — go about your day and we&apos;ll email you when your matches are ready.
           </p>
-          <p className="engineer-matches-computing-hint">
+          <p style={{ fontFamily: f.serif, fontSize: 14, color: c.mist, margin: 0 }}>
             You can also check back here anytime. No need to keep this page open.
           </p>
         </div>

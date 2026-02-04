@@ -3,6 +3,17 @@ import { createClient } from '@/lib/supabase/server'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import EngineerQuestionnaireForm from '@/components/engineer/EngineerQuestionnaireForm'
 
+const c = {
+  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C',
+  parchment: '#FAF8F5',
+  honeyBorder: 'rgba(201, 168, 108, 0.30)',
+  stoneLight: 'rgba(166, 155, 141, 0.12)',
+}
+const f = {
+  serif: 'Georgia, "Times New Roman", serif',
+  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
+}
+
 export default async function EngineerQuestionnairePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -21,27 +32,44 @@ export default async function EngineerQuestionnairePage() {
   const isCrawling = profile.status === 'crawling'
 
   return (
-    <div className="engineer-questionnaire-page">
-      <div className="engineer-page-header">
-        <h1>{isEditing ? 'Edit Questionnaire' : 'Questionnaire'}</h1>
-        <p className="engineer-section-desc">
+    <div>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontFamily: f.serif, fontSize: 24, fontWeight: 400, color: c.charcoal, margin: '0 0 8px 0' }}>
+          {isEditing ? 'Edit Questionnaire' : 'Questionnaire'}
+        </h1>
+        <p style={{ fontFamily: f.serif, fontSize: 15, color: c.graphite, margin: 0, lineHeight: 1.8 }}>
           {isEditing
             ? 'Update your answers below. Your existing matches will stay visible while we recompute new ones.'
-            : 'Step 2 of 3 — Tell us what matters to you so we can find jobs that actually fit. This takes about 5 minutes.'}
+            : 'Step 2 of 3 — Tell us what matters to you so we can find jobs that actually fit.'}
         </p>
       </div>
 
       {isCrawling && (
-        <div className="engineer-crawling-banner">
-          <strong>We&apos;re analyzing your profile in the background.</strong>
-          <p>We&apos;re scanning your GitHub and portfolio to build your technical DNA. In the meantime, help us understand you better through this questionnaire. You&apos;re already beautiful and you earned the spa.</p>
+        <div style={{
+          backgroundColor: c.parchment, border: `1px solid ${c.honeyBorder}`,
+          borderRadius: 8, padding: '20px 24px', marginBottom: 24,
+        }}>
+          <strong style={{ fontFamily: f.mono, fontSize: 11, letterSpacing: '0.05em', color: c.charcoal }}>
+            We&apos;re analyzing your profile in the background.
+          </strong>
+          <p style={{ fontFamily: f.serif, fontSize: 14, color: c.graphite, margin: '8px 0 0 0', lineHeight: 1.6 }}>
+            We&apos;re scanning your GitHub and portfolio to build your technical DNA. In the meantime, help us understand you better through this questionnaire.
+          </p>
         </div>
       )}
 
       {isEditing && (
-        <div className="engineer-reanalysis-warning">
-          <strong>Heads up:</strong> Saving changes will trigger a new analysis of your profile against all active jobs.
-          Your current matches will remain visible, but new scores may shift your rankings. This process runs in the background.
+        <div style={{
+          backgroundColor: c.parchment, border: `1px solid ${c.stoneLight}`,
+          borderRadius: 8, padding: '20px 24px', marginBottom: 24,
+        }}>
+          <strong style={{ fontFamily: f.mono, fontSize: 11, letterSpacing: '0.05em', color: c.charcoal }}>
+            Heads up:
+          </strong>
+          <span style={{ fontFamily: f.serif, fontSize: 14, color: c.graphite, marginLeft: 8 }}>
+            Saving changes will trigger a new analysis of your profile against all active jobs.
+            Your current matches will remain visible, but new scores may shift your rankings.
+          </span>
         </div>
       )}
 
