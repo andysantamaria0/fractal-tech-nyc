@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { generateEngineerProfileSummary } from '@/lib/hiring-spa/engineer-summary'
 import { computeMatchesForEngineer } from '@/lib/hiring-spa/job-matching'
+import { notifyEngineerMatchesReady } from '@/lib/hiring-spa/notifications'
 
 export async function POST(request: Request) {
   try {
@@ -109,10 +110,14 @@ export async function POST(request: Request) {
         .eq('id', profile.id)
     }
 
-    // Auto-trigger match computation (fire and forget)
-    computeMatchesForEngineer(profile.id, serviceClient).catch(
-      err => console.error('[engineer/questionnaire] Match computation error:', err),
-    )
+    // Auto-trigger match computation (fire and forget), then email
+    computeMatchesForEngineer(profile.id, serviceClient)
+      .then(result => {
+        if (result.matches.length > 0) {
+          return notifyEngineerMatchesReady(profile.id, result.matches.length, serviceClient)
+        }
+      })
+      .catch(err => console.error('[engineer/questionnaire] Match/notify error:', err))
 
     return NextResponse.json({ success: true })
   } catch (err) {

@@ -3,6 +3,7 @@ import { crawlUrls } from './crawl'
 import { synthesizeEngineerData } from './engineer-synthesis'
 import { generateEngineerProfileSummary } from './engineer-summary'
 import { computeMatchesForEngineer } from './job-matching'
+import { notifyEngineerMatchesReady } from './notifications'
 import type { EngineerCrawlData, GitHubOrgData, GitHubRepoSummary } from './types'
 
 const GITHUB_API = 'https://api.github.com'
@@ -100,9 +101,13 @@ export async function runEngineerCrawlPipeline(
         console.error('[engineer-crawl] Summary generation failed:', summaryErr)
       }
 
-      computeMatchesForEngineer(engineerProfileId, serviceClient).catch(
-        err => console.error('[engineer-crawl] Match computation error:', err),
-      )
+      computeMatchesForEngineer(engineerProfileId, serviceClient)
+        .then(result => {
+          if (result.matches.length > 0) {
+            return notifyEngineerMatchesReady(engineerProfileId, result.matches.length, serviceClient)
+          }
+        })
+        .catch(err => console.error('[engineer-crawl] Match/notify error:', err))
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown pipeline error'

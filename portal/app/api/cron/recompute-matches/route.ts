@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { computeMatchesForEngineer } from '@/lib/hiring-spa/job-matching'
+import { notifyEngineerMatchesReady } from '@/lib/hiring-spa/notifications'
 
 // Cron endpoint: re-match all complete engineers against new jobs.
 // The matching function skips previously-scored jobs, so only new
@@ -41,6 +42,11 @@ export async function GET(request: Request) {
         const result = await computeMatchesForEngineer(eng.id, serviceClient)
         const newMatches = result.matches.length
         console.log(`[cron/recompute-matches] ${eng.name}: ${newMatches} matches`)
+        if (newMatches > 0) {
+          await notifyEngineerMatchesReady(eng.id, newMatches, serviceClient).catch(
+            err => console.error(`[cron/recompute-matches] Email failed for ${eng.name}:`, err),
+          )
+        }
         results.push({ id: eng.id, name: eng.name, newMatches })
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Unknown error'

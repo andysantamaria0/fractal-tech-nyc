@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { MatchMovedForwardEmail } from '@/emails/match-moved-forward'
 import { EngineerMatchNotificationEmail } from '@/emails/engineer-match-notification'
+import { MatchesReadyEmail } from '@/emails/matches-ready'
 import type { DimensionWeights } from './types'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -154,4 +155,49 @@ export async function notifyEngineerOfMatch(
     .from('hiring_spa_matches')
     .update({ engineer_notified_at: new Date().toISOString() })
     .eq('id', matchId)
+}
+
+/**
+ * Send a notification email to an engineer when their job matches are ready.
+ * Called after computeMatchesForEngineer completes with results.
+ * Fire-and-forget — caller should .catch() errors.
+ */
+export async function notifyEngineerMatchesReady(
+  engineerProfileId: string,
+  matchCount: number,
+  serviceClient: SupabaseClient,
+): Promise<void> {
+  if (matchCount <= 0) return
+
+  const { data: profile, error } = await serviceClient
+    .from('engineer_profiles_spa')
+    .select('name, email')
+    .eq('id', engineerProfileId)
+    .single()
+
+  if (error || !profile) {
+    throw new Error(`Engineer profile not found: ${engineerProfileId}`)
+  }
+
+  if (!profile.email) {
+    throw new Error(`No email for engineer profile: ${engineerProfileId}`)
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://partners.fractaltech.nyc'
+  const dashboardUrl = `${baseUrl}/engineer/matches`
+
+  const html = MatchesReadyEmail({
+    engineerName: profile.name || 'there',
+    matchCount,
+    dashboardUrl,
+  })
+
+  await resend.emails.send({
+    from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
+    to: profile.email,
+    subject: `Your top ${matchCount} job match${matchCount === 1 ? '' : 'es'} ${matchCount === 1 ? 'is' : 'are'} ready`,
+    html,
+  })
+
+  console.log(`[notifications] Sent matches-ready email to ${profile.email} (${matchCount} matches)`)
 }
