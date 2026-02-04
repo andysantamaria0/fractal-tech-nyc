@@ -52,9 +52,9 @@
 *Find jobs that actually fit. Not keyword matching — real AI matching.*
 
 #### Hero
-**Get matched to your best-fit jobs in 3 steps.**
+**What if we could hand-deliver 10 high fit jobs that match your skills, work output, and personal vibes? Come visit the spa.**
 
-Share your GitHub. Tell us what matters. See your top matches — scored across mission, technical fit, culture, environment, and career growth. Every match shows exactly *why*.
+Relaxing sessions every Monday starting at Noon EST.
 
 #### How It Works
 
