@@ -71,6 +71,17 @@ export default function EngineerLoginPage() {
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         textAlign: 'center',
       }}>
+        <p style={{
+          fontFamily: fonts.serif,
+          fontSize: 15,
+          lineHeight: 1.8,
+          color: colors.graphite,
+          margin: 0,
+          marginBottom: 24,
+        }}>
+          What if we could hand-deliver up to 10 ultra high fit jobs that match your skills, work output, and personal priorities each week?
+        </p>
+
         <h1 style={{
           fontFamily: fonts.serif,
           fontSize: 28,
