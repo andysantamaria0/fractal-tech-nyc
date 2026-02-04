@@ -71,10 +71,13 @@ export default async function EngineerDashboardPage() {
       )}
 
       {typedProfile.status === 'complete' && totalMatches === 0 && (
-        <div className="engineer-section">
-          <h2>Matches Computing</h2>
-          <p className="engineer-section-desc">
-            We&apos;re scoring hundreds of jobs against your profile right now. This runs in the background and can take a few minutes. Refresh this page to check for updates — no need to do anything else.
+        <div className="engineer-matches-computing">
+          <h2>We&apos;re finding your matches</h2>
+          <p>
+            We&apos;re scoring hundreds of jobs against your profile right now. This happens in the background — go about your day and we&apos;ll email you when your matches are ready.
+          </p>
+          <p className="engineer-matches-computing-hint">
+            You can also check back here anytime. No need to keep this page open.
           </p>
         </div>
       )}
