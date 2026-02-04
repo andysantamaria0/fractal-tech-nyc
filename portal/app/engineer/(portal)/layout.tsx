@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import EngineerHeader from '@/components/engineer/EngineerHeader'
+
+export const metadata: Metadata = {
+  title: 'Fractal Engineers',
+  description: 'Intelligent job matching for Fractal engineers — build your EngineerDNA, get matched to roles that fit your skills, culture, and career goals.',
+}
 
 export default async function EngineerPortalLayout({
   children,
