@@ -66,22 +66,11 @@ export default function EngineerLoginPage() {
         border: `1px solid ${colors.stoneLight}`,
         borderRadius: 12,
         padding: 48,
-        maxWidth: 460,
+        maxWidth: 530,
         width: '100%',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         textAlign: 'center',
       }}>
-        <p style={{
-          fontFamily: fonts.serif,
-          fontSize: 15,
-          lineHeight: 1.8,
-          color: colors.graphite,
-          margin: 0,
-          marginBottom: 24,
-        }}>
-          What if we could hand-deliver up to 10 ultra high fit jobs that match your skills, work output, and personal priorities each week?
-        </p>
-
         <h1 style={{
           fontFamily: fonts.serif,
           fontSize: 28,
@@ -92,7 +81,7 @@ export default function EngineerLoginPage() {
           margin: 0,
           marginBottom: 8,
         }}>
-          Welcome to the Fractal Hiring Spa.
+          What if we could <span style={{ color: colors.honey }}>hand-deliver</span> 10 high fit jobs that match your skills, work output, and personal vibes? Come visit the spa.
         </h1>
 
         <p style={{
