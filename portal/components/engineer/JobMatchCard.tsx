@@ -1,7 +1,14 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import type { EngineerJobMatchWithJob, DimensionWeights, MatchReasoning } from '@/lib/hiring-spa/types'
+import { useState, useCallback, useMemo } from 'react'
+import type {
+  EngineerJobMatchWithJob,
+  DimensionWeights,
+  MatchReasoning,
+  FeedbackCategory,
+  MatchingPreferences,
+} from '@/lib/hiring-spa/types'
+import { FEEDBACK_CATEGORIES } from '@/lib/hiring-spa/types'
 
 const DIMENSION_LABELS: Record<keyof DimensionWeights, string> = {
   mission: 'Mission',
@@ -15,32 +22,70 @@ const DIMENSION_ORDER: (keyof DimensionWeights)[] = [
   'mission', 'technical', 'culture', 'environment', 'dna',
 ]
 
-interface Props {
-  match: EngineerJobMatchWithJob
-  onFeedback: (matchId: string, feedback: 'not_a_fit' | 'applied', reason?: string) => Promise<void>
+interface RuleSuggestion {
+  type: keyof MatchingPreferences
+  value: string
+  label: string
 }
 
-export default function JobMatchCard({ match, onFeedback }: Props) {
+interface Props {
+  match: EngineerJobMatchWithJob
+  onFeedback: (matchId: string, feedback: 'not_a_fit' | 'applied', reason?: string, category?: FeedbackCategory) => Promise<void>
+  onAddPreference?: (type: keyof MatchingPreferences, value: string) => Promise<void>
+}
+
+export default function JobMatchCard({ match, onFeedback, onAddPreference }: Props) {
   const [expanded, setExpanded] = useState(false)
-  const [showReasonInput, setShowReasonInput] = useState(false)
+  const [feedbackStep, setFeedbackStep] = useState<'idle' | 'picking_category' | 'confirming'>('idle')
+  const [selectedCategory, setSelectedCategory] = useState<FeedbackCategory | null>(null)
   const [reason, setReason] = useState('')
+  const [addRule, setAddRule] = useState(true)
   const [acting, setActing] = useState(false)
   const [applied, setApplied] = useState(!!match.applied_at)
 
   const job = match.scanned_job
 
-  const handleNotAFit = useCallback(async () => {
-    if (!showReasonInput) {
-      setShowReasonInput(true)
-      return
+  const ruleSuggestion = useMemo((): RuleSuggestion | null => {
+    if (!selectedCategory) return null
+    if (selectedCategory === 'wrong_location' && job.location) {
+      return {
+        type: 'excluded_locations',
+        value: job.location,
+        label: `Don't show me jobs in ${job.location}`,
+      }
     }
+    if (selectedCategory === 'company_not_interesting') {
+      return {
+        type: 'excluded_companies',
+        value: job.company_name,
+        label: `Don't show me jobs from ${job.company_name}`,
+      }
+    }
+    return null
+  }, [selectedCategory, job.location, job.company_name])
+
+  const handleNotAFit = useCallback(() => {
+    setFeedbackStep('picking_category')
+  }, [])
+
+  const handleCategorySelect = useCallback((cat: FeedbackCategory) => {
+    setSelectedCategory(cat)
+    setFeedbackStep('confirming')
+    setAddRule(true)
+  }, [])
+
+  const handleConfirm = useCallback(async () => {
+    if (!selectedCategory) return
     setActing(true)
     try {
-      await onFeedback(match.id, 'not_a_fit', reason)
+      await onFeedback(match.id, 'not_a_fit', reason || undefined, selectedCategory)
+      if (addRule && ruleSuggestion && onAddPreference) {
+        await onAddPreference(ruleSuggestion.type, ruleSuggestion.value)
+      }
     } finally {
       setActing(false)
     }
-  }, [match.id, onFeedback, reason, showReasonInput])
+  }, [match.id, onFeedback, onAddPreference, reason, selectedCategory, addRule, ruleSuggestion])
 
   const handleApplied = useCallback(async () => {
     setActing(true)
@@ -51,6 +96,13 @@ export default function JobMatchCard({ match, onFeedback }: Props) {
       setActing(false)
     }
   }, [match.id, onFeedback])
+
+  const handleCancelFeedback = useCallback(() => {
+    setFeedbackStep('idle')
+    setSelectedCategory(null)
+    setReason('')
+    setAddRule(true)
+  }, [])
 
   return (
     <div className={`engineer-match-card ${expanded ? 'engineer-match-card-expanded' : ''}`}>
@@ -112,15 +164,57 @@ export default function JobMatchCard({ match, onFeedback }: Props) {
             )}
           </div>
 
-          {showReasonInput && (
-            <div className="engineer-not-a-fit-reason">
-              <textarea
-                className="form-input"
-                rows={2}
-                placeholder="Why isn't this a fit? (optional)"
-                value={reason}
-                onChange={e => setReason(e.target.value)}
-              />
+          {feedbackStep === 'picking_category' && (
+            <div className="engineer-feedback-categories">
+              <div className="engineer-feedback-categories-label">Why isn&apos;t this a fit?</div>
+              <div className="engineer-feedback-categories-row">
+                {FEEDBACK_CATEGORIES.map(cat => (
+                  <button
+                    key={cat.value}
+                    className="engineer-feedback-category-btn"
+                    onClick={() => handleCategorySelect(cat.value)}
+                    type="button"
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                className="engineer-feedback-cancel"
+                onClick={handleCancelFeedback}
+                type="button"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {feedbackStep === 'confirming' && (
+            <div className="engineer-feedback-confirm">
+              <div className="engineer-feedback-selected-category">
+                {FEEDBACK_CATEGORIES.find(c => c.value === selectedCategory)?.label}
+              </div>
+
+              {ruleSuggestion && (
+                <label className="engineer-rule-suggestion">
+                  <input
+                    type="checkbox"
+                    checked={addRule}
+                    onChange={e => setAddRule(e.target.checked)}
+                  />
+                  <span>{ruleSuggestion.label}</span>
+                </label>
+              )}
+
+              <div className="engineer-not-a-fit-reason">
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  placeholder="Additional details (optional)"
+                  value={reason}
+                  onChange={e => setReason(e.target.value)}
+                />
+              </div>
             </div>
           )}
 
@@ -138,14 +232,32 @@ export default function JobMatchCard({ match, onFeedback }: Props) {
                 {acting ? 'Saving...' : 'I Applied'}
               </button>
             )}
-            {!applied && (
+            {!applied && feedbackStep === 'idle' && (
               <button
                 className="btn-secondary"
                 onClick={handleNotAFit}
                 disabled={acting}
               >
-                {showReasonInput ? 'Confirm Not a Fit' : 'Not a Fit'}
+                Not a Fit
               </button>
+            )}
+            {!applied && feedbackStep === 'confirming' && (
+              <>
+                <button
+                  className="btn-secondary"
+                  onClick={handleConfirm}
+                  disabled={acting}
+                >
+                  {acting ? 'Saving...' : 'Confirm Not a Fit'}
+                </button>
+                <button
+                  className="engineer-feedback-cancel"
+                  onClick={handleCancelFeedback}
+                  type="button"
+                >
+                  Cancel
+                </button>
+              </>
             )}
           </div>
         </div>

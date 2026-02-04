@@ -6,6 +6,7 @@ import type {
   DimensionWeights,
   MatchReasoning,
   PriorityRatings,
+  MatchingPreferences,
 } from './types'
 
 const MODEL = 'claude-sonnet-4-20250514'
@@ -52,6 +53,53 @@ Guidelines:
 - Don't inflate scores — honest calibration is more valuable than optimism
 - The highlight_quote should be specific and memorable, not generic`
 
+/**
+ * Pre-filter jobs based on engineer matching preferences.
+ * Removes jobs that match any exclusion rule.
+ */
+export function filterByPreferences(
+  jobs: ScannedJob[],
+  prefs: MatchingPreferences | null,
+): ScannedJob[] {
+  if (!prefs) return jobs
+
+  return jobs.filter(job => {
+    // Excluded locations: case-insensitive substring match on job.location
+    if (prefs.excluded_locations?.length && job.location) {
+      const loc = job.location.toLowerCase()
+      if (prefs.excluded_locations.some(ex => loc.includes(ex.toLowerCase()))) {
+        return false
+      }
+    }
+
+    // Excluded companies: case-insensitive exact match on company_name
+    if (prefs.excluded_companies?.length) {
+      const name = job.company_name.toLowerCase()
+      if (prefs.excluded_companies.some(ex => name === ex.toLowerCase())) {
+        return false
+      }
+    }
+
+    // Excluded company domains: case-insensitive exact match on company_domain
+    if (prefs.excluded_company_domains?.length) {
+      const domain = job.company_domain.toLowerCase()
+      if (prefs.excluded_company_domains.some(ex => domain === ex.toLowerCase())) {
+        return false
+      }
+    }
+
+    // Excluded keywords: case-insensitive substring match on title + description
+    if (prefs.excluded_keywords?.length) {
+      const text = `${job.job_title} ${job.description || ''}`.toLowerCase()
+      if (prefs.excluded_keywords.some(ex => text.includes(ex.toLowerCase()))) {
+        return false
+      }
+    }
+
+    return true
+  })
+}
+
 interface ScoreResult {
   scores: DimensionWeights
   reasoning: MatchReasoning
@@ -65,6 +113,7 @@ export async function scoreJobForEngineer(
   job: ScannedJob,
   engineer: EngineerProfileSpa,
   notAFitReasons: string[],
+  preferences?: MatchingPreferences | null,
 ): Promise<ScoreResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
@@ -150,6 +199,27 @@ export async function scoreJobForEngineer(
     userPrompt += `Culture: ${pr.culture}/5\n`
     userPrompt += `Mission-Driven: ${pr.mission_driven}/5\n`
     userPrompt += `Technical Challenges: ${pr.technical_challenges}/5\n\n`
+  }
+
+  // Engineer matching preferences (things they've explicitly excluded)
+  if (preferences) {
+    const prefLines: string[] = []
+    if (preferences.excluded_locations?.length) {
+      prefLines.push(`Excluded locations: ${preferences.excluded_locations.join(', ')}`)
+    }
+    if (preferences.excluded_companies?.length) {
+      prefLines.push(`Excluded companies: ${preferences.excluded_companies.join(', ')}`)
+    }
+    if (preferences.excluded_keywords?.length) {
+      prefLines.push(`Excluded keywords: ${preferences.excluded_keywords.join(', ')}`)
+    }
+    if (prefLines.length > 0) {
+      userPrompt += '## Engineer Matching Preferences (explicit exclusions — score lower if related)\n\n'
+      for (const line of prefLines) {
+        userPrompt += `- ${line}\n`
+      }
+      userPrompt += '\n'
+    }
   }
 
   // Past "not a fit" reasons for context
@@ -281,6 +351,10 @@ export async function computeMatchesForEngineer(
 
   const typedJobs = jobs as ScannedJob[]
 
+  // Pre-filter jobs based on matching preferences
+  const preferences = (typedEngineer.matching_preferences as MatchingPreferences | null) || null
+  const filteredJobs = filterByPreferences(typedJobs, preferences)
+
   // Fetch existing matches to avoid re-scoring
   const { data: existingMatches } = await serviceClient
     .from('engineer_job_matches')
@@ -292,7 +366,7 @@ export async function computeMatchesForEngineer(
   )
 
   // Filter to jobs that haven't been scored yet
-  const newJobs = typedJobs.filter(j => !existingJobIds.has(j.id))
+  const newJobs = filteredJobs.filter(j => !existingJobIds.has(j.id))
 
   if (newJobs.length === 0) {
     // Return existing top matches
@@ -336,7 +410,7 @@ export async function computeMatchesForEngineer(
 
   for (const job of newJobs) {
     try {
-      const result = await scoreJobForEngineer(job, typedEngineer, notAFitReasons)
+      const result = await scoreJobForEngineer(job, typedEngineer, notAFitReasons, preferences)
 
       // Check minimum threshold: every dimension must be >= 40
       const belowThreshold = DIMENSION_KEYS.some(

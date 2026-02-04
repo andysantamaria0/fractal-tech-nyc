@@ -344,6 +344,7 @@ export interface EngineerProfileSpa {
   growth_areas: GrowthAreasAnswers | null
   deal_breakers: DealBreakersAnswers | null
   profile_summary: EngineerProfileSummary | null
+  matching_preferences: MatchingPreferences | null
   priority_ratings: PriorityRatings | null
   status: EngineerProfileStatus
   created_at: string
@@ -380,6 +381,23 @@ export interface ScannedJob {
 
 export type EngineerJobFeedback = 'not_a_fit' | 'applied'
 
+export type FeedbackCategory = 'wrong_location' | 'wrong_tech_stack' | 'company_not_interesting' | 'role_seniority' | 'other'
+
+export const FEEDBACK_CATEGORIES: { value: FeedbackCategory; label: string }[] = [
+  { value: 'wrong_location', label: 'Wrong Location' },
+  { value: 'wrong_tech_stack', label: 'Wrong Tech Stack' },
+  { value: 'company_not_interesting', label: 'Company Not Interesting' },
+  { value: 'role_seniority', label: 'Role / Seniority Mismatch' },
+  { value: 'other', label: 'Other' },
+]
+
+export interface MatchingPreferences {
+  excluded_locations: string[]
+  excluded_companies: string[]
+  excluded_company_domains: string[]
+  excluded_keywords: string[]
+}
+
 export interface EngineerJobMatch {
   id: string
   engineer_profile_id: string
@@ -391,6 +409,7 @@ export interface EngineerJobMatch {
   display_rank: number | null
   feedback: EngineerJobFeedback | null
   feedback_reason: string | null
+  feedback_category: FeedbackCategory | null
   feedback_at: string | null
   applied_at: string | null
   batch_id: string | null

@@ -15,7 +15,7 @@ export async function POST(
     }
 
     const body = await request.json()
-    const { feedback, reason } = body
+    const { feedback, reason, category } = body
 
     if (!feedback || !['not_a_fit', 'applied'].includes(feedback)) {
       return NextResponse.json({ error: 'Invalid feedback value' }, { status: 400 })
@@ -50,8 +50,9 @@ export async function POST(
       feedback_at: now,
     }
 
-    if (feedback === 'not_a_fit' && reason) {
-      updateData.feedback_reason = reason
+    if (feedback === 'not_a_fit') {
+      if (reason) updateData.feedback_reason = reason
+      if (category) updateData.feedback_category = category
     }
 
     if (feedback === 'applied') {

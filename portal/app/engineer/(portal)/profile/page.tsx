@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import EngineerProfileView from '@/components/engineer/EngineerProfileView'
+import MatchingPreferencesEditor from '@/components/engineer/MatchingPreferencesEditor'
 import Link from 'next/link'
 
 export default async function EngineerProfilePage() {
@@ -28,13 +29,16 @@ export default async function EngineerProfilePage() {
       <EngineerProfileView profile={typedProfile} />
 
       {typedProfile.status === 'complete' && (
-        <div className="engineer-profile-questionnaire-link">
-          <h3>Questionnaire Answers</h3>
-          <p>Your preferences and priorities are used to score job matches. Updating them will trigger a fresh round of matching.</p>
-          <Link href="/engineer/questionnaire" className="btn-secondary">
-            Edit Questionnaire
-          </Link>
-        </div>
+        <>
+          <div className="engineer-profile-questionnaire-link">
+            <h3>Questionnaire Answers</h3>
+            <p>Your preferences and priorities are used to score job matches. Updating them will trigger a fresh round of matching.</p>
+            <Link href="/engineer/questionnaire" className="btn-secondary">
+              Edit Questionnaire
+            </Link>
+          </div>
+          <MatchingPreferencesEditor />
+        </>
       )}
 
       {!typedProfile.resume_url && typedProfile.status !== 'draft' && (

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import type { EngineerJobMatchWithJob } from '@/lib/hiring-spa/types'
+import type { EngineerJobMatchWithJob, FeedbackCategory, MatchingPreferences } from '@/lib/hiring-spa/types'
 import JobMatchCard from './JobMatchCard'
 
 interface Props {
@@ -15,11 +15,12 @@ export default function JobMatchList({ matches: initialMatches }: Props) {
     matchId: string,
     feedback: 'not_a_fit' | 'applied',
     reason?: string,
+    category?: FeedbackCategory,
   ) => {
     const res = await fetch(`/api/engineer/matches/${matchId}/feedback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ feedback, reason }),
+      body: JSON.stringify({ feedback, reason, category }),
     })
 
     if (!res.ok) {
@@ -40,6 +41,22 @@ export default function JobMatchList({ matches: initialMatches }: Props) {
     }
   }, [])
 
+  const handleAddPreference = useCallback(async (
+    type: keyof MatchingPreferences,
+    value: string,
+  ) => {
+    const res = await fetch('/api/engineer/preferences', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, value }),
+    })
+
+    if (!res.ok) {
+      const data = await res.json()
+      console.error('Failed to save preference:', data.error)
+    }
+  }, [])
+
   if (matches.length === 0) {
     return (
       <div className="engineer-empty-state">
@@ -56,6 +73,7 @@ export default function JobMatchList({ matches: initialMatches }: Props) {
           key={match.id}
           match={match}
           onFeedback={handleFeedback}
+          onAddPreference={handleAddPreference}
         />
       ))}
     </div>
