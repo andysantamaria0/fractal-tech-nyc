@@ -7,7 +7,7 @@ config({ path: '.env.local' })
 
 import { createClient } from '@supabase/supabase-js'
 import { scoreJobForEngineer } from '../lib/hiring-spa/job-matching'
-import type { EngineerProfileSpa, ScannedJob, DimensionWeights } from '../lib/hiring-spa/types'
+import type { EngineerProfileSpa, ScannedJob, DimensionWeights, MatchReasoning } from '../lib/hiring-spa/types'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -138,7 +138,7 @@ async function main() {
   const scored: Array<{
     job: ScannedJob
     scores: DimensionWeights
-    reasoning: Record<string, string>
+    reasoning: MatchReasoning
     highlight_quote: string
     overall_score: number
   }> = []
