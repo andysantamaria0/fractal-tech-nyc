@@ -95,6 +95,29 @@ export default function EngineerLoginPage() {
           Relaxing sessions every Monday starting at Noon EST.
         </p>
 
+        <p style={{
+          fontFamily: fonts.serif,
+          fontSize: 13,
+          lineHeight: 1.6,
+          color: colors.mist,
+          margin: '0 0 32px 0',
+        }}>
+          Currently only available to engineers part of the Fractal Tech Accelerator.{' '}
+          <a
+            href="https://fractaltech.nyc"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: colors.honey,
+              textDecoration: 'none',
+              borderBottom: `1px solid ${colors.honeyBorder}`,
+              paddingBottom: 1,
+            }}
+          >
+            Learn more here
+          </a>
+        </p>
+
         <hr style={{
           border: 'none',
           borderTop: `1px solid ${colors.stoneLight}`,
@@ -231,6 +254,23 @@ export default function EngineerLoginPage() {
           </>
         )}
       </div>
+
+      <footer style={{
+        position: 'absolute',
+        bottom: 24,
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+      }}>
+        <span style={{
+          fontFamily: fonts.mono,
+          fontSize: 10,
+          letterSpacing: '0.05em',
+          color: colors.mist,
+        }}>
+          Built by Fractal Tech NYC
+        </span>
+      </footer>
     </div>
   )
 }
