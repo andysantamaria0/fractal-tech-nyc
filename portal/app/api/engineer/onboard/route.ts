@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { engineer_id, name, linkedin_url, github_url, portfolio_url } = body
+    const { engineer_id, name, linkedin_url, github_url, portfolio_url, resume_url } = body
 
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
@@ -59,6 +59,7 @@ export async function POST(request: Request) {
         linkedin_url: linkedin_url || null,
         github_url: github_url || null,
         portfolio_url: portfolio_url || null,
+        resume_url: resume_url || null,
         status: 'draft',
       })
       .select('id, status')

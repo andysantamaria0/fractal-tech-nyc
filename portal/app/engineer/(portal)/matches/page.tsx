@@ -33,7 +33,7 @@ export default async function EngineerMatchesPage() {
     <div className="engineer-matches-page">
       <div className="engineer-page-header">
         <h1>Your Job Matches</h1>
-        <p className="engineer-page-desc">
+        <p className="engineer-section-desc">
           Top matches based on your profile and preferences. Scored across 5 dimensions.
         </p>
       </div>

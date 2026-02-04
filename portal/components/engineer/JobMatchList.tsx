@@ -50,7 +50,7 @@ export default function JobMatchList({ matches: initialMatches }: Props) {
   }
 
   return (
-    <div className="engineer-match-list">
+    <div className="engineer-matches-list">
       {matches.map(match => (
         <JobMatchCard
           key={match.id}

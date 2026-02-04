@@ -17,15 +17,27 @@ export default async function EngineerQuestionnairePage() {
 
   if (!profile) redirect('/engineer/onboard')
 
+  const isEditing = profile.status === 'complete'
+
   return (
     <div className="engineer-questionnaire-page">
       <div className="engineer-page-header">
-        <h1>Questionnaire</h1>
-        <p className="engineer-page-desc">
-          Help us understand what you&apos;re looking for so we can find the best matches.
+        <h1>{isEditing ? 'Edit Questionnaire' : 'Questionnaire'}</h1>
+        <p className="engineer-section-desc">
+          {isEditing
+            ? 'Update your answers below. Your existing matches will stay visible while we recompute new ones.'
+            : 'Step 2 of 3 — Tell us what matters to you so we can find jobs that actually fit. This takes about 5 minutes.'}
         </p>
       </div>
-      <EngineerQuestionnaireForm profile={profile as EngineerProfileSpa} />
+
+      {isEditing && (
+        <div className="engineer-reanalysis-warning">
+          <strong>Heads up:</strong> Saving changes will trigger a new analysis of your profile against all active jobs.
+          Your current matches will remain visible, but new scores may shift your rankings. This process runs in the background.
+        </div>
+      )}
+
+      <EngineerQuestionnaireForm profile={profile as EngineerProfileSpa} isEditing={isEditing} />
     </div>
   )
 }

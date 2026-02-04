@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createPlainClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const isSupabaseConfigured =
@@ -51,8 +52,16 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Dev bypass: refresh session but skip access control
-  if (isDev) {
+  // Dev bypass: skip access control but still handle auth-page redirects below
+  if (isDev && !user) {
+    return supabaseResponse
+  }
+  if (isDev && user && !(
+    request.nextUrl.pathname === '/' ||
+    request.nextUrl.pathname === '/login' ||
+    request.nextUrl.pathname === '/signup' ||
+    request.nextUrl.pathname === '/early-access'
+  )) {
     return supabaseResponse
   }
 
@@ -69,7 +78,9 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/hiring-spa'))
   ) {
     const url = request.nextUrl.clone()
+    const redirectTo = request.nextUrl.pathname
     url.pathname = '/login'
+    url.searchParams.set('redirect', redirectTo)
     return NextResponse.redirect(url)
   }
 
@@ -111,8 +122,14 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname === '/signup' ||
       request.nextUrl.pathname === '/early-access')
   ) {
-    // Check if user is an engineer first
-    const { data: engineerProfile } = await supabase
+    // Use service role client to bypass RLS for engineer detection
+    const serviceClient = createPlainClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+
+    // Check if user is an engineer first (linked profile)
+    const { data: engineerProfile } = await serviceClient
       .from('engineer_profiles_spa')
       .select('id')
       .eq('auth_user_id', user.id)
@@ -123,6 +140,22 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/engineer/dashboard'
       return NextResponse.redirect(url)
+    }
+
+    // Check engineers table (needs onboarding)
+    if (user.email) {
+      const { data: engineer } = await serviceClient
+        .from('engineers')
+        .select('id')
+        .eq('email', user.email)
+        .limit(1)
+        .single()
+
+      if (engineer) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/engineer/onboard'
+        return NextResponse.redirect(url)
+      }
     }
 
     // Check if user has a company profile — if not, send them to complete it

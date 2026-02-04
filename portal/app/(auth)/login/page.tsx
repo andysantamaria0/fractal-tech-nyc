@@ -23,6 +23,8 @@ export default function LoginPage() {
     }
   }, [searchParams])
 
+  const redirectParam = searchParams.get('redirect')
+
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -44,6 +46,12 @@ export default function LoginPage() {
     if (data.user) {
       identifyUser(data.user.id, { email: data.user.email })
       trackEvent('user_logged_in', { auth_method: 'email' })
+    }
+
+    // Honor explicit redirect (e.g., from /engineer/onboard)
+    if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+      router.push(redirectParam)
+      return
     }
 
     // Determine redirect based on user type

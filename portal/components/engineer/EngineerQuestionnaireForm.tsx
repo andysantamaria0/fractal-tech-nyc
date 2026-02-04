@@ -8,9 +8,10 @@ import PriorityRatingsForm from './PriorityRatingsForm'
 
 interface Props {
   profile: EngineerProfileSpa
+  isEditing?: boolean
 }
 
-export default function EngineerQuestionnaireForm({ profile }: Props) {
+export default function EngineerQuestionnaireForm({ profile, isEditing }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -107,7 +108,11 @@ export default function EngineerQuestionnaireForm({ profile }: Props) {
 
       <div className="engineer-questionnaire-submit">
         <button type="submit" className="btn-primary btn-full" disabled={saving}>
-          {saving ? 'Saving & Computing Matches...' : 'Complete Questionnaire'}
+          {saving
+            ? 'Saving & Computing Matches...'
+            : isEditing
+              ? 'Save Changes & Recompute Matches'
+              : 'Complete Questionnaire'}
         </button>
       </div>
     </form>

@@ -25,6 +25,7 @@ export default function JobMatchCard({ match, onFeedback }: Props) {
   const [showReasonInput, setShowReasonInput] = useState(false)
   const [reason, setReason] = useState('')
   const [acting, setActing] = useState(false)
+  const [applied, setApplied] = useState(!!match.applied_at)
 
   const job = match.scanned_job
 
@@ -45,6 +46,7 @@ export default function JobMatchCard({ match, onFeedback }: Props) {
     setActing(true)
     try {
       await onFeedback(match.id, 'applied')
+      setApplied(true)
     } finally {
       setActing(false)
     }
@@ -57,64 +59,61 @@ export default function JobMatchCard({ match, onFeedback }: Props) {
         onClick={() => setExpanded(!expanded)}
         type="button"
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-          <div>
-            <span className="engineer-match-title">{job.job_title}</span>
-            <span className="engineer-match-company">{job.company_name}</span>
-          </div>
+        <div className="engineer-match-card-info">
+          <h3>{job.job_title}</h3>
+          <div className="engineer-match-card-company">{job.company_name}</div>
           {job.location && (
-            <span className="engineer-match-location">{job.location}</span>
+            <div className="engineer-match-card-location">{job.location}</div>
           )}
         </div>
-        <div className="engineer-match-score-badge">
+        <div className="engineer-match-score">
           {match.overall_score}%
         </div>
       </button>
 
       {expanded && (
-        <div className="engineer-match-card-detail">
+        <div className="engineer-match-card-body">
           {match.highlight_quote && (
             <div className="engineer-match-highlight">
               {match.highlight_quote}
             </div>
           )}
 
-          <div style={{ marginTop: 16 }}>
-            <p className="engineer-label" style={{ marginBottom: 12 }}>Dimension Breakdown</p>
+          <div className="engineer-dimensions">
             {DIMENSION_ORDER.map(key => {
               const score = (match.dimension_scores as DimensionWeights)[key]
               const matchReasoning = (match.reasoning as MatchReasoning)[key]
               return (
-                <div key={key} className="engineer-dimension-row">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <span className="engineer-dim-label">{DIMENSION_LABELS[key]}</span>
-                    <span className="engineer-dim-score">{score}</span>
+                <div key={key} className="engineer-dimension">
+                  <div className="engineer-dimension-label">
+                    <span>{DIMENSION_LABELS[key]}</span>
+                    <span className="engineer-dimension-score">{score}</span>
                   </div>
-                  <div className="engineer-dim-bar">
+                  <div className="engineer-dimension-bar">
                     <div
-                      className="engineer-dim-bar-fill"
+                      className="engineer-dimension-fill"
                       style={{ width: `${score}%` }}
                     />
                   </div>
                   {matchReasoning && (
-                    <p className="engineer-dim-reason">{matchReasoning}</p>
+                    <div className="engineer-dimension-reasoning">{matchReasoning}</div>
                   )}
                 </div>
               )
             })}
           </div>
 
-          <div className="engineer-match-link">
-            <a href={job.job_url} target="_blank" rel="noopener noreferrer">
+          <div style={{ marginBottom: 'var(--space-4)' }}>
+            <a href={job.job_url} target="_blank" rel="noopener noreferrer" className="engineer-match-job-link">
               View Job Posting
             </a>
             {job.job_board_source && (
-              <span className="engineer-match-source">via {job.job_board_source}</span>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-slate)', marginLeft: 8 }}>via {job.job_board_source}</span>
             )}
           </div>
 
           {showReasonInput && (
-            <div className="engineer-reason-input" style={{ marginTop: 12 }}>
+            <div className="engineer-not-a-fit-reason">
               <textarea
                 className="form-input"
                 rows={2}
@@ -126,20 +125,28 @@ export default function JobMatchCard({ match, onFeedback }: Props) {
           )}
 
           <div className="engineer-match-actions">
-            <button
-              className="btn-primary"
-              onClick={handleApplied}
-              disabled={acting}
-            >
-              {acting ? 'Saving...' : 'I Applied'}
-            </button>
-            <button
-              className="btn-secondary"
-              onClick={handleNotAFit}
-              disabled={acting}
-            >
-              {showReasonInput ? 'Confirm Not a Fit' : 'Not a Fit'}
-            </button>
+            {applied ? (
+              <span className="btn-applied">
+                &#10003; Applied
+              </span>
+            ) : (
+              <button
+                className="btn-primary"
+                onClick={handleApplied}
+                disabled={acting}
+              >
+                {acting ? 'Saving...' : 'I Applied'}
+              </button>
+            )}
+            {!applied && (
+              <button
+                className="btn-secondary"
+                onClick={handleNotAFit}
+                disabled={acting}
+              >
+                {showReasonInput ? 'Confirm Not a Fit' : 'Not a Fit'}
+              </button>
+            )}
           </div>
         </div>
       )}

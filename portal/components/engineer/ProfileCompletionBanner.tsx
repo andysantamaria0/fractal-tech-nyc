@@ -16,18 +16,22 @@ export default function ProfileCompletionBanner({ profile }: Props) {
 
   if (profile.status === 'draft' || profile.status === 'crawling') {
     return (
-      <div className="engineer-banner engineer-banner-info">
+      <div className="engineer-completion-banner">
         <div>
-          <strong>Profile setup in progress</strong>
+          <h3>
+            {profile.status === 'crawling'
+              ? 'Analyzing your profile...'
+              : 'Step 1: Add your links'}
+          </h3>
           <p>
             {profile.status === 'crawling'
-              ? 'We\'re analyzing your online presence. This usually takes a minute.'
-              : 'Add your GitHub or portfolio URL to get started.'}
+              ? 'We\'re scanning your GitHub and portfolio to build your technical DNA. This usually takes about a minute — refresh to check.'
+              : 'Add your GitHub or portfolio URL so we can analyze your technical strengths.'}
           </p>
           {missingFields.length > 0 && (
-            <p style={{ fontSize: 13, marginTop: 4 }}>
+            <div className="engineer-missing-fields">
               Missing: {missingFields.join(', ')}
-            </p>
+            </div>
           )}
         </div>
         <Link href="/engineer/profile" className="btn-primary" style={{ whiteSpace: 'nowrap' }}>
@@ -39,10 +43,10 @@ export default function ProfileCompletionBanner({ profile }: Props) {
 
   if (profile.status === 'questionnaire') {
     return (
-      <div className="engineer-banner engineer-banner-action">
+      <div className="engineer-completion-banner">
         <div>
-          <strong>Complete your questionnaire</strong>
-          <p>Answer a few questions so we can find your best job matches.</p>
+          <h3>Step 2: Complete your questionnaire</h3>
+          <p>Answer a few questions about what you&apos;re looking for so we can match you to the right jobs. Takes about 5 minutes.</p>
         </div>
         <Link href="/engineer/questionnaire" className="btn-primary" style={{ whiteSpace: 'nowrap' }}>
           Start Questionnaire
