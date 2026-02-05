@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
-    const crawlDone = profile.status !== 'crawling' && profile.status !== 'draft'
+    const isCrawling = profile.status === 'crawling'
 
     // Save answers — update status only if crawl is already done
     const updatePayload: Record<string, unknown> = {
@@ -54,10 +54,11 @@ export async function POST(request: Request) {
       deal_breakers: deal_breakers || null,
     }
 
-    // If crawl is still running, keep the current status so the crawl
+    // If crawl is actively running, keep the current status so the crawl
     // pipeline knows to advance to 'complete' when it finishes.
     // Mark questionnaire_completed_at so the crawl pipeline can detect it.
-    if (!crawlDone) {
+    // Note: 'draft' means no crawl was ever triggered, so we can proceed.
+    if (isCrawling) {
       updatePayload.questionnaire_completed_at = new Date().toISOString()
       console.log('[engineer/questionnaire] Crawl still running — saving answers, deferring matches')
     }
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
 
     // If crawl is still running, return early — the crawl pipeline will
     // handle summary generation and match computation when it finishes
-    if (!crawlDone) {
+    if (isCrawling) {
       return NextResponse.json({ success: true, pending_crawl: true })
     }
 
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
     trackServerEvent(user.id, 'engineer_questionnaire_submitted', {
       engineer_profile_id: profile.id,
       is_editing: profile.status === 'complete',
-      crawl_pending: !crawlDone,
+      crawl_pending: isCrawling,
     })
 
     // Run summary generation + match computation in the background

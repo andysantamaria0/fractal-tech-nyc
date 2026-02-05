@@ -37,6 +37,12 @@ export async function POST(request: Request) {
         !existing.github_url && !existing.portfolio_url &&
         existing.status === 'draft'
 
+      // If no URLs to crawl and still in draft, advance to questionnaire
+      const advanceToQuestionnaire = !needsCrawl &&
+        existing.status === 'draft' &&
+        !(github_url || portfolio_url) &&
+        !(existing.github_url || existing.portfolio_url)
+
       await serviceClient
         .from('engineer_profiles_spa')
         .update({
@@ -46,6 +52,7 @@ export async function POST(request: Request) {
           portfolio_url: portfolio_url || null,
           resume_url: resume_url || null,
           ...(needsCrawl ? { status: 'crawling' } : {}),
+          ...(advanceToQuestionnaire ? { status: 'questionnaire' } : {}),
         })
         .eq('id', existing.id)
 

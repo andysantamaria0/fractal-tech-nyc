@@ -94,7 +94,6 @@ export default function EngineerQuestionnaireForm({ profile, isEditing }: Props)
       }
 
       router.push('/engineer/dashboard')
-      router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setSaving(false)
