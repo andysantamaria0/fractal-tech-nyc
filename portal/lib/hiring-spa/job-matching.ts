@@ -88,6 +88,63 @@ Guidelines:
 - Don't inflate scores — honest calibration is more valuable than optimism
 - The highlight_quote should be specific and memorable, not generic`
 
+// Map shorthand location names to patterns for matching
+const LOCATION_PATTERNS: Record<string, string[]> = {
+  'nyc': ['new york', 'nyc', 'brooklyn', 'manhattan'],
+  'sf': ['san francisco', 'sf', 'bay area'],
+  'remote': ['remote'],
+  'la': ['los angeles', 'la'],
+  'austin': ['austin'],
+  'boston': ['boston'],
+  'seattle': ['seattle'],
+  'chicago': ['chicago'],
+  'denver': ['denver'],
+  'miami': ['miami'],
+}
+
+/**
+ * Filter jobs by engineer's preferred locations.
+ * If no preferences set, returns all jobs.
+ * Remote jobs always pass if engineer selected Remote.
+ */
+export function filterByPreferredLocations(
+  jobs: ScannedJob[],
+  preferredLocations: string[] | null,
+): ScannedJob[] {
+  if (!preferredLocations || preferredLocations.length === 0) return jobs
+
+  const wantsRemote = preferredLocations.some(loc => loc.toLowerCase() === 'remote')
+
+  return jobs.filter(job => {
+    const jobLoc = (job.location || '').toLowerCase()
+
+    // If job is remote and engineer wants remote, always include
+    if (wantsRemote && jobLoc.includes('remote')) {
+      return true
+    }
+
+    // Check if job location matches any preferred location
+    for (const pref of preferredLocations) {
+      const prefLower = pref.toLowerCase()
+
+      // Try known patterns first
+      const patterns = LOCATION_PATTERNS[prefLower]
+      if (patterns) {
+        if (patterns.some(p => jobLoc.includes(p))) {
+          return true
+        }
+      } else {
+        // Custom location - direct substring match
+        if (jobLoc.includes(prefLower)) {
+          return true
+        }
+      }
+    }
+
+    return false
+  })
+}
+
 /**
  * Pre-filter jobs based on engineer matching preferences.
  * Removes jobs that match any exclusion rule.
@@ -386,9 +443,12 @@ export async function computeMatchesForEngineer(
 
   const typedJobs = jobs as ScannedJob[]
 
-  // Pre-filter jobs based on matching preferences
+  // Pre-filter jobs based on matching preferences (exclusions)
   const preferences = (typedEngineer.matching_preferences as MatchingPreferences | null) || null
-  const filteredJobs = filterByPreferences(typedJobs, preferences)
+  const afterExclusions = filterByPreferences(typedJobs, preferences)
+
+  // Filter by preferred locations (inclusions)
+  const filteredJobs = filterByPreferredLocations(afterExclusions, typedEngineer.preferred_locations)
 
   // Fetch existing matches to avoid re-scoring
   const { data: existingMatches } = await serviceClient
