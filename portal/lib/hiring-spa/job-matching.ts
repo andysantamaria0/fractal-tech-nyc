@@ -259,6 +259,53 @@ export function filterByPreferredLocations(
 }
 
 /**
+ * Normalize a job title for comparison (lowercase, remove common suffixes/prefixes).
+ */
+function normalizeTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/\s*[-–—]\s*/g, ' ') // normalize dashes
+    .replace(/\s*(sr\.?|senior|jr\.?|junior|lead|staff|principal|intern)\s*/gi, ' ')
+    .replace(/\s*(i|ii|iii|iv|v|1|2|3|4|5)\s*$/gi, '') // remove level suffixes
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * Deduplicate jobs from the same company with very similar titles.
+ * Keeps the most recent posting (by date_posted or first_seen_at).
+ */
+export function deduplicateJobs(jobs: ScannedJob[]): ScannedJob[] {
+  // Group by company domain + normalized title
+  const groups = new Map<string, ScannedJob[]>()
+
+  for (const job of jobs) {
+    const key = `${job.company_domain.toLowerCase()}::${normalizeTitle(job.job_title)}`
+    const existing = groups.get(key) || []
+    existing.push(job)
+    groups.set(key, existing)
+  }
+
+  // From each group, keep the most recent job
+  const deduplicated: ScannedJob[] = []
+  for (const group of groups.values()) {
+    if (group.length === 1) {
+      deduplicated.push(group[0])
+    } else {
+      // Sort by date (most recent first) and keep the first
+      group.sort((a, b) => {
+        const dateA = new Date(a.date_posted || a.first_seen_at).getTime()
+        const dateB = new Date(b.date_posted || b.first_seen_at).getTime()
+        return dateB - dateA
+      })
+      deduplicated.push(group[0])
+    }
+  }
+
+  return deduplicated
+}
+
+/**
  * Pre-filter jobs based on engineer matching preferences.
  * Removes jobs that match any exclusion rule.
  */
@@ -486,10 +533,13 @@ export async function scoreJobForEngineer(
  *   mission_driven → mission
  *   technical_challenges → technical
  *   dna always at baseline 20%
+ *
+ * If learnedAdjustments provided, applies multipliers based on feedback history.
  */
 function computeWeightedScore(
   scores: DimensionWeights,
   priorityRatings: PriorityRatings | null,
+  learnedAdjustments?: DimensionWeights | null,
 ): number {
   if (!priorityRatings) {
     // Equal weights if no priority ratings
@@ -505,6 +555,13 @@ function computeWeightedScore(
     dna: 3, // baseline weight
   }
 
+  // Apply learned adjustments if available (multipliers centered at 1.0)
+  if (learnedAdjustments) {
+    for (const key of DIMENSION_KEYS) {
+      weights[key] *= learnedAdjustments[key]
+    }
+  }
+
   let weightedSum = 0
   let weightTotal = 0
   for (const key of DIMENSION_KEYS) {
@@ -513,6 +570,61 @@ function computeWeightedScore(
   }
 
   return Math.round(weightedSum / (weightTotal || 1))
+}
+
+interface FeedbackMatch {
+  feedback: 'applied' | 'not_a_fit'
+  dimension_scores: DimensionWeights
+}
+
+/**
+ * Compute learned weight adjustments from engineer's feedback history.
+ * Returns multipliers for each dimension (1.0 = no change, >1 = boost, <1 = reduce).
+ *
+ * Logic: Dimensions that score high on "applied" jobs and low on "not_a_fit" jobs
+ * are better predictors and get boosted. Dimensions that mislead (high on not_a_fit)
+ * get reduced.
+ */
+function computeLearnedAdjustments(feedbackHistory: FeedbackMatch[]): DimensionWeights | null {
+  if (feedbackHistory.length < 3) return null // need minimum feedback to learn
+
+  const appliedScores: Record<keyof DimensionWeights, number[]> = {
+    mission: [], technical: [], culture: [], environment: [], dna: [],
+  }
+  const notFitScores: Record<keyof DimensionWeights, number[]> = {
+    mission: [], technical: [], culture: [], environment: [], dna: [],
+  }
+
+  for (const match of feedbackHistory) {
+    const target = match.feedback === 'applied' ? appliedScores : notFitScores
+    for (const key of DIMENSION_KEYS) {
+      target[key].push(match.dimension_scores[key])
+    }
+  }
+
+  // Need at least 1 applied to learn from
+  const hasApplied = appliedScores.mission.length > 0
+  if (!hasApplied) return null
+
+  const adjustments: DimensionWeights = {
+    mission: 1, technical: 1, culture: 1, environment: 1, dna: 1,
+  }
+
+  for (const key of DIMENSION_KEYS) {
+    const appliedAvg = appliedScores[key].length > 0
+      ? appliedScores[key].reduce((a, b) => a + b, 0) / appliedScores[key].length
+      : 50
+    const notFitAvg = notFitScores[key].length > 0
+      ? notFitScores[key].reduce((a, b) => a + b, 0) / notFitScores[key].length
+      : 50
+
+    // If dimension scores higher on applied than not_a_fit, boost it
+    // Adjustment range: 0.7 to 1.3
+    const diff = (appliedAvg - notFitAvg) / 100 // -1 to 1 range
+    adjustments[key] = Math.max(0.7, Math.min(1.3, 1 + diff * 0.3))
+  }
+
+  return adjustments
 }
 
 /**
@@ -561,7 +673,10 @@ export async function computeMatchesForEngineer(
   const afterExclusions = filterByPreferences(typedJobs, preferences)
 
   // Filter by preferred locations (inclusions)
-  const filteredJobs = filterByPreferredLocations(afterExclusions, typedEngineer.preferred_locations)
+  const afterLocations = filterByPreferredLocations(afterExclusions, typedEngineer.preferred_locations)
+
+  // Deduplicate similar jobs from same company
+  const filteredJobs = deduplicateJobs(afterLocations)
 
   // Fetch existing matches to avoid re-scoring
   const { data: existingMatches } = await serviceClient
@@ -606,6 +721,25 @@ export async function computeMatchesForEngineer(
   const notAFitReasons = (notAFitMatches || [])
     .map(m => m.feedback_reason)
     .filter(Boolean) as string[]
+
+  // Fetch feedback history to compute learned weight adjustments
+  const { data: feedbackMatches } = await serviceClient
+    .from('engineer_job_matches')
+    .select('feedback, dimension_scores')
+    .eq('engineer_profile_id', engineerProfileId)
+    .not('feedback', 'is', null)
+
+  const feedbackHistory: FeedbackMatch[] = (feedbackMatches || [])
+    .filter(m => m.feedback && m.dimension_scores)
+    .map(m => ({
+      feedback: m.feedback as 'applied' | 'not_a_fit',
+      dimension_scores: m.dimension_scores as DimensionWeights,
+    }))
+
+  const learnedAdjustments = computeLearnedAdjustments(feedbackHistory)
+  if (learnedAdjustments) {
+    console.log(`[job-matching] Using learned adjustments from ${feedbackHistory.length} feedback items`)
+  }
 
   // Initialize Anthropic client
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -667,6 +801,7 @@ export async function computeMatchesForEngineer(
         const baseScore = computeWeightedScore(
           result.scores,
           typedEngineer.priority_ratings,
+          learnedAdjustments,
         )
         const recencyBoost = getRecencyBoost(job)
         const overall_score = Math.min(100, baseScore + recencyBoost)
