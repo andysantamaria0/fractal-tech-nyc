@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
+import { sendDiscordWebhook } from '@/lib/discord'
 import { computeMatchesForEngineer } from '@/lib/hiring-spa/job-matching'
 import { notifyEngineerMatchesReady } from '@/lib/hiring-spa/notifications'
 
@@ -58,12 +59,26 @@ export async function GET(request: Request) {
     const totalNew = results.reduce((sum, r) => sum + r.newMatches, 0)
     console.log(`[cron/recompute-matches] Done. ${results.length} engineers, ${totalNew} total matches updated`)
 
+    if (totalNew > 0) {
+      sendDiscordWebhook({
+        embeds: [{
+          title: 'Batch Match Recomputation Complete',
+          color: 0x059669,
+          fields: [
+            { name: 'Engineers Processed', value: String(results.length), inline: true },
+            { name: 'New Matches', value: String(totalNew), inline: true },
+          ],
+          timestamp: new Date().toISOString(),
+        }],
+      }).catch(err => console.error('[cron/recompute-matches] Discord notify error:', err))
+    }
+
     return NextResponse.json({
       processed: results.length,
       totalNewMatches: totalNew,
       results,
     })
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('[cron/recompute-matches] Error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

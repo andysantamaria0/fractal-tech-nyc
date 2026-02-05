@@ -346,6 +346,7 @@ export interface EngineerProfileSpa {
   profile_summary: EngineerProfileSummary | null
   matching_preferences: MatchingPreferences | null
   priority_ratings: PriorityRatings | null
+  preferred_locations: string[] | null
   status: EngineerProfileStatus
   created_at: string
   updated_at: string

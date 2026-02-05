@@ -1,5 +1,23 @@
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL
 
+interface DiscordEmbed {
+  title?: string
+  description?: string
+  color?: number
+  fields?: { name: string; value: string; inline?: boolean }[]
+  timestamp?: string
+}
+
+export async function sendDiscordWebhook(payload: { embeds: DiscordEmbed[] }) {
+  if (!DISCORD_WEBHOOK_URL) return
+
+  await fetch(DISCORD_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}
+
 export async function notifyDiscordEngineerSignup(params: {
   name: string
   email: string

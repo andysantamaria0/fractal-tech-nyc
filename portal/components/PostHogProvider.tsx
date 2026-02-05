@@ -15,11 +15,15 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
   useEffect(() => {
     if (!POSTHOG_KEY) return
     if (pathname) {
-      let url = window.origin + pathname
-      if (searchParams?.toString()) {
-        url = url + '?' + searchParams.toString()
+      try {
+        let url = window.origin + pathname
+        if (searchParams?.toString()) {
+          url = url + '?' + searchParams.toString()
+        }
+        posthog.capture('$pageview', { $current_url: url })
+      } catch {
+        // Silently fail if blocked by ad blocker / privacy extension
       }
-      posthog.capture('$pageview', { $current_url: url })
     }
   }, [pathname, searchParams])
 

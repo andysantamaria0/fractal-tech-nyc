@@ -18,6 +18,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const {
       priority_ratings,
+      preferred_locations,
       work_preferences,
       career_growth,
       strengths,
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
     // Save answers — update status only if crawl is already done
     const updatePayload: Record<string, unknown> = {
       priority_ratings,
+      preferred_locations: preferred_locations || null,
       work_preferences: work_preferences || null,
       career_growth: career_growth || null,
       strengths: strengths || null,
