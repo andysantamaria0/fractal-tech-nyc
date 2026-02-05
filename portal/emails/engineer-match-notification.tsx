@@ -52,7 +52,7 @@ export function EngineerMatchNotificationEmail({
       <a href="${safeUrl}" class="cta">View Role &amp; Respond</a>
     </div>
     <div class="footer">
-      Fractal Bootcamp &middot; fractaltech.nyc
+      Fractal Tech &middot; fractaltech.nyc
     </div>
   </div>
 </body>

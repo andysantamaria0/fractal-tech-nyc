@@ -38,7 +38,7 @@ export function FeatureSubmittedEmail({ name, featureTitle, timeline }: FeatureS
       <p>We'll match you with an engineer and follow up with next steps. You can track your submissions in the portal.</p>
     </div>
     <div class="footer">
-      Fractal Bootcamp &middot; fractaltech.nyc
+      Fractal Tech &middot; fractaltech.nyc
     </div>
   </div>
 </body>

@@ -6,7 +6,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Fractal Partners Portal',
-  description: 'Partner portal for Fractal Bootcamp — track cohort progress, discover engineers, and submit feature requests.',
+  description: 'Partner portal for Fractal Tech — track cohort progress, discover engineers, and submit feature requests.',
 }
 
 export default function RootLayout({

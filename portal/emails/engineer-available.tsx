@@ -48,7 +48,7 @@ export function EngineerAvailableEmail({
       </p>
     </div>
     <div class="footer">
-      Fractal Bootcamp &middot; fractaltech.nyc<br>
+      Fractal Tech &middot; fractaltech.nyc<br>
       <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://portal.fractaltech.nyc'}/settings" style="color: #5A5A5A;">Manage email preferences</a>
     </div>
   </div>

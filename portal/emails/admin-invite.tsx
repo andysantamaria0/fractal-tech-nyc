@@ -36,7 +36,7 @@ export function AdminInviteEmail({ name, inviteLink }: AdminInviteEmailProps) {
       </p>
     </div>
     <div class="footer">
-      Fractal Bootcamp &middot; fractaltech.nyc
+      Fractal Tech &middot; fractaltech.nyc
     </div>
   </div>
 </body>

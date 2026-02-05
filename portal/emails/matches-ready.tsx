@@ -44,7 +44,7 @@ export function MatchesReadyEmail({
       <a href="${safeUrl}" class="cta">View Your Matches</a>
     </div>
     <div class="footer">
-      Fractal Bootcamp &middot; fractaltech.nyc
+      Fractal Tech &middot; fractaltech.nyc
     </div>
   </div>
 </body>
