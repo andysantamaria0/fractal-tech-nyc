@@ -5,16 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { EngineerProfileSpa, PriorityRatings } from '@/lib/hiring-spa/types'
 import { ENGINEER_SECTIONS } from '@/lib/hiring-spa/engineer-priority-questions'
 import PriorityRatingsForm from './PriorityRatingsForm'
-
-const c = {
-  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C', honey: '#C9A86C',
-  parchment: '#FAF8F5', fog: '#F7F5F2',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 function FocusTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const [focused, setFocused] = useState(false)

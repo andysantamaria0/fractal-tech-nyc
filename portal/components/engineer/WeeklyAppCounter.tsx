@@ -1,5 +1,4 @@
-const c = { match: '#8B7355', honeyLight: 'rgba(201, 168, 108, 0.20)' }
-const f = { mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace' }
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 export default function WeeklyAppCounter({ count }: { count: number }) {
   return (

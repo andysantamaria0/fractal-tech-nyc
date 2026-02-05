@@ -2,17 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import EngineerQuestionnaireForm from '@/components/engineer/EngineerQuestionnaireForm'
-
-const c = {
-  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C',
-  parchment: '#FAF8F5',
-  honeyBorder: 'rgba(201, 168, 108, 0.30)',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 export default async function EngineerQuestionnairePage() {
   const supabase = await createClient()
@@ -22,7 +12,7 @@ export default async function EngineerQuestionnairePage() {
 
   const { data: profile } = await supabase
     .from('engineer_profiles_spa')
-    .select('*')
+    .select('id, status, priority_ratings, work_preferences, career_growth, strengths, growth_areas, deal_breakers')
     .eq('auth_user_id', user.id)
     .single()
 

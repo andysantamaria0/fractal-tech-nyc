@@ -2,19 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
-
-const c = {
-  parchment: '#FAF8F5',
-  honey: '#C9A86C',
-  charcoal: '#2C2C2C',
-  graphite: '#5C5C5C',
-  mist: '#9C9C9C',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-  stoneBorder: 'rgba(166, 155, 141, 0.40)',
-}
-const f = {
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 const navItems = [
   { href: '/engineer/dashboard', label: 'Dashboard' },
@@ -33,7 +21,9 @@ export default function EngineerHeader({ engineerName }: { engineerName?: string
   }
 
   return (
-    <header style={{
+    <>
+    <style>{`@media (max-width: 640px) { .ep-header { flex-direction: column !important; gap: 12px !important; padding: 16px !important; } }`}</style>
+    <header className="ep-header" style={{
       padding: '24px 48px',
       borderBottom: `1px solid ${c.stoneLight}`,
       display: 'flex',
@@ -81,5 +71,6 @@ export default function EngineerHeader({ engineerName }: { engineerName?: string
         </button>
       </div>
     </header>
+    </>
   )
 }

@@ -4,17 +4,7 @@ import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import EngineerProfileView from '@/components/engineer/EngineerProfileView'
 import MatchingPreferencesEditor from '@/components/engineer/MatchingPreferencesEditor'
 import Link from 'next/link'
-
-const c = {
-  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C',
-  parchment: '#FAF8F5', fog: '#F7F5F2', stone: '#A69B8D',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-  honeyBorder: 'rgba(201, 168, 108, 0.30)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 export default async function EngineerProfilePage() {
   const supabase = await createClient()
@@ -24,7 +14,7 @@ export default async function EngineerProfilePage() {
 
   const { data: profile } = await supabase
     .from('engineer_profiles_spa')
-    .select('*')
+    .select('id, name, email, status, linkedin_url, github_url, portfolio_url, resume_url, engineer_dna, profile_summary')
     .eq('auth_user_id', user.id)
     .single()
 

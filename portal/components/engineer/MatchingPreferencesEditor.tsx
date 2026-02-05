@@ -2,17 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { MatchingPreferences } from '@/lib/hiring-spa/types'
-
-const c = {
-  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C',
-  match: '#8B7355', fog: '#F7F5F2',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-  honeyLight: 'rgba(201, 168, 108, 0.20)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 const SECTION_LABELS: Record<keyof MatchingPreferences, string> = {
   excluded_locations: 'Excluded Locations',

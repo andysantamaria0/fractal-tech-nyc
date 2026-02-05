@@ -1,19 +1,11 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import EngineerHeader from '@/components/engineer/EngineerHeader'
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 export const metadata: Metadata = {
   title: 'Fractal Engineers',
   description: 'Intelligent job matching for Fractal engineers — build your EngineerDNA, get matched to roles that fit your skills, culture, and career goals.',
-}
-
-const c = {
-  platinum: '#E8E4DF',
-  mist: '#9C9C9C',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-}
-const f = {
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
 }
 
 export default async function EngineerPortalLayout({
@@ -55,8 +47,9 @@ export default async function EngineerPortalLayout({
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: c.platinum, WebkitFontSmoothing: 'antialiased' }}>
+      <style>{`@media (max-width: 640px) { .ep-main { padding: 24px 16px !important; } }`}</style>
       <EngineerHeader engineerName={engineerName} />
-      <main style={{ maxWidth: 900, margin: '0 auto', padding: 48 }}>
+      <main className="ep-main" style={{ maxWidth: 900, margin: '0 auto', padding: 48 }}>
         {children}
       </main>
       <footer style={{

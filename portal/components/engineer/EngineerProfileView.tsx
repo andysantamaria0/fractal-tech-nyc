@@ -3,18 +3,7 @@
 import { useState } from 'react'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import { useRouter } from 'next/navigation'
-
-const c = {
-  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C',
-  honey: '#C9A86C', stone: '#A69B8D', match: '#8B7355',
-  parchment: '#FAF8F5', fog: '#F7F5F2',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-  honeyLight: 'rgba(201, 168, 108, 0.20)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 function FocusInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   const [focused, setFocused] = useState(false)

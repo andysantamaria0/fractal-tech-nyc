@@ -2,13 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { EngineerJobMatchWithJob } from '@/lib/hiring-spa/types'
 import JobMatchList from '@/components/engineer/JobMatchList'
-
-const c = {
-  charcoal: '#2C2C2C', graphite: '#5C5C5C',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 export default async function EngineerMatchesPage() {
   const supabase = await createClient()
@@ -28,13 +22,19 @@ export default async function EngineerMatchesPage() {
     redirect('/engineer/questionnaire')
   }
 
-  const { data: matches } = await supabase
-    .from('engineer_job_matches')
-    .select('*, scanned_job:scanned_jobs(*)')
-    .eq('engineer_profile_id', profile.id)
-    .is('feedback', null)
-    .order('display_rank', { ascending: true })
-    .limit(10)
+  const [{ data: matches }, { count: totalMatchCount }] = await Promise.all([
+    supabase
+      .from('engineer_job_matches')
+      .select('*, scanned_job:scanned_jobs(*)')
+      .eq('engineer_profile_id', profile.id)
+      .is('feedback', null)
+      .order('display_rank', { ascending: true })
+      .limit(10),
+    supabase
+      .from('engineer_job_matches')
+      .select('*', { count: 'exact', head: true })
+      .eq('engineer_profile_id', profile.id),
+  ])
 
   return (
     <div>
@@ -46,7 +46,7 @@ export default async function EngineerMatchesPage() {
           Top matches based on your profile and preferences. Scored across 5 dimensions.
         </p>
       </div>
-      <JobMatchList matches={(matches || []) as EngineerJobMatchWithJob[]} />
+      <JobMatchList matches={(matches || []) as EngineerJobMatchWithJob[]} totalMatchCount={totalMatchCount ?? 0} />
     </div>
   )
 }

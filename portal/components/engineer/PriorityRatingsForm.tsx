@@ -2,15 +2,7 @@
 
 import type { PriorityRatings } from '@/lib/hiring-spa/types'
 import { PRIORITY_QUESTIONS } from '@/lib/hiring-spa/engineer-priority-questions'
-
-const c = {
-  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C', honey: '#C9A86C',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 const RATING_LABELS = ['', 'Low', 'Moderate', 'Important', 'Very Important', 'Critical']
 

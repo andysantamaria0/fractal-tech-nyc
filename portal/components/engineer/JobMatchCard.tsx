@@ -9,19 +9,7 @@ import type {
   MatchingPreferences,
 } from '@/lib/hiring-spa/types'
 import { FEEDBACK_CATEGORIES } from '@/lib/hiring-spa/types'
-
-const c = {
-  charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C',
-  honey: '#C9A86C', match: '#8B7355', stone: '#A69B8D',
-  parchment: '#FAF8F5', fog: '#F7F5F2',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-  honeyBorder: 'rgba(201, 168, 108, 0.30)',
-  honeyLight: 'rgba(201, 168, 108, 0.20)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 const DIMENSION_LABELS: Record<keyof DimensionWeights, string> = {
   mission: 'Mission',
@@ -55,6 +43,7 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
   const [addRule, setAddRule] = useState(true)
   const [acting, setActing] = useState(false)
   const [applied, setApplied] = useState(!!match.applied_at)
+  const [error, setError] = useState('')
   const [reasonFocused, setReasonFocused] = useState(false)
 
   const job = match.scanned_job
@@ -91,11 +80,14 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
   const handleConfirm = useCallback(async () => {
     if (!selectedCategory) return
     setActing(true)
+    setError('')
     try {
       await onFeedback(match.id, 'not_a_fit', reason || undefined, selectedCategory)
       if (addRule && ruleSuggestion && onAddPreference) {
         await onAddPreference(ruleSuggestion.type, ruleSuggestion.value)
       }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save feedback')
     } finally {
       setActing(false)
     }
@@ -103,9 +95,12 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
 
   const handleApplied = useCallback(async () => {
     setActing(true)
+    setError('')
     try {
       await onFeedback(match.id, 'applied')
       setApplied(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save feedback')
     } finally {
       setActing(false)
     }
@@ -295,6 +290,16 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
                   transition: 'border-color 200ms ease',
                 }}
               />
+            </div>
+          )}
+
+          {error && (
+            <div style={{
+              fontFamily: f.mono, fontSize: 12, color: '#8B3A3A',
+              backgroundColor: 'rgba(139, 58, 58, 0.08)', border: '1px solid rgba(139, 58, 58, 0.2)',
+              borderRadius: 6, padding: '10px 14px', marginBottom: 12,
+            }}>
+              {error}
             </div>
           )}
 

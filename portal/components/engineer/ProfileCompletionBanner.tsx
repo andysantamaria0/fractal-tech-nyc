@@ -1,14 +1,6 @@
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import Link from 'next/link'
-
-const c = {
-  parchment: '#FAF8F5', charcoal: '#2C2C2C', graphite: '#5C5C5C', mist: '#9C9C9C',
-  honeyBorder: 'rgba(201, 168, 108, 0.30)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 export default function ProfileCompletionBanner({ profile }: { profile: EngineerProfileSpa }) {
   if (profile.status === 'complete') return null

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 interface EngineerData {
   id: string
@@ -12,22 +13,6 @@ interface EngineerData {
   linkedin_url: string | null
   portfolio_url: string | null
   resume_url: string | null
-}
-
-const c = {
-  platinum: '#E8E4DF',
-  fog: '#F7F5F2',
-  parchment: '#FAF8F5',
-  honey: '#C9A86C',
-  charcoal: '#2C2C2C',
-  graphite: '#5C5C5C',
-  mist: '#9C9C9C',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-  honeyBorder: 'rgba(201, 168, 108, 0.30)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
 }
 
 function FocusInput({ id, type = 'text', value, onChange, placeholder, required = false }: {

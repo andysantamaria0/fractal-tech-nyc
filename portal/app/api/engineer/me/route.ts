@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { runEngineerCrawlPipeline } from '@/lib/hiring-spa/engineer-crawl'
 import { trackServerEvent } from '@/lib/posthog-server'
@@ -85,11 +85,17 @@ export async function PATCH(request: Request) {
         .update({ status: 'crawling', crawl_error: null })
         .eq('id', profile.id)
 
-      runEngineerCrawlPipeline(
-        profile.id,
-        github_url ?? profile.github_url,
-        portfolio_url ?? profile.portfolio_url,
-      ).catch(err => console.error('[engineer/me] Crawl error:', err))
+      after(async () => {
+        try {
+          await runEngineerCrawlPipeline(
+            profile.id,
+            github_url ?? profile.github_url,
+            portfolio_url ?? profile.portfolio_url,
+          )
+        } catch (err) {
+          console.error('[engineer/me] Crawl error:', err)
+        }
+      })
     }
 
     return NextResponse.json({ success: true })

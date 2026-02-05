@@ -3,21 +3,14 @@
 import { useState, useCallback } from 'react'
 import type { EngineerJobMatchWithJob, FeedbackCategory, MatchingPreferences } from '@/lib/hiring-spa/types'
 import JobMatchCard from './JobMatchCard'
-
-const c = {
-  charcoal: '#2C2C2C', mist: '#9C9C9C',
-  fog: '#F7F5F2',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 interface Props {
   matches: EngineerJobMatchWithJob[]
+  totalMatchCount?: number
 }
 
-export default function JobMatchList({ matches: initialMatches }: Props) {
+export default function JobMatchList({ matches: initialMatches, totalMatchCount = 0 }: Props) {
   const [matches, setMatches] = useState(initialMatches)
 
   const handleFeedback = useCallback(async (
@@ -65,16 +58,19 @@ export default function JobMatchList({ matches: initialMatches }: Props) {
   }, [])
 
   if (matches.length === 0) {
+    const allReviewed = totalMatchCount > 0
     return (
       <div style={{
         backgroundColor: c.fog, border: `1px solid ${c.stoneLight}`,
         borderRadius: 8, padding: 40, textAlign: 'center',
       }}>
         <h3 style={{ fontFamily: f.serif, fontSize: 18, fontWeight: 400, color: c.charcoal, margin: '0 0 8px 0' }}>
-          No matches to show
+          {allReviewed ? 'All caught up' : 'Matches on the way'}
         </h3>
         <p style={{ fontFamily: f.serif, fontSize: 15, color: c.mist, margin: 0 }}>
-          All matches have been reviewed, or matches haven&apos;t been computed yet.
+          {allReviewed
+            ? 'You\u2019ve reviewed all your current matches. New matches will appear as we find more jobs that fit your profile.'
+            : 'We\u2019re scoring jobs against your profile right now. Check back soon \u2014 your top matches will appear here.'}
         </p>
       </div>
     )

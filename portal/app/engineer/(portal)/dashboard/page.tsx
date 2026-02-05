@@ -3,18 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import ProfileCompletionBanner from '@/components/engineer/ProfileCompletionBanner'
 import WeeklyAppCounter from '@/components/engineer/WeeklyAppCounter'
-
-const c = {
-  fog: '#F7F5F2', parchment: '#FAF8F5', charcoal: '#2C2C2C', graphite: '#5C5C5C',
-  mist: '#9C9C9C', honey: '#C9A86C', match: '#8B7355',
-  stoneLight: 'rgba(166, 155, 141, 0.12)',
-  honeyBorder: 'rgba(201, 168, 108, 0.30)',
-  honeyLight: 'rgba(201, 168, 108, 0.20)',
-}
-const f = {
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", Monaco, Inconsolata, "Fira Code", monospace',
-}
+import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 export default async function EngineerDashboardPage() {
   const supabase = await createClient()
@@ -24,7 +13,7 @@ export default async function EngineerDashboardPage() {
 
   const { data: profile } = await supabase
     .from('engineer_profiles_spa')
-    .select('*')
+    .select('id, status, linkedin_url, github_url, portfolio_url, resume_url')
     .eq('auth_user_id', user.id)
     .single()
 
@@ -53,6 +42,7 @@ export default async function EngineerDashboardPage() {
 
   return (
     <div>
+      <style>{`@media (max-width: 640px) { .ep-stats-grid { grid-template-columns: 1fr !important; } }`}</style>
       {/* Page header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <h1 style={{ fontFamily: f.serif, fontSize: 24, fontWeight: 400, color: c.charcoal, margin: 0 }}>
@@ -64,7 +54,7 @@ export default async function EngineerDashboardPage() {
       <ProfileCompletionBanner profile={typedProfile} />
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
+      <div className="ep-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
         <div style={statCard}>
           <div style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 500, color: c.match, marginBottom: 4 }}>
             {totalMatches}

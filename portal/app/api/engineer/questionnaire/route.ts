@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { notifyDiscordMatchesComputed } from '@/lib/discord'
 import { generateEngineerProfileSummary } from '@/lib/hiring-spa/engineer-summary'
@@ -78,57 +78,57 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, pending_crawl: true })
     }
 
-    // Generate profile summary
-    try {
-      const { data: fullProfile } = await serviceClient
-        .from('engineer_profiles_spa')
-        .select('*')
-        .eq('id', profile.id)
-        .single()
-
-      if (fullProfile) {
-        const summary = await generateEngineerProfileSummary({
-          engineerDna: fullProfile.engineer_dna,
-          workPreferences: fullProfile.work_preferences,
-          careerGrowth: fullProfile.career_growth,
-          strengths: fullProfile.strengths,
-          growthAreas: fullProfile.growth_areas,
-          dealBreakers: fullProfile.deal_breakers,
-        })
-        await serviceClient
-          .from('engineer_profiles_spa')
-          .update({
-            profile_summary: summary,
-            status: 'complete',
-          })
-          .eq('id', profile.id)
-      }
-    } catch (summaryErr) {
-      console.error('[engineer/questionnaire] Summary generation failed:', summaryErr)
-      // Still mark as complete even if summary fails
-      await serviceClient
-        .from('engineer_profiles_spa')
-        .update({ status: 'complete' })
-        .eq('id', profile.id)
-    }
-
-    // Auto-trigger match computation (fire and forget), then email
-    computeMatchesForEngineer(profile.id, serviceClient)
-      .then(result => {
-        if (result.matches.length > 0) {
-          notifyDiscordMatchesComputed({
-            engineerName: profile.name || 'Unknown',
-            matchCount: result.matches.length,
-          }).catch(err => console.error('[engineer/questionnaire] Discord notify error:', err))
-          return notifyEngineerMatchesReady(profile.id, result.matches.length, serviceClient)
-        }
-      })
-      .catch(err => console.error('[engineer/questionnaire] Match/notify error:', err))
+    // Mark as complete immediately so the UI can proceed
+    await serviceClient
+      .from('engineer_profiles_spa')
+      .update({ status: 'complete' })
+      .eq('id', profile.id)
 
     trackServerEvent(user.id, 'engineer_questionnaire_submitted', {
       engineer_profile_id: profile.id,
       is_editing: profile.status === 'complete',
       crawl_pending: !crawlDone,
+    })
+
+    // Run summary generation + match computation in the background
+    after(async () => {
+      try {
+        const { data: fullProfile } = await serviceClient
+          .from('engineer_profiles_spa')
+          .select('*')
+          .eq('id', profile.id)
+          .single()
+
+        if (fullProfile) {
+          try {
+            const summary = await generateEngineerProfileSummary({
+              engineerDna: fullProfile.engineer_dna,
+              workPreferences: fullProfile.work_preferences,
+              careerGrowth: fullProfile.career_growth,
+              strengths: fullProfile.strengths,
+              growthAreas: fullProfile.growth_areas,
+              dealBreakers: fullProfile.deal_breakers,
+            })
+            await serviceClient
+              .from('engineer_profiles_spa')
+              .update({ profile_summary: summary })
+              .eq('id', profile.id)
+          } catch (summaryErr) {
+            console.error('[engineer/questionnaire] Summary generation failed:', summaryErr)
+          }
+        }
+
+        const result = await computeMatchesForEngineer(profile.id, serviceClient)
+        if (result.matches.length > 0) {
+          notifyDiscordMatchesComputed({
+            engineerName: profile.name || 'Unknown',
+            matchCount: result.matches.length,
+          }).catch(err => console.error('[engineer/questionnaire] Discord notify error:', err))
+          await notifyEngineerMatchesReady(profile.id, result.matches.length, serviceClient)
+        }
+      } catch (err) {
+        console.error('[engineer/questionnaire] Background processing error:', err)
+      }
     })
 
     return NextResponse.json({ success: true })
