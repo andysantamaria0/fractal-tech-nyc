@@ -116,10 +116,13 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
   }, [])
 
   return (
-    <div style={{
-      backgroundColor: c.fog, border: `1px solid ${expanded ? c.honeyBorder : c.stoneLight}`,
-      borderRadius: 8, overflow: 'hidden', transition: 'border-color 200ms ease',
-    }}>
+    <motion.div
+      whileHover={{ y: -2, boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)' }}
+      transition={{ duration: duration.hover }}
+      style={{
+        backgroundColor: c.fog, border: `1px solid ${expanded ? c.honeyBorder : c.stoneLight}`,
+        borderRadius: 8, overflow: 'hidden', transition: 'border-color 200ms ease',
+      }}>
       <motion.button
         onClick={() => setExpanded(!expanded)}
         type="button"
@@ -416,6 +419,6 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }
