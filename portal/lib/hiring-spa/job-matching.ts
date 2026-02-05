@@ -18,6 +18,7 @@ const DIMENSION_KEYS: (keyof DimensionWeights)[] = [
 
 const MIN_DIMENSION_SCORE = 40
 const TOP_N = 10
+const MAX_JOBS_PER_COMPANY = 2
 
 const SYSTEM_PROMPT = `You are a matching engine for a job platform. Given an engineer's profile and a job posting, score how well the job fits the engineer across 5 dimensions.
 
@@ -435,9 +436,21 @@ export async function computeMatchesForEngineer(
     }
   }
 
-  // Sort by overall score descending, take top N
+  // Sort by overall score descending
   scored.sort((a, b) => b.overall_score - a.overall_score)
-  const topMatches = scored.slice(0, TOP_N)
+
+  // Limit to MAX_JOBS_PER_COMPANY per company (by domain) to ensure variety
+  const companyCount = new Map<string, number>()
+  const diversifiedMatches = scored.filter(m => {
+    const domain = m.job.company_domain.toLowerCase()
+    const count = companyCount.get(domain) || 0
+    if (count >= MAX_JOBS_PER_COMPANY) return false
+    companyCount.set(domain, count + 1)
+    return true
+  })
+
+  // Take top N from diversified list
+  const topMatches = diversifiedMatches.slice(0, TOP_N)
 
   // Generate a batch ID for this computation
   const batchId = `eng_${engineerProfileId.slice(0, 8)}_${Date.now()}`
