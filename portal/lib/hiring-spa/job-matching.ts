@@ -19,6 +19,40 @@ const DIMENSION_KEYS: (keyof DimensionWeights)[] = [
 const MIN_DIMENSION_SCORE = 40
 const TOP_N = 10
 const MAX_JOBS_PER_COMPANY = 2
+const SCORING_CONCURRENCY = 5
+
+/**
+ * Run async tasks with limited concurrency.
+ */
+async function parallelMap<T, R>(
+  items: T[],
+  fn: (item: T) => Promise<R>,
+  concurrency: number,
+): Promise<R[]> {
+  const results: R[] = []
+  const executing: Promise<void>[] = []
+
+  for (const item of items) {
+    const p = fn(item).then(result => {
+      results.push(result)
+    })
+    executing.push(p)
+
+    if (executing.length >= concurrency) {
+      await Promise.race(executing)
+      // Remove settled promises
+      for (let i = executing.length - 1; i >= 0; i--) {
+        const settled = await Promise.race([executing[i], Promise.resolve('pending')])
+        if (settled !== 'pending') {
+          executing.splice(i, 1)
+        }
+      }
+    }
+  }
+
+  await Promise.all(executing)
+  return results
+}
 
 const SYSTEM_PROMPT = `You are a matching engine for a job platform. Given an engineer's profile and a job posting, score how well the job fits the engineer across 5 dimensions.
 
@@ -400,41 +434,49 @@ export async function computeMatchesForEngineer(
     .map(m => m.feedback_reason)
     .filter(Boolean) as string[]
 
-  // Score each new job
-  const scored: Array<{
+  // Score jobs in parallel with limited concurrency
+  type ScoredJob = {
     job: ScannedJob
     scores: DimensionWeights
     reasoning: MatchReasoning
     highlight_quote: string
     overall_score: number
-  }> = []
+  } | null
 
-  for (const job of newJobs) {
-    try {
-      const result = await scoreJobForEngineer(job, typedEngineer, notAFitReasons, preferences)
+  const scoredResults = await parallelMap(
+    newJobs,
+    async (job): Promise<ScoredJob> => {
+      try {
+        const result = await scoreJobForEngineer(job, typedEngineer, notAFitReasons, preferences)
 
-      // Check minimum threshold: every dimension must be >= 40
-      const belowThreshold = DIMENSION_KEYS.some(
-        key => result.scores[key] < MIN_DIMENSION_SCORE,
-      )
-      if (belowThreshold) continue
+        // Check minimum threshold: every dimension must be >= 40
+        const belowThreshold = DIMENSION_KEYS.some(
+          key => result.scores[key] < MIN_DIMENSION_SCORE,
+        )
+        if (belowThreshold) return null
 
-      const overall_score = computeWeightedScore(
-        result.scores,
-        typedEngineer.priority_ratings,
-      )
+        const overall_score = computeWeightedScore(
+          result.scores,
+          typedEngineer.priority_ratings,
+        )
 
-      scored.push({
-        job,
-        scores: result.scores,
-        reasoning: result.reasoning,
-        highlight_quote: result.highlight_quote,
-        overall_score,
-      })
-    } catch (err) {
-      console.error(`Failed to score job ${job.id} for engineer ${engineerProfileId}:`, err)
-    }
-  }
+        return {
+          job,
+          scores: result.scores,
+          reasoning: result.reasoning,
+          highlight_quote: result.highlight_quote,
+          overall_score,
+        }
+      } catch (err) {
+        console.error(`Failed to score job ${job.id} for engineer ${engineerProfileId}:`, err)
+        return null
+      }
+    },
+    SCORING_CONCURRENCY,
+  )
+
+  // Filter out nulls (failed or below threshold)
+  const scored = scoredResults.filter((r): r is NonNullable<ScoredJob> => r !== null)
 
   // Sort by overall score descending
   scored.sort((a, b) => b.overall_score - a.overall_score)
