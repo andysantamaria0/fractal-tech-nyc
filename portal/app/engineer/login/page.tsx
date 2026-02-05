@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import PortalAudioPlayer from '@/components/engineer/PortalAudioPlayer'
 
 const colors = {
   platinum: '#E8E4DF',
@@ -271,6 +272,7 @@ export default function EngineerLoginPage() {
           Built by Fractal Tech NYC
         </span>
       </footer>
+      <PortalAudioPlayer />
     </div>
   )
 }
