@@ -48,9 +48,15 @@ export async function middleware(request: NextRequest) {
           supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options as Record<string, unknown>)
-          )
+          cookiesToSet.forEach(({ name, value, options }) => {
+            const cookieOptions = {
+              ...options,
+              path: '/',
+              sameSite: 'lax' as const,
+              secure: process.env.NODE_ENV === 'production',
+            }
+            supabaseResponse.cookies.set(name, value, cookieOptions)
+          })
         },
       },
     }

@@ -101,8 +101,15 @@ export async function GET(request: Request) {
       }
 
       const response = buildRedirect(request, origin, redirectPath)
+      // Apply cookies with explicit options to ensure they propagate correctly
       cookieBuffer.forEach(({ name, value, options }) => {
-        response.cookies.set(name, value, options as Record<string, unknown>)
+        const cookieOptions = {
+          ...options,
+          path: '/',
+          sameSite: 'lax' as const,
+          secure: process.env.NODE_ENV === 'production',
+        }
+        response.cookies.set(name, value, cookieOptions)
       })
       return response
     }

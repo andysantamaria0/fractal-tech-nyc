@@ -20,7 +20,16 @@ export default function CompleteProfilePage() {
 
   useEffect(() => {
     async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser()
+      // Retry session detection a few times to handle cookie propagation delay
+      let user = null
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data } = await supabase.auth.getUser()
+        user = data.user
+        if (user) break
+        // Wait before retrying (100ms, 200ms)
+        if (attempt < 2) await new Promise(r => setTimeout(r, 100 * (attempt + 1)))
+      }
+
       if (!user) {
         router.push('/signup')
         return
