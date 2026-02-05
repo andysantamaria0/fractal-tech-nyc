@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import ProfileCompletionBanner from '@/components/engineer/ProfileCompletionBanner'
 import WeeklyAppCounter from '@/components/engineer/WeeklyAppCounter'
+import { StaggerContainer, StaggerItem } from '@/components/engineer/StaggerChildren'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 export default async function EngineerDashboardPage() {
@@ -54,32 +55,38 @@ export default async function EngineerDashboardPage() {
       <ProfileCompletionBanner profile={typedProfile} />
 
       {/* Stats */}
-      <div className="ep-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
-        <div style={statCard}>
-          <div style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 500, color: c.match, marginBottom: 4 }}>
-            {totalMatches}
+      <StaggerContainer className="ep-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
+        <StaggerItem>
+          <div style={statCard}>
+            <div style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 500, color: c.match, marginBottom: 4 }}>
+              {totalMatches}
+            </div>
+            <div style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
+              Job Matches
+            </div>
           </div>
-          <div style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
-            Job Matches
+        </StaggerItem>
+        <StaggerItem>
+          <div style={statCard}>
+            <div style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 500, color: c.match, marginBottom: 4 }}>
+              {weeklyApps}
+            </div>
+            <div style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
+              Applied This Week
+            </div>
           </div>
-        </div>
-        <div style={statCard}>
-          <div style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 500, color: c.match, marginBottom: 4 }}>
-            {weeklyApps}
+        </StaggerItem>
+        <StaggerItem>
+          <div style={statCard}>
+            <div style={{ fontFamily: f.mono, fontSize: 14, fontWeight: 500, color: c.charcoal, marginBottom: 4 }}>
+              {typedProfile.status}
+            </div>
+            <div style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
+              Profile Status
+            </div>
           </div>
-          <div style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
-            Applied This Week
-          </div>
-        </div>
-        <div style={statCard}>
-          <div style={{ fontFamily: f.mono, fontSize: 14, fontWeight: 500, color: c.charcoal, marginBottom: 4 }}>
-            {typedProfile.status}
-          </div>
-          <div style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
-            Profile Status
-          </div>
-        </div>
-      </div>
+        </StaggerItem>
+      </StaggerContainer>
 
       {/* Matches CTA */}
       {typedProfile.status === 'complete' && totalMatches > 0 && (

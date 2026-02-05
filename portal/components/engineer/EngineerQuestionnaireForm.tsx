@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'motion/react'
 import { useRouter } from 'next/navigation'
 import type { EngineerProfileSpa, PriorityRatings } from '@/lib/hiring-spa/types'
 import { ENGINEER_SECTIONS } from '@/lib/hiring-spa/engineer-priority-questions'
@@ -143,9 +144,10 @@ export default function EngineerQuestionnaireForm({ profile, isEditing }: Props)
       ))}
 
       <div style={{ paddingTop: 16, borderTop: `1px solid ${c.stoneLight}` }}>
-        <button
+        <motion.button
           type="submit"
           disabled={saving}
+          whileTap={{ scale: 0.98 }}
           style={{
             width: '100%', fontFamily: f.mono, fontSize: 11,
             letterSpacing: '0.08em', textTransform: 'uppercase' as const,
@@ -160,7 +162,7 @@ export default function EngineerQuestionnaireForm({ profile, isEditing }: Props)
             : isEditing
               ? 'Save Changes & Recompute Matches'
               : 'Complete Questionnaire'}
-        </button>
+        </motion.button>
       </div>
     </form>
   )

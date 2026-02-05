@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import EngineerHeader from '@/components/engineer/EngineerHeader'
 import PortalAudioPlayer from '@/components/engineer/PortalAudioPlayer'
+import PageTransition from '@/components/engineer/PageTransition'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 export const metadata: Metadata = {
@@ -51,7 +52,7 @@ export default async function EngineerPortalLayout({
       <style>{`@media (max-width: 640px) { .ep-main { padding: 24px 16px !important; } }`}</style>
       <EngineerHeader engineerName={engineerName} />
       <main className="ep-main" style={{ maxWidth: 900, margin: '0 auto', padding: 48 }}>
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
       <footer style={{
         textAlign: 'center', padding: '24px 48px',

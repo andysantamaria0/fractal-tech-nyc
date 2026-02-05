@@ -1,8 +1,10 @@
 'use client'
 
+import { motion } from 'motion/react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
+import { duration } from '@/lib/engineer-animation-tokens'
 
 const navItems = [
   { href: '/engineer/dashboard', label: 'Dashboard' },
@@ -42,15 +44,21 @@ export default function EngineerHeader({ engineerName }: { engineerName?: string
         {navItems.map(item => {
           const active = pathname === item.href
           return (
-            <a key={item.href} href={item.href} style={{
-              fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em',
-              textTransform: 'uppercase', textDecoration: 'none',
-              color: active ? c.charcoal : c.graphite,
-              borderBottom: active ? `2px solid ${c.honey}` : '2px solid transparent',
-              padding: '8px 0', transition: '150ms ease',
-            }}>
+            <motion.a
+              key={item.href}
+              href={item.href}
+              whileHover={active ? undefined : { color: c.charcoal }}
+              transition={{ duration: duration.hover }}
+              style={{
+                fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em',
+                textTransform: 'uppercase', textDecoration: 'none',
+                color: active ? c.charcoal : c.graphite,
+                borderBottom: active ? `2px solid ${c.honey}` : '2px solid transparent',
+                padding: '8px 0', transition: '150ms ease',
+              }}
+            >
               {item.label}
-            </a>
+            </motion.a>
           )
         })}
       </nav>
@@ -61,14 +69,19 @@ export default function EngineerHeader({ engineerName }: { engineerName?: string
             {engineerName}
           </span>
         )}
-        <button onClick={handleLogout} style={{
-          fontFamily: f.mono, fontSize: 10, letterSpacing: '0.05em',
-          textTransform: 'uppercase', color: c.graphite, background: 'none',
-          border: `1px solid ${c.stoneBorder}`, borderRadius: 4,
-          padding: '6px 12px', cursor: 'pointer', transition: '150ms ease',
-        }}>
+        <motion.button
+          onClick={handleLogout}
+          whileHover={{ borderColor: c.honey, color: c.charcoal }}
+          transition={{ duration: duration.hover }}
+          style={{
+            fontFamily: f.mono, fontSize: 10, letterSpacing: '0.05em',
+            textTransform: 'uppercase', color: c.graphite, background: 'none',
+            border: `1px solid ${c.stoneBorder}`, borderRadius: 4,
+            padding: '6px 12px', cursor: 'pointer', transition: '150ms ease',
+          }}
+        >
           Log Out
-        </button>
+        </motion.button>
       </div>
     </header>
     </>

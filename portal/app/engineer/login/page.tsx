@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { createClient } from '@/lib/supabase/client'
 import PortalAudioPlayer from '@/components/engineer/PortalAudioPlayer'
+import { ease, duration, drift } from '@/lib/engineer-animation-tokens'
 
 const colors = {
   platinum: '#E8E4DF',
@@ -62,7 +64,11 @@ export default function EngineerLoginPage() {
       fontFamily: fonts.serif,
       WebkitFontSmoothing: 'antialiased',
     }}>
-      <div style={{
+      <motion.div
+        initial={{ opacity: 0, y: drift.login }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: duration.login, ease: ease.page, delay: 0.2 }}
+        style={{
         backgroundColor: colors.fog,
         border: `1px solid ${colors.stoneLight}`,
         borderRadius: 12,
@@ -125,136 +131,151 @@ export default function EngineerLoginPage() {
           margin: '0 0 32px 0',
         }} />
 
-        {sent ? (
-          <div>
-            <p style={{
-              fontFamily: fonts.mono,
-              fontSize: 10,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase' as const,
-              color: colors.honey,
-              margin: '0 0 16px 0',
-            }}>
-              Check your email
-            </p>
-            <p style={{
-              fontFamily: fonts.serif,
-              fontSize: 15,
-              lineHeight: 1.8,
-              color: colors.charcoal,
-              margin: '0 0 16px 0',
-            }}>
-              We sent a login link to <strong>{email}</strong>.
-              Click the link in your email to sign in — no password needed.
-            </p>
-            <p style={{
-              fontFamily: fonts.serif,
-              fontSize: 14,
-              lineHeight: 1.7,
-              color: colors.graphite,
-              margin: 0,
-            }}>
-              Don&apos;t see it? Check your spam folder, or{' '}
-              <button
-                type="button"
-                onClick={() => { setSent(false); setLoading(false) }}
-                style={{
-                  fontFamily: fonts.serif,
-                  fontSize: 14,
-                  color: colors.graphite,
-                  background: 'none',
-                  border: 'none',
-                  textDecoration: 'underline',
-                  cursor: 'pointer',
-                  padding: 0,
-                }}
-              >
-                try again
-              </button>.
-            </p>
-          </div>
-        ) : (
-          <>
-            {error && (
+        <AnimatePresence mode="wait">
+          {sent ? (
+            <motion.div
+              key="sent"
+              initial={{ opacity: 0, y: drift.feedback }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -drift.feedback }}
+              transition={{ duration: duration.feedback, ease: ease.page }}
+            >
               <p style={{
                 fontFamily: fonts.mono,
-                fontSize: 11,
-                color: '#c0392b',
-                marginBottom: 12,
+                fontSize: 10,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase' as const,
+                color: colors.honey,
+                margin: '0 0 16px 0',
               }}>
-                {error}
+                Check your email
               </p>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: 16, textAlign: 'left' }}>
-                <label
-                  htmlFor="email"
+              <p style={{
+                fontFamily: fonts.serif,
+                fontSize: 15,
+                lineHeight: 1.8,
+                color: colors.charcoal,
+                margin: '0 0 16px 0',
+              }}>
+                We sent a login link to <strong>{email}</strong>.
+                Click the link in your email to sign in — no password needed.
+              </p>
+              <p style={{
+                fontFamily: fonts.serif,
+                fontSize: 14,
+                lineHeight: 1.7,
+                color: colors.graphite,
+                margin: 0,
+              }}>
+                Don&apos;t see it? Check your spam folder, or{' '}
+                <button
+                  type="button"
+                  onClick={() => { setSent(false); setLoading(false) }}
                   style={{
-                    display: 'block',
-                    fontFamily: fonts.mono,
-                    fontSize: 10,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase' as const,
-                    color: colors.graphite,
-                    marginBottom: 8,
-                  }}
-                >
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setFocused(true)}
-                  onBlur={() => setFocused(false)}
-                  required
-                  autoFocus
-                  style={{
-                    width: '100%',
                     fontFamily: fonts.serif,
                     fontSize: 14,
-                    lineHeight: 1.7,
-                    color: colors.charcoal,
-                    backgroundColor: colors.fog,
-                    border: `1px solid ${focused ? colors.honeyBorder : colors.stoneLight}`,
-                    borderRadius: 4,
-                    padding: 16,
-                    outline: 'none',
-                    transition: '150ms ease',
-                    boxSizing: 'border-box' as const,
+                    color: colors.graphite,
+                    background: 'none',
+                    border: 'none',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    padding: 0,
                   }}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: '100%',
+                >
+                  try again
+                </button>.
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="form"
+              initial={{ opacity: 0, y: drift.feedback }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -drift.feedback }}
+              transition={{ duration: duration.feedback, ease: ease.page }}
+            >
+              {error && (
+                <p style={{
                   fontFamily: fonts.mono,
                   fontSize: 11,
-                  fontWeight: 400,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase' as const,
-                  backgroundColor: colors.charcoal,
-                  color: colors.parchment,
-                  border: 'none',
-                  borderRadius: 4,
-                  padding: '14px 28px',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.5 : 1,
-                  transition: '150ms ease',
-                }}
-              >
-                {loading ? 'Sending...' : 'Sign in'}
-              </button>
-            </form>
-          </>
-        )}
-      </div>
+                  color: '#c0392b',
+                  marginBottom: 12,
+                }}>
+                  {error}
+                </p>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <div style={{ marginBottom: 16, textAlign: 'left' }}>
+                  <label
+                    htmlFor="email"
+                    style={{
+                      display: 'block',
+                      fontFamily: fonts.mono,
+                      fontSize: 10,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase' as const,
+                      color: colors.graphite,
+                      marginBottom: 8,
+                    }}
+                  >
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="you@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    required
+                    autoFocus
+                    style={{
+                      width: '100%',
+                      fontFamily: fonts.serif,
+                      fontSize: 14,
+                      lineHeight: 1.7,
+                      color: colors.charcoal,
+                      backgroundColor: colors.fog,
+                      border: `1px solid ${focused ? colors.honeyBorder : colors.stoneLight}`,
+                      borderRadius: 4,
+                      padding: 16,
+                      outline: 'none',
+                      transition: '150ms ease',
+                      boxSizing: 'border-box' as const,
+                    }}
+                  />
+                </div>
+
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    width: '100%',
+                    fontFamily: fonts.mono,
+                    fontSize: 11,
+                    fontWeight: 400,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase' as const,
+                    backgroundColor: colors.charcoal,
+                    color: colors.parchment,
+                    border: 'none',
+                    borderRadius: 4,
+                    padding: '14px 28px',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.5 : 1,
+                    transition: '150ms ease',
+                  }}
+                >
+                  {loading ? 'Sending...' : 'Sign in'}
+                </motion.button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       <footer style={{
         position: 'absolute',

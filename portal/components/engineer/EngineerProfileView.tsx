@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import { useRouter } from 'next/navigation'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
+import { ease, duration } from '@/lib/engineer-animation-tokens'
 
 function FocusInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   const [focused, setFocused] = useState(false)
@@ -162,86 +164,102 @@ export default function EngineerProfileView({ profile }: Props) {
           </div>
         )}
 
-        {editing ? (
-          <div>
-            {[
-              { label: 'LinkedIn', value: linkedinUrl, set: setLinkedinUrl, placeholder: 'https://linkedin.com/in/...' },
-              { label: 'GitHub', value: githubUrl, set: setGithubUrl, placeholder: 'https://github.com/...' },
-              { label: 'Portfolio', value: portfolioUrl, set: setPortfolioUrl, placeholder: 'https://...' },
-              { label: 'Resume URL', value: resumeUrl, set: setResumeUrl, placeholder: 'https://...' },
-            ].map(field => (
-              <div key={field.label} style={{ marginBottom: 16 }}>
-                <label style={{
-                  display: 'block', fontFamily: f.mono, fontSize: 10,
-                  letterSpacing: '0.05em', color: c.charcoal, marginBottom: 6,
-                }}>
-                  {field.label}
-                </label>
-                <FocusInput
-                  value={field.value}
-                  onChange={e => field.set(e.target.value)}
-                  placeholder={field.placeholder}
-                />
-              </div>
-            ))}
-            <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                style={{
-                  fontFamily: f.mono, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
-                  backgroundColor: saving ? c.mist : c.charcoal, color: c.parchment,
-                  border: 'none', borderRadius: 4, padding: '12px 24px',
-                  cursor: saving ? 'not-allowed' : 'pointer', transition: '150ms ease',
-                }}
-              >
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-              <button
-                onClick={() => setEditing(false)}
-                type="button"
-                style={{
-                  fontFamily: f.mono, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
-                  backgroundColor: 'transparent', color: c.graphite,
-                  border: `1px solid ${c.stone}`, borderRadius: 4, padding: '12px 24px',
-                  cursor: 'pointer', transition: '150ms ease',
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div>
-            {[
-              { label: 'LinkedIn', url: profile.linkedin_url },
-              { label: 'GitHub', url: profile.github_url },
-              { label: 'Portfolio', url: profile.portfolio_url },
-              { label: 'Resume', url: profile.resume_url },
-            ].map(link => (
-              <div key={link.label} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '10px 0', borderBottom: `1px solid ${c.stoneLight}`,
-              }}>
-                <span style={{ fontFamily: f.mono, fontSize: 11, color: c.mist }}>
-                  {link.label}
-                </span>
-                {link.url ? (
-                  <a href={link.url} target="_blank" rel="noopener noreferrer" style={{
-                    fontFamily: f.mono, fontSize: 11, color: c.honey, textDecoration: 'none',
-                    maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        <AnimatePresence mode="wait">
+          {editing ? (
+            <motion.div
+              key="editing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: duration.feedback, ease: ease.page }}
+            >
+              {[
+                { label: 'LinkedIn', value: linkedinUrl, set: setLinkedinUrl, placeholder: 'https://linkedin.com/in/...' },
+                { label: 'GitHub', value: githubUrl, set: setGithubUrl, placeholder: 'https://github.com/...' },
+                { label: 'Portfolio', value: portfolioUrl, set: setPortfolioUrl, placeholder: 'https://...' },
+                { label: 'Resume URL', value: resumeUrl, set: setResumeUrl, placeholder: 'https://...' },
+              ].map(field => (
+                <div key={field.label} style={{ marginBottom: 16 }}>
+                  <label style={{
+                    display: 'block', fontFamily: f.mono, fontSize: 10,
+                    letterSpacing: '0.05em', color: c.charcoal, marginBottom: 6,
                   }}>
-                    {link.url}
-                  </a>
-                ) : (
-                  <span style={{ fontFamily: f.mono, fontSize: 11, color: c.mist, fontStyle: 'italic' }}>
-                    Not set
-                  </span>
-                )}
+                    {field.label}
+                  </label>
+                  <FocusInput
+                    value={field.value}
+                    onChange={e => field.set(e.target.value)}
+                    placeholder={field.placeholder}
+                  />
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
+                <motion.button
+                  onClick={handleSave}
+                  disabled={saving}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    fontFamily: f.mono, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+                    backgroundColor: saving ? c.mist : c.charcoal, color: c.parchment,
+                    border: 'none', borderRadius: 4, padding: '12px 24px',
+                    cursor: saving ? 'not-allowed' : 'pointer', transition: '150ms ease',
+                  }}
+                >
+                  {saving ? 'Saving...' : 'Save'}
+                </motion.button>
+                <motion.button
+                  onClick={() => setEditing(false)}
+                  type="button"
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    fontFamily: f.mono, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+                    backgroundColor: 'transparent', color: c.graphite,
+                    border: `1px solid ${c.stone}`, borderRadius: 4, padding: '12px 24px',
+                    cursor: 'pointer', transition: '150ms ease',
+                  }}
+                >
+                  Cancel
+                </motion.button>
               </div>
-            ))}
-          </div>
-        )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="viewing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: duration.feedback, ease: ease.page }}
+            >
+              {[
+                { label: 'LinkedIn', url: profile.linkedin_url },
+                { label: 'GitHub', url: profile.github_url },
+                { label: 'Portfolio', url: profile.portfolio_url },
+                { label: 'Resume', url: profile.resume_url },
+              ].map(link => (
+                <div key={link.label} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '10px 0', borderBottom: `1px solid ${c.stoneLight}`,
+                }}>
+                  <span style={{ fontFamily: f.mono, fontSize: 11, color: c.mist }}>
+                    {link.label}
+                  </span>
+                  {link.url ? (
+                    <a href={link.url} target="_blank" rel="noopener noreferrer" style={{
+                      fontFamily: f.mono, fontSize: 11, color: c.honey, textDecoration: 'none',
+                      maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
+                      {link.url}
+                    </a>
+                  ) : (
+                    <span style={{ fontFamily: f.mono, fontSize: 11, color: c.mist, fontStyle: 'italic' }}>
+                      Not set
+                    </span>
+                  )}
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

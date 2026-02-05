@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import type { EngineerJobMatchWithJob, FeedbackCategory, MatchingPreferences } from '@/lib/hiring-spa/types'
 import JobMatchCard from './JobMatchCard'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
+import { ease, duration, drift, stagger } from '@/lib/engineer-animation-tokens'
 
 interface Props {
   matches: EngineerJobMatchWithJob[]
@@ -77,15 +79,34 @@ export default function JobMatchList({ matches: initialMatches, totalMatchCount 
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {matches.map(match => (
-        <JobMatchCard
-          key={match.id}
-          match={match}
-          onFeedback={handleFeedback}
-          onAddPreference={handleAddPreference}
-        />
-      ))}
-    </div>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: stagger.items, delayChildren: stagger.initialDelay } },
+      }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+    >
+      <AnimatePresence>
+        {matches.map(match => (
+          <motion.div
+            key={match.id}
+            layout
+            variants={{
+              hidden: { opacity: 0, y: drift.item },
+              visible: { opacity: 1, y: 0, transition: { duration: duration.page, ease: ease.page } },
+            }}
+            exit={{ opacity: 0, x: -20, transition: { duration: 0.25 } }}
+          >
+            <JobMatchCard
+              match={match}
+              onFeedback={handleFeedback}
+              onAddPreference={handleAddPreference}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </motion.div>
   )
 }

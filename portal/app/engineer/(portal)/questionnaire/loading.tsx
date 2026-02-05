@@ -8,7 +8,7 @@ export default function QuestionnaireLoading() {
 
   return (
     <div>
-      <style>{`@keyframes ep-pulse { 0%,100% { opacity: .4 } 50% { opacity: 1 } } .ep-skel { animation: ep-pulse 1.5s ease-in-out infinite; }`}</style>
+      <style>{`@keyframes ep-pulse { 0%,100% { opacity: .3 } 50% { opacity: .6 } } .ep-skel { animation: ep-pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite; } .ep-skel:nth-child(2) { animation-delay: 0.15s; } .ep-skel:nth-child(3) { animation-delay: 0.3s; } .ep-skel:nth-child(4) { animation-delay: 0.45s; }`}</style>
       <div style={{ marginBottom: 32 }}>
         <div className="ep-skel" style={{ ...skel, width: 180, height: 28, marginBottom: 8 }} />
         <div className="ep-skel" style={{ ...skel, width: 440, height: 16 }} />

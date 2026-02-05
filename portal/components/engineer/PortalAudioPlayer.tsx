@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
+import { motion } from 'motion/react'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 const AUDIO_URL = 'https://cdn1.suno.ai/6b2081f6-c25c-441e-91ca-a44c88f135eb.mp3'
@@ -70,9 +71,11 @@ export default function PortalAudioPlayer() {
   return (
     <>
       <audio ref={audioRef} src={AUDIO_URL} loop preload="auto" />
-      <button
+      <motion.button
         onClick={toggle}
         aria-label={muted ? 'Unmute music' : 'Mute music'}
+        whileHover={{ opacity: 1 }}
+        whileTap={{ scale: 0.96 }}
         style={{
           position: 'fixed',
           bottom: 20,
@@ -91,13 +94,10 @@ export default function PortalAudioPlayer() {
           letterSpacing: '0.03em',
           cursor: 'pointer',
           opacity: 0.75,
-          transition: 'opacity 150ms',
         }}
-        onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-        onMouseLeave={e => (e.currentTarget.style.opacity = '0.75')}
       >
         {muted ? '♪ unmute' : '♪ playing'}
-      </button>
+      </motion.button>
     </>
   )
 }

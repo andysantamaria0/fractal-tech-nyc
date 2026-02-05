@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'motion/react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
+import { ease, duration, drift, stagger } from '@/lib/engineer-animation-tokens'
 
 interface EngineerData {
   id: string
@@ -157,33 +159,47 @@ export default function EngineerOnboardPage() {
         </div>
 
         {/* Steps */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40 }}>
-          {steps.map(s => (
-            <div key={s.num} style={{
-              display: 'flex', gap: 16, alignItems: 'flex-start',
-              backgroundColor: s.active ? c.parchment : c.fog,
-              border: `1px solid ${s.active ? c.honeyBorder : c.stoneLight}`,
-              borderRadius: 8, padding: '16px 20px',
-              opacity: s.active ? 1 : 0.7,
-            }}>
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: stagger.steps, delayChildren: 0.3 } },
+          }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40 }}
+        >
+          {steps.map(step => (
+            <motion.div
+              key={step.num}
+              variants={{
+                hidden: { opacity: 0, y: drift.item },
+                visible: { opacity: step.active ? 1 : 0.7, y: 0, transition: { duration: duration.page, ease: ease.page } },
+              }}
+              style={{
+                display: 'flex', gap: 16, alignItems: 'flex-start',
+                backgroundColor: step.active ? c.parchment : c.fog,
+                border: `1px solid ${step.active ? c.honeyBorder : c.stoneLight}`,
+                borderRadius: 8, padding: '16px 20px',
+              }}
+            >
               <span style={{
-                fontFamily: f.mono, fontSize: 11, fontWeight: 500, color: s.active ? c.honey : c.mist,
+                fontFamily: f.mono, fontSize: 11, fontWeight: 500, color: step.active ? c.honey : c.mist,
                 width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: '50%', border: `1.5px solid ${s.active ? c.honey : c.mist}`, flexShrink: 0,
+                borderRadius: '50%', border: `1.5px solid ${step.active ? c.honey : c.mist}`, flexShrink: 0,
               }}>
-                {s.num}
+                {step.num}
               </span>
               <div>
                 <div style={{ fontFamily: f.serif, fontSize: 15, fontWeight: 500, color: c.charcoal, marginBottom: 2 }}>
-                  {s.title}
+                  {step.title}
                 </div>
                 <div style={{ fontFamily: f.serif, fontSize: 13, color: c.graphite, lineHeight: 1.6 }}>
-                  {s.desc}
+                  {step.desc}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Error */}
         {error && (
@@ -229,7 +245,7 @@ export default function EngineerOnboardPage() {
               <p style={hint}>Link to your resume (Google Drive, Dropbox, or direct PDF link).</p>
             </div>
 
-            <button type="submit" disabled={submitting} style={{
+            <motion.button type="submit" disabled={submitting} whileTap={{ scale: 0.98 }} style={{
               width: '100%', fontFamily: f.mono, fontSize: 11, fontWeight: 400,
               letterSpacing: '0.08em', textTransform: 'uppercase' as const,
               backgroundColor: c.charcoal, color: c.parchment, border: 'none',
@@ -238,7 +254,7 @@ export default function EngineerOnboardPage() {
               opacity: submitting ? 0.5 : 1, transition: '150ms ease',
             }}>
               {submitting ? 'Analyzing your profile...' : 'Continue'}
-            </button>
+            </motion.button>
           </form>
         </div>
       </div>

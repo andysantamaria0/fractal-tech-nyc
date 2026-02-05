@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import type { MatchingPreferences } from '@/lib/hiring-spa/types'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
@@ -113,33 +114,43 @@ export default function MatchingPreferencesEditor() {
                   {SECTION_LABELS[key]}
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {values.map(value => {
-                    const deleteKey = `${key}:${value}`
-                    return (
-                      <span key={value} style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        fontFamily: f.mono, fontSize: 11,
-                        color: c.match, backgroundColor: c.honeyLight,
-                        borderRadius: 4, padding: '5px 10px',
-                      }}>
-                        <span>{value}</span>
-                        <button
-                          onClick={() => handleDelete(key, value)}
-                          disabled={deleting === deleteKey}
-                          type="button"
-                          aria-label={`Remove ${value}`}
+                  <AnimatePresence>
+                    {values.map(value => {
+                      const deleteKey = `${key}:${value}`
+                      return (
+                        <motion.span
+                          key={value}
+                          layout
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: 0.2 }}
                           style={{
-                            fontFamily: f.mono, fontSize: 13, lineHeight: 1,
-                            color: c.mist, background: 'none', border: 'none',
-                            cursor: deleting === deleteKey ? 'not-allowed' : 'pointer',
-                            padding: 0, marginLeft: 2,
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            fontFamily: f.mono, fontSize: 11,
+                            color: c.match, backgroundColor: c.honeyLight,
+                            borderRadius: 4, padding: '5px 10px',
                           }}
                         >
-                          {deleting === deleteKey ? '...' : '\u00D7'}
-                        </button>
-                      </span>
-                    )
-                  })}
+                          <span>{value}</span>
+                          <button
+                            onClick={() => handleDelete(key, value)}
+                            disabled={deleting === deleteKey}
+                            type="button"
+                            aria-label={`Remove ${value}`}
+                            style={{
+                              fontFamily: f.mono, fontSize: 13, lineHeight: 1,
+                              color: c.mist, background: 'none', border: 'none',
+                              cursor: deleting === deleteKey ? 'not-allowed' : 'pointer',
+                              padding: 0, marginLeft: 2,
+                            }}
+                          >
+                            {deleting === deleteKey ? '...' : '\u00D7'}
+                          </button>
+                        </motion.span>
+                      )
+                    })}
+                  </AnimatePresence>
                 </div>
               </div>
             )
