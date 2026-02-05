@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import EngineerHeader from '@/components/engineer/EngineerHeader'
+import PortalAudioPlayer from '@/components/engineer/PortalAudioPlayer'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 export const metadata: Metadata = {
@@ -63,6 +64,7 @@ export default async function EngineerPortalLayout({
           fractaltech.nyc
         </a>
       </footer>
+      <PortalAudioPlayer />
     </div>
   )
 }
