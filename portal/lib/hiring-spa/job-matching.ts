@@ -21,6 +21,29 @@ const TOP_N = 10
 const MAX_JOBS_PER_COMPANY = 2
 const SCORING_CONCURRENCY = 5
 
+// Recency boost: jobs posted recently get a score bump
+const RECENCY_BOOST_MAX = 5 // max points added for brand new jobs
+const RECENCY_BOOST_DAYS = 14 // boost tapers to 0 over this many days
+
+/**
+ * Calculate recency boost based on job posting date.
+ * Returns 0-RECENCY_BOOST_MAX points, tapering linearly over RECENCY_BOOST_DAYS.
+ */
+function getRecencyBoost(job: ScannedJob): number {
+  const dateStr = job.date_posted || job.first_seen_at
+  if (!dateStr) return 0
+
+  const postDate = new Date(dateStr)
+  const now = new Date()
+  const daysOld = (now.getTime() - postDate.getTime()) / (1000 * 60 * 60 * 24)
+
+  if (daysOld <= 0) return RECENCY_BOOST_MAX
+  if (daysOld >= RECENCY_BOOST_DAYS) return 0
+
+  // Linear taper
+  return Math.round(RECENCY_BOOST_MAX * (1 - daysOld / RECENCY_BOOST_DAYS))
+}
+
 /**
  * Run async tasks with limited concurrency.
  */
@@ -515,10 +538,12 @@ export async function computeMatchesForEngineer(
         )
         if (belowThreshold) return null
 
-        const overall_score = computeWeightedScore(
+        const baseScore = computeWeightedScore(
           result.scores,
           typedEngineer.priority_ratings,
         )
+        const recencyBoost = getRecencyBoost(job)
+        const overall_score = Math.min(100, baseScore + recencyBoost)
 
         return {
           job,
