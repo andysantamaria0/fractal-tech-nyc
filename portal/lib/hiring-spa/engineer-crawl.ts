@@ -1,4 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/server'
+import { notifyDiscordMatchesComputed } from '@/lib/discord'
 import { crawlUrls } from './crawl'
 import { synthesizeEngineerData } from './engineer-synthesis'
 import { generateEngineerProfileSummary } from './engineer-summary'
@@ -57,7 +58,7 @@ export async function runEngineerCrawlPipeline(
     // 4. Check if questionnaire was already completed while we were crawling
     const { data: currentProfile } = await serviceClient
       .from('engineer_profiles_spa')
-      .select('questionnaire_completed_at, priority_ratings, work_preferences, career_growth, strengths, growth_areas, deal_breakers')
+      .select('name, questionnaire_completed_at, priority_ratings, work_preferences, career_growth, strengths, growth_areas, deal_breakers')
       .eq('id', engineerProfileId)
       .single()
 
@@ -104,6 +105,10 @@ export async function runEngineerCrawlPipeline(
       computeMatchesForEngineer(engineerProfileId, serviceClient)
         .then(result => {
           if (result.matches.length > 0) {
+            notifyDiscordMatchesComputed({
+              engineerName: currentProfile.name || 'Unknown',
+              matchCount: result.matches.length,
+            }).catch(err => console.error('[engineer-crawl] Discord notify error:', err))
             return notifyEngineerMatchesReady(engineerProfileId, result.matches.length, serviceClient)
           }
         })

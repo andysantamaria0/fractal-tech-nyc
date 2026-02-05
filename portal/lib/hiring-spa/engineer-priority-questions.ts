@@ -47,11 +47,6 @@ export const ENGINEER_WORK_PREFERENCES_QUESTIONS: EngineerQuestionDefinition[] =
     section: 'work_preferences',
   },
   {
-    id: 'remote_preference',
-    question: 'What\'s your preference for remote vs. in-office work?',
-    section: 'work_preferences',
-  },
-  {
     id: 'ideal_team_dynamic',
     question: 'Describe your ideal team dynamic.',
     section: 'work_preferences',
