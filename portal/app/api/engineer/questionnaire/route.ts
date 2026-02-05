@@ -87,11 +87,23 @@ export async function POST(request: Request) {
       .update({ status: 'complete' })
       .eq('id', profile.id)
 
+    const isEditing = profile.status === 'complete'
+
     trackServerEvent(user.id, 'engineer_questionnaire_submitted', {
       engineer_profile_id: profile.id,
-      is_editing: profile.status === 'complete',
+      is_editing: isEditing,
       crawl_pending: isCrawling,
     })
+
+    // If editing existing profile, delete old matches to force re-scoring
+    if (isEditing) {
+      console.log('[engineer/questionnaire] Profile edit detected — clearing old matches for re-scoring')
+      await serviceClient
+        .from('engineer_job_matches')
+        .delete()
+        .eq('engineer_profile_id', profile.id)
+        .is('feedback', null) // keep matches with feedback for learning
+    }
 
     // Run summary generation + match computation in the background
     after(async () => {

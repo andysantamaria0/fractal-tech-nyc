@@ -134,16 +134,23 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
           cursor: 'pointer', textAlign: 'left',
         }}
       >
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <h3 style={{ fontFamily: f.serif, fontSize: 17, fontWeight: 400, color: c.charcoal, margin: '0 0 2px 0' }}>
             {job.job_title}
           </h3>
           <div style={{ fontFamily: f.mono, fontSize: 11, color: c.graphite, letterSpacing: '0.03em' }}>
             {job.company_name}
+            {job.location && (
+              <span style={{ color: c.mist }}> · {job.location}</span>
+            )}
           </div>
-          {job.location && (
-            <div style={{ fontFamily: f.mono, fontSize: 10, color: c.mist, marginTop: 2 }}>
-              {job.location}
+          {match.highlight_quote && !expanded && (
+            <div style={{
+              fontFamily: f.serif, fontSize: 13, fontStyle: 'italic', color: c.mist,
+              marginTop: 6, lineHeight: 1.4,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              &ldquo;{match.highlight_quote}&rdquo;
             </div>
           )}
         </div>

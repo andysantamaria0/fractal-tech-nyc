@@ -305,6 +305,84 @@ export function deduplicateJobs(jobs: ScannedJob[]): ScannedJob[] {
   return deduplicated
 }
 
+// Tech stacks that are generally incompatible (if job requires one, engineer with the other is poor fit)
+const INCOMPATIBLE_STACKS: Record<string, string[]> = {
+  // Backend language families
+  'java': ['spring', 'kotlin', 'scala', 'jvm'],
+  'c#': ['.net', 'dotnet', 'asp.net', 'unity'],
+  'go': ['golang'],
+  'rust': [],
+  'php': ['laravel', 'symfony', 'wordpress'],
+  'ruby': ['rails', 'ruby on rails'],
+  // Frontend
+  'angular': ['angularjs'],
+  'vue': ['vuejs', 'vue.js', 'nuxt'],
+  // Mobile
+  'swift': ['ios', 'swiftui', 'uikit'],
+  'objective-c': ['ios'],
+  'kotlin': ['android'],
+  'flutter': ['dart'],
+  'react native': ['react-native'],
+}
+
+// Languages/frameworks that are commonly interchangeable or complementary
+const COMPATIBLE_SKILLS = new Set([
+  'javascript', 'typescript', 'react', 'node', 'nodejs', 'next', 'nextjs',
+  'python', 'django', 'flask', 'fastapi',
+  'sql', 'postgresql', 'postgres', 'mysql', 'mongodb',
+  'aws', 'gcp', 'azure', 'cloud',
+  'docker', 'kubernetes', 'k8s',
+])
+
+/**
+ * Filter out jobs that require incompatible tech stacks.
+ * If engineer knows React/TypeScript, skip jobs requiring Java/C#.
+ */
+export function filterByTechStack(
+  jobs: ScannedJob[],
+  engineerSkills: string[],
+): ScannedJob[] {
+  if (!engineerSkills || engineerSkills.length === 0) return jobs
+
+  const engineerSkillsLower = new Set(engineerSkills.map(s => s.toLowerCase()))
+
+  // Determine which incompatible stacks to filter out
+  const stacksToExclude = new Set<string>()
+
+  for (const [stack, aliases] of Object.entries(INCOMPATIBLE_STACKS)) {
+    // Check if engineer has this stack
+    const hasStack = engineerSkillsLower.has(stack) ||
+      aliases.some(a => engineerSkillsLower.has(a))
+
+    if (!hasStack) {
+      // Engineer doesn't have this stack - mark it for exclusion
+      stacksToExclude.add(stack)
+      aliases.forEach(a => stacksToExclude.add(a))
+    }
+  }
+
+  return jobs.filter(job => {
+    const jobText = `${job.job_title} ${job.description || ''}`.toLowerCase()
+
+    // Check if job strongly requires an excluded stack
+    for (const stack of stacksToExclude) {
+      // Look for strong requirement signals (not just mentions)
+      const patterns = [
+        new RegExp(`\\b${stack}\\s+(developer|engineer|expert)`, 'i'),
+        new RegExp(`(senior|staff|lead)\\s+${stack}`, 'i'),
+        new RegExp(`\\brequired?:\\s*[^.]*\\b${stack}\\b`, 'i'),
+        new RegExp(`\\bmust\\s+(have|know)\\s+[^.]*\\b${stack}\\b`, 'i'),
+      ]
+
+      if (patterns.some(p => p.test(jobText))) {
+        return false
+      }
+    }
+
+    return true
+  })
+}
+
 /**
  * Pre-filter jobs based on engineer matching preferences.
  * Removes jobs that match any exclusion rule.
@@ -676,7 +754,15 @@ export async function computeMatchesForEngineer(
   const afterLocations = filterByPreferredLocations(afterExclusions, typedEngineer.preferred_locations)
 
   // Deduplicate similar jobs from same company
-  const filteredJobs = deduplicateJobs(afterLocations)
+  const afterDedup = deduplicateJobs(afterLocations)
+
+  // Filter by tech stack compatibility
+  const engineerSkills = [
+    ...(typedEngineer.engineer_dna?.languages || []),
+    ...(typedEngineer.engineer_dna?.frameworks || []),
+    ...(typedEngineer.engineer_dna?.topSkills || []),
+  ]
+  const filteredJobs = filterByTechStack(afterDedup, engineerSkills)
 
   // Fetch existing matches to avoid re-scoring
   const { data: existingMatches } = await serviceClient
