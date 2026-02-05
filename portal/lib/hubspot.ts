@@ -30,6 +30,28 @@ export async function findCompanyByDomain(domain: string) {
   return response.results?.[0] ?? null
 }
 
+export async function findCompanyByName(name: string) {
+  const response = await hubspotClient.crm.companies.searchApi.doSearch({
+    filterGroups: [
+      {
+        filters: [
+          {
+            propertyName: 'name',
+            operator: FilterOperatorEnum.ContainsToken,
+            value: name,
+          },
+        ],
+      },
+    ],
+    sorts: [],
+    properties: ['name', 'domain'],
+    limit: 1,
+    after: '0',
+  })
+
+  return response.results?.[0] ?? null
+}
+
 export async function createCompany(properties: {
   name: string
   domain?: string
