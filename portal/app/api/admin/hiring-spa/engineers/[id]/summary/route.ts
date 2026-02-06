@@ -30,13 +30,15 @@ export async function POST(
       dealBreakers: profile.deal_breakers,
     })
 
-    // Save summary and update status
+    // Save summary — only advance to 'complete' if questionnaire was submitted
+    const updatePayload: Record<string, unknown> = { profile_summary: summary }
+    if (profile.questionnaire_completed_at) {
+      updatePayload.status = 'complete'
+    }
+
     const { data: updated, error: updateError } = await serviceClient
       .from('engineers')
-      .update({
-        profile_summary: summary,
-        status: 'complete',
-      })
+      .update(updatePayload)
       .eq('id', id)
       .select()
       .single()

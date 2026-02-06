@@ -46,8 +46,11 @@ export async function GET() {
       if (engineersWhoApplied.has(e.email)) return 'Applied'
       if (engineersWithMatches.has(e.id)) return 'Got Matches'
       if (e.questionnaire_completed_at) return 'Questionnaire Completed'
-      if (e.status === 'questionnaire' || e.status === 'complete') return 'Questionnaire Started'
+      if (e.status === 'questionnaire' || e.status === 'crawling') return 'Questionnaire Started'
       if (e.crawl_completed_at) return 'Profile Crawled'
+      // status='complete' without questionnaire_completed_at is a data anomaly —
+      // show as 'Questionnaire Started' so the admin knows follow-up is needed
+      if (e.status === 'complete') return 'Questionnaire Started'
       return 'Signed Up'
     }
 

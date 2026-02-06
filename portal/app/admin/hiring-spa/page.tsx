@@ -219,7 +219,7 @@ export default function AdminHiringSpaPage() {
                       <td style={tdMono}>{eng.questionnaireCompletedAt ? formatDate(eng.questionnaireCompletedAt) : '\u2014'}</td>
                       <td style={tdMono}>{formatDate(eng.createdAt)}</td>
                       <td style={td}>
-                        {(eng.stage === 'Questionnaire Completed' || eng.stage === 'Questionnaire Started') && eng.status === 'complete' && (() => {
+                        {eng.questionnaireCompletedAt && eng.status === 'complete' && (() => {
                           const state = matchState[eng.id]
                           if (state === 'starting') return (
                             <span style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>

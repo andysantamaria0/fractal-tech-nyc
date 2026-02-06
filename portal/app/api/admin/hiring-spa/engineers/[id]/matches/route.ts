@@ -12,7 +12,7 @@ export async function POST(
 
     const { data: engineer, error } = await serviceClient
       .from('engineers')
-      .select('id, name, status, questionnaire_completed_at')
+      .select('id, name, status, questionnaire_completed_at, priority_ratings')
       .eq('id', id)
       .single()
 
@@ -23,6 +23,13 @@ export async function POST(
     if (engineer.status !== 'complete') {
       return NextResponse.json(
         { error: `Engineer status is '${engineer.status}', must be 'complete'` },
+        { status: 400 },
+      )
+    }
+
+    if (!engineer.priority_ratings) {
+      return NextResponse.json(
+        { error: 'Engineer has not completed the questionnaire — no preference data to match against' },
         { status: 400 },
       )
     }
