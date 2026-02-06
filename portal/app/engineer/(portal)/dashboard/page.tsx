@@ -58,9 +58,9 @@ export default async function EngineerDashboardPage() {
       <ProfileCompletionBanner profile={typedProfile} />
 
       {/* Stats */}
-      <StaggerContainer className="ep-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
-        <StaggerItem>
-          <div style={statCard}>
+      <StaggerContainer className="ep-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40, alignItems: 'stretch' }}>
+        <StaggerItem style={{ display: 'flex' }}>
+          <div style={{ ...statCard, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 500, color: c.match, marginBottom: 4 }}>
               {totalMatches}
             </div>
@@ -69,8 +69,8 @@ export default async function EngineerDashboardPage() {
             </div>
           </div>
         </StaggerItem>
-        <StaggerItem>
-          <div style={statCard}>
+        <StaggerItem style={{ display: 'flex' }}>
+          <div style={{ ...statCard, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 500, color: c.match, marginBottom: 4 }}>
               {weeklyApps}
             </div>
@@ -79,8 +79,8 @@ export default async function EngineerDashboardPage() {
             </div>
           </div>
         </StaggerItem>
-        <StaggerItem>
-          <div style={statCard}>
+        <StaggerItem style={{ display: 'flex' }}>
+          <div style={{ ...statCard, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ fontFamily: f.mono, fontSize: 14, fontWeight: 500, color: c.charcoal, marginBottom: 4 }}>
               {typedProfile.status}
             </div>

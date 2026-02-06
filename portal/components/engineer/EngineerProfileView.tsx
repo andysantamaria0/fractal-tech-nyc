@@ -245,7 +245,7 @@ export default function EngineerProfileView({ profile }: Props) {
                   </span>
                   {link.url ? (
                     <a href={link.url} target="_blank" rel="noopener noreferrer" style={{
-                      fontFamily: f.mono, fontSize: 11, color: c.honey, textDecoration: 'none',
+                      fontFamily: f.mono, fontSize: 11, color: c.match, textDecoration: 'underline',
                       maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>
                       {link.url}
