@@ -27,17 +27,9 @@ export async function GET() {
     }
     if (matchesErr) console.warn('engineer_job_matches query failed:', matchesErr.message)
 
-    // --- Funnel ---
+    // --- Engineers with funnel stage ---
     const engineerList = engineers || []
-    const signedUp = engineerList.length
-    const profileCrawled = engineerList.filter((e) => e.crawl_completed_at).length
-    const questionnaireStarted = engineerList.filter(
-      (e) => e.status === 'questionnaire' || e.status === 'complete'
-    ).length
-    const questionnaireCompleted = engineerList.filter((e) => e.questionnaire_completed_at).length
-
     const engineersWithMatches = new Set((matchedEngineerIds || []).map((m) => m.engineer_id))
-    const gotMatches = engineerList.filter((e) => engineersWithMatches.has(e.id)).length
 
     const appList = applications || []
     const engineersWhoApplied = new Set(
@@ -46,7 +38,30 @@ export async function GET() {
         return eng?.email
       }).filter(Boolean)
     )
-    const applied = engineersWhoApplied.size
+
+    const stageOrder = ['Signed Up', 'Profile Crawled', 'Questionnaire Started', 'Questionnaire Completed', 'Got Matches', 'Applied'] as const
+    type Stage = typeof stageOrder[number]
+
+    function getStage(e: typeof engineerList[number]): Stage {
+      if (engineersWhoApplied.has(e.email)) return 'Applied'
+      if (engineersWithMatches.has(e.id)) return 'Got Matches'
+      if (e.questionnaire_completed_at) return 'Questionnaire Completed'
+      if (e.status === 'questionnaire' || e.status === 'complete') return 'Questionnaire Started'
+      if (e.crawl_completed_at) return 'Profile Crawled'
+      return 'Signed Up'
+    }
+
+    const engineerRows = engineerList
+      .map((e) => ({
+        id: e.id,
+        name: e.name,
+        email: e.email,
+        status: e.status,
+        stage: getStage(e),
+        stageIndex: stageOrder.indexOf(getStage(e)),
+        createdAt: e.created_at,
+      }))
+      .sort((a, b) => b.stageIndex - a.stageIndex)
 
     // --- Application aggregation ---
     const now = new Date()
@@ -95,17 +110,10 @@ export async function GET() {
     })
 
     return NextResponse.json({
-      funnel: {
-        signedUp,
-        profileCrawled,
-        questionnaireStarted,
-        questionnaireCompleted,
-        gotMatches,
-        applied,
-      },
+      engineers: engineerRows,
       applications: {
         total: appList.length,
-        uniqueEngineers: applied,
+        uniqueEngineers: engineersWhoApplied.size,
         thisWeek,
         thisMonth,
         byEngineer,

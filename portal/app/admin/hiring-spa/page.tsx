@@ -3,14 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 
 interface OverviewData {
-  funnel: {
-    signedUp: number
-    profileCrawled: number
-    questionnaireStarted: number
-    questionnaireCompleted: number
-    gotMatches: number
-    applied: number
-  }
+  engineers: { id: string; name: string; email: string; status: string; stage: string; createdAt: string }[]
   applications: {
     total: number
     uniqueEngineers: number
@@ -24,15 +17,6 @@ interface OverviewData {
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
-
-const FUNNEL_STEPS = [
-  { key: 'signedUp', label: 'Signed Up' },
-  { key: 'profileCrawled', label: 'Profile Crawled' },
-  { key: 'questionnaireStarted', label: 'Questionnaire Started' },
-  { key: 'questionnaireCompleted', label: 'Questionnaire Completed' },
-  { key: 'gotMatches', label: 'Got Matches' },
-  { key: 'applied', label: 'Applied' },
-] as const
 
 export default function AdminHiringSpaPage() {
   const [data, setData] = useState<OverviewData | null>(null)
@@ -91,8 +75,7 @@ export default function AdminHiringSpaPage() {
     )
   }
 
-  const { funnel, applications } = data
-  const topOfFunnel = funnel.signedUp || 1
+  const { engineers, applications } = data
 
   return (
     <div className="dashboard">
@@ -103,34 +86,34 @@ export default function AdminHiringSpaPage() {
           <h1 className="section-title">Hiring Spa</h1>
         </div>
 
-        {/* Engineer Funnel */}
+        {/* Engineers Table */}
         <div className="window">
-          <div className="window-title">Engineer Funnel</div>
-          <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            {FUNNEL_STEPS.map((step, i) => {
-              const count = funnel[step.key]
-              const pct = Math.round((count / topOfFunnel) * 100)
-              const prevCount = i > 0 ? funnel[FUNNEL_STEPS[i - 1].key] : null
-              const dropoff = prevCount && prevCount > 0 ? Math.round(((prevCount - count) / prevCount) * 100) : null
-              return (
-                <div key={step.key}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--space-1)' }}>
-                    <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>{step.label}</span>
-                    <span style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'baseline' }}>
-                      {dropoff !== null && dropoff > 0 && (
-                        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-slate)' }}>
-                          -{dropoff}%
-                        </span>
-                      )}
-                      <span style={{ fontSize: 'var(--text-sm)', fontWeight: 700 }}>{count}</span>
-                    </span>
-                  </div>
-                  <div style={{ height: 6, borderRadius: 3, background: 'var(--color-border, #e2e2e2)' }}>
-                    <div style={{ height: '100%', borderRadius: 3, width: `${pct}%`, background: 'var(--color-primary, #000)', transition: 'width 0.3s ease' }} />
-                  </div>
-                </div>
-              )
-            })}
+          <div className="window-title">Engineers ({engineers.length})</div>
+          <div className="admin-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Stage</th>
+                  <th>Signed Up</th>
+                </tr>
+              </thead>
+              <tbody>
+                {engineers.length === 0 ? (
+                  <tr><td colSpan={4} style={{ color: 'var(--color-slate)' }}>No engineers yet</td></tr>
+                ) : (
+                  engineers.map((eng) => (
+                    <tr key={eng.id}>
+                      <td>{eng.name}</td>
+                      <td>{eng.email}</td>
+                      <td>{eng.stage}</td>
+                      <td>{formatDate(eng.createdAt)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
