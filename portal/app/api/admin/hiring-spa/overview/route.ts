@@ -3,28 +3,58 @@ import { withAdmin } from '@/lib/api/admin-helpers'
 
 export async function GET() {
   return withAdmin(async ({ serviceClient }) => {
-    const { data: applications, error: applicationsErr } = await serviceClient
-      .from('engineer_job_matches')
-      .select('id, applied_at, feedback, engineer:engineers(name, email), scanned_job:scanned_jobs(company_name, job_title, location)')
-      .not('applied_at', 'is', null)
-      .order('applied_at', { ascending: false })
+    const [
+      { data: engineers, error: engineersErr },
+      { data: matchedEngineerIds, error: matchesErr },
+      { data: applications, error: applicationsErr },
+    ] = await Promise.all([
+      serviceClient
+        .from('engineers')
+        .select('id, name, email, status, crawl_completed_at, questionnaire_completed_at, created_at'),
+      serviceClient
+        .from('engineer_job_matches')
+        .select('engineer_id'),
+      serviceClient
+        .from('engineer_job_matches')
+        .select('id, applied_at, feedback, engineer:engineers(name, email), scanned_job:scanned_jobs(company_name, job_title, location)')
+        .not('applied_at', 'is', null)
+        .order('applied_at', { ascending: false }),
+    ])
 
-    if (applicationsErr) {
-      console.error('Applications query error:', applicationsErr)
-      return NextResponse.json({ error: 'Failed to fetch applications data' }, { status: 500 })
+    if (engineersErr || applicationsErr) {
+      console.error('Overview query error:', engineersErr || applicationsErr)
+      return NextResponse.json({ error: 'Failed to fetch overview data' }, { status: 500 })
     }
+    if (matchesErr) console.warn('engineer_job_matches query failed:', matchesErr.message)
+
+    // --- Funnel ---
+    const engineerList = engineers || []
+    const signedUp = engineerList.length
+    const profileCrawled = engineerList.filter((e) => e.crawl_completed_at).length
+    const questionnaireStarted = engineerList.filter(
+      (e) => e.status === 'questionnaire' || e.status === 'complete'
+    ).length
+    const questionnaireCompleted = engineerList.filter((e) => e.questionnaire_completed_at).length
+
+    const engineersWithMatches = new Set((matchedEngineerIds || []).map((m) => m.engineer_id))
+    const gotMatches = engineerList.filter((e) => engineersWithMatches.has(e.id)).length
 
     const appList = applications || []
+    const engineersWhoApplied = new Set(
+      appList.map((a) => {
+        const eng = Array.isArray(a.engineer) ? a.engineer[0] : a.engineer
+        return eng?.email
+      }).filter(Boolean)
+    )
+    const applied = engineersWhoApplied.size
 
-    // Aggregate stats
+    // --- Application aggregation ---
     const now = new Date()
     const startOfWeek = new Date(now)
     startOfWeek.setDate(now.getDate() - now.getDay())
     startOfWeek.setHours(0, 0, 0, 0)
-
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-    const uniqueEngineers = new Set<string>()
     const engineerCounts: Record<string, { name: string; email: string; count: number; lastAppliedAt: string }> = {}
     let thisWeek = 0
     let thisMonth = 0
@@ -34,8 +64,6 @@ export async function GET() {
       const email = engineer?.email || 'unknown'
       const name = engineer?.name || 'Unknown'
       const appliedAt = new Date(app.applied_at!)
-
-      uniqueEngineers.add(email)
 
       if (appliedAt >= startOfWeek) thisWeek++
       if (appliedAt >= startOfMonth) thisMonth++
@@ -67,9 +95,17 @@ export async function GET() {
     })
 
     return NextResponse.json({
+      funnel: {
+        signedUp,
+        profileCrawled,
+        questionnaireStarted,
+        questionnaireCompleted,
+        gotMatches,
+        applied,
+      },
       applications: {
         total: appList.length,
-        uniqueEngineers: uniqueEngineers.size,
+        uniqueEngineers: applied,
         thisWeek,
         thisMonth,
         byEngineer,
