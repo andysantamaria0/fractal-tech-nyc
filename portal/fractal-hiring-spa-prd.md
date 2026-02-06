@@ -1,9 +1,9 @@
 # Fractal Hiring Spa — Product Requirements Document
 
-**Version:** 1.4
-**Date:** February 3, 2026
+**Version:** 1.5
+**Date:** February 5, 2026
 **Owner:** Andy Santamaria
-**Status:** Phase 1a + 1b + 1c + 2a + 2b + 3-core implemented
+**Status:** Phase 1a + 1b + 1c + 2a + 2b + 3-core + Engineer Portal + Job Ingestion implemented
 
 ---
 
@@ -41,7 +41,7 @@ Already has an account on the Fractal partners portal (`profiles` table). Must b
 
 ### 3.2 Engineer
 
-Software engineers at various career stages. They do not have a portal or login — they are invited into the system when matched. They receive an email with a link to the company's beautified JD. They want transparency about what a role actually involves, who the team is, and whether the culture genuinely fits them.
+Software engineers at various career stages. Engineers now have a self-service portal at `eng.fractaltech.nyc` where they can sign in via Google, complete their profile questionnaire, and view personalized job matches. They want transparency about what a role actually involves, who the team is, and whether the culture genuinely fits them.
 
 ---
 
@@ -226,7 +226,11 @@ Companies can attach a take-home technical challenge:
 
 #### 6.3.2 Engineer Questionnaire
 
-**Work Preferences:** What type of environment they thrive in, remote/hybrid/in-office preference, ideal team dynamic, management style that brings out their best.
+**Location Preferences:** Multi-select checkboxes for NYC, SF, and Remote. Stored as JSONB array in `location_preferences`.
+
+**Priority Ranking:** Drag-and-drop ranking of four priorities: Work-Life Balance, Culture, Mission-Driven, Technical Challenges. Order determines relative importance for job matching.
+
+**Work Preferences:** What type of environment they thrive in, ideal team dynamic, management style that brings out their best.
 
 **Career & Growth:** What they're looking for next, where they want to grow, what problems excite them.
 
@@ -238,19 +242,20 @@ Companies can attach a take-home technical challenge:
 
 #### 6.3.3 Engineer Experience
 
-Engineers do not have a portal. Their flow:
+Engineers have a self-service portal at `eng.fractaltech.nyc`. Their flow:
 
-1. Profiled by Fractal (with consent, participation via questionnaire).
-2. When matched → email with unique link to the Beautified JD.
-3. Engineer enters their email to view the full JD (email gate — see Section 6.5).
-4. If a challenge exists → complete it after viewing the JD.
-5. Notified of outcomes by Fractal (manual, mediated).
+1. Sign in via Google OAuth.
+2. Complete onboarding: basic info (name, LinkedIn, GitHub, resume URL) + location preferences (multi-select: NYC, SF, Remote).
+3. Complete the questionnaire (5 sections: Work Preferences, Career Growth, Strengths, Growth Areas, Deal Breakers).
+4. View personalized job matches on their dashboard — jobs sourced from partner companies and external boards (BuiltIn, etc.).
+5. If a challenge exists → complete it after viewing the JD.
+6. Express interest in matches; notified of outcomes by Fractal.
 
-The Beautified JD is their window into the company. It should be so good, so honest, and so well-crafted that the engineer knows within minutes whether this is a place they want to work.
+The portal shows job matches with fit scores and company context. The engineer can see which jobs align with their preferences and priorities.
 
-#### 6.3.4 Engineer Entry (Phase 1)
+#### 6.3.4 Engineer Entry
 
-For Phase 1, all engineers are **Fractal-sourced only**. No self-signup, no referral flow. Fractal identifies, profiles, and onboards engineers into the matching pool. Self-signup and referral mechanics are Phase 3+.
+Engineers can now self-signup via the engineer portal at `eng.fractaltech.nyc`. They sign in with Google, which creates their `engineer_profiles_spa` record if it doesn't exist. The onboarding flow collects basic info and location preferences before presenting the questionnaire.
 
 ### 6.4 Matching System
 
@@ -349,6 +354,65 @@ No pipelines, no stages, no drag-and-drop. The Hiring Spa handles orchestration.
 Designed for a ten-minute session. Matches presented in curated order (highest match first, three per role). Interface does not reward binge-scrolling. Generous whitespace, unhurried typography, no notification counts or urgency indicators.
 
 Footer: "The calmest 10 minutes of your workday."
+
+### 6.7 Job Sourcing & Ingestion ✅ COMPLETE
+
+Jobs are sourced from two channels: partner companies submitting roles through the Hiring Spa, and external job boards scraped by Job Detective Jr.
+
+#### 6.7.1 External Job Board Integration
+
+**Job Detective Jr.** (`github.com/fractal-bootcamp/job-jr`) scrapes external job boards and pushes jobs to the portal via the ingestion API.
+
+**Currently supported boards:**
+- **BuiltIn** — NYC, SF, and Remote job listings for entry-level/junior software engineering roles
+
+**Filtering pipeline:**
+Jobs are filtered before ingestion to ensure they're appropriate for bootcamp graduates:
+- Excludes senior, lead, staff, principal, manager, director roles
+- Excludes non-engineering roles (sales engineer, QA, solutions engineer)
+- Only includes matching SWE roles (software engineer, developer, full-stack, backend, frontend)
+
+**Automation:**
+- GitHub Actions cron runs every Monday at 12:00 UTC (7-8 AM ET)
+- Jobs scraped and pushed to portal before 9 AM Monday morning
+- Manual trigger available via workflow_dispatch
+
+#### 6.7.2 Job Ingestion API
+
+`POST /api/jobs/ingest` accepts jobs from external sources.
+
+**Authentication:** Bearer token via `JOBS_INGESTION_API_KEY` environment variable.
+
+**Payload format:**
+```json
+{
+  "jobs": [
+    {
+      "company_name": "Acme Corp",
+      "job_title": "Software Engineer",
+      "job_url": "https://acme.com/careers/swe",
+      "location": "New York, NY",
+      "job_board_source": "builtin"
+    }
+  ]
+}
+```
+
+**Deduplication:** Jobs are matched by `job_url` (unique constraint). Existing jobs are updated; new jobs are created.
+
+**Storage:** Jobs stored in `jobs` table with `is_active` flag for lifecycle management.
+
+#### 6.7.3 Engineer Job Matching
+
+Engineers see personalized job matches on their portal dashboard. The matching system considers:
+
+- **Location alignment**: Engineer's selected locations (NYC, SF, Remote) vs job location
+- **Priority alignment**: Engineer's ranked priorities (work-life balance, culture, mission-driven, technical challenges) vs job/company signals
+
+Matches are stored in `engineer_job_matches` with scores recomputed when:
+- Engineer updates their profile or questionnaire answers
+- New jobs are ingested
+- Daily cron job runs (`/api/cron/recompute-matches`)
 
 ---
 
@@ -499,6 +563,7 @@ Extended engineer profiles for matching (separate from the existing `engineers` 
 CREATE TABLE engineer_profiles_spa (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   engineer_id UUID REFERENCES engineers(id) ON DELETE SET NULL,  -- Link to existing engineer if applicable
+  auth_user_id UUID REFERENCES auth.users(id),  -- Supabase Auth user (for self-service login)
 
   -- Basic info
   name TEXT NOT NULL,
@@ -507,6 +572,10 @@ CREATE TABLE engineer_profiles_spa (
   resume_url TEXT,
   github_url TEXT,
   portfolio_url TEXT,
+
+  -- Location & Priority preferences (engineer portal)
+  location_preferences JSONB,  -- ["nyc", "sf", "remote"]
+  priorities JSONB,            -- ["work_life_balance", "culture", "mission_driven", "technical_challenges"]
 
   -- Intelligence layer
   crawl_data JSONB,
@@ -583,6 +652,49 @@ CREATE TABLE jd_page_views (
   viewer_email TEXT NOT NULL,
   engineer_profile_id UUID REFERENCES engineer_profiles_spa(id),  -- Linked if email matches a known engineer
   viewed_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### `jobs`
+
+External job listings from job boards.
+
+```sql
+CREATE TABLE jobs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_name TEXT NOT NULL,
+  job_title TEXT NOT NULL,
+  job_url TEXT NOT NULL UNIQUE,
+  location TEXT,
+  job_board_source TEXT,  -- 'builtin', 'wellfound', etc.
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### `engineer_job_matches`
+
+Stores computed matches between engineers and external jobs.
+
+```sql
+CREATE TABLE engineer_job_matches (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  engineer_profile_id UUID NOT NULL REFERENCES engineer_profiles_spa(id) ON DELETE CASCADE,
+  job_id UUID NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+
+  -- Scores (0-100)
+  overall_score INT CHECK (overall_score BETWEEN 0 AND 100),
+  location_score INT CHECK (location_score BETWEEN 0 AND 100),
+  priority_score INT CHECK (priority_score BETWEEN 0 AND 100),
+
+  -- Match reasoning
+  match_reasoning JSONB,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(engineer_profile_id, job_id)
 );
 ```
 
@@ -730,6 +842,11 @@ Email only. No in-app notification noise.
 | `/jd/[slug]` | Public beautified JD page (email-gated) | No | Public (email gate) | ✅ Phase 1c |
 | `/engineer/apply` | Engineer self-signup (info → crawl → questionnaire → confirmation) | No | Public (middleware exemption) | ✅ Phase 3 |
 | `/admin/hiring-spa` | Admin overview of all Hiring Spa activity | Yes | Admin only | ✅ Shipped |
+| `/engineer/login` | Engineer sign-in page (Google OAuth) | No | Public | ✅ Shipped |
+| `/engineer/dashboard` | Engineer portal home with job matches | Yes | Engineer auth | ✅ Shipped |
+| `/engineer/matches` | Full list of engineer's job matches | Yes | Engineer auth | ✅ Shipped |
+| `/engineer/profile` | Engineer profile view/edit | Yes | Engineer auth | ✅ Shipped |
+| `/engineer/questionnaire` | Engineer questionnaire (5 sections) | Yes | Engineer auth | ✅ Shipped |
 
 **API Routes:**
 
@@ -751,6 +868,11 @@ Email only. No in-app notification noise.
 | `/api/hiring-spa/matches/[id]/decision` | PATCH | Record match decision (moved_forward / passed) | ✅ Phase 2b |
 | `/api/hiring-spa/matches/[id]/feedback` | GET/POST | Fetch/upsert match quality feedback | ✅ Phase 3 |
 | `/api/jd/engineer-consent` | POST | Engineer responds to match (interested / not_interested) | ✅ Phase 3 |
+| `/api/engineer/profile` | GET/PATCH | Get/update engineer's own profile | ✅ Shipped |
+| `/api/engineer/questionnaire` | GET/POST | Get/save engineer questionnaire answers | ✅ Shipped |
+| `/api/engineer/matches` | GET | List engineer's job matches with scores | ✅ Shipped |
+| `/api/jobs/ingest` | POST | Ingest jobs from external sources (API key auth) | ✅ Shipped |
+| `/api/cron/recompute-matches` | POST | Recompute all engineer-job matches (cron auth) | ✅ Shipped |
 
 ---
 
@@ -981,6 +1103,65 @@ Three core Phase 3 features: automated engineer notifications, multi-role submis
 
 **Components built:**
 - `MatchFeedbackForm` — inline feedback form for moved-forward matches
+
+### Engineer Portal ✅ COMPLETE
+
+Full self-service engineer portal with authentication, onboarding, questionnaire, and job matching.
+
+**Deliverables (all shipped):**
+- Engineer authentication via Google OAuth (Supabase Auth)
+  - `/engineer/login` page with Google sign-in button
+  - Auth callback creates `engineer_profiles_spa` record if new user
+  - Redirect flow: login → onboard (if incomplete) → dashboard
+- Engineer onboarding flow
+  - Collects: name, LinkedIn URL, GitHub URL, resume URL
+  - Location preferences: multi-select checkboxes (NYC, SF, Remote)
+  - Saves to `engineer_profiles_spa` with status progression
+- Engineer questionnaire (`/engineer/questionnaire`)
+  - 5 sections: Work Preferences, Career Growth, Strengths, Growth Areas, Deal Breakers
+  - Priority ranking: drag-and-drop ranking of work-life balance, culture, mission-driven, technical challenges
+  - Progress tracking with section completion indicators
+  - Inline styles using shared design tokens (`lib/engineer-design-tokens.ts`)
+- Engineer dashboard (`/engineer/dashboard`)
+  - Personalized job matches with fit scores
+  - Job cards showing company, title, location, match score
+  - Framer Motion animations for card interactions
+- Engineer profile view (`/engineer/profile`)
+  - Display and edit profile information
+  - View questionnaire responses
+- Job matching engine
+  - Location alignment scoring
+  - Priority alignment based on engineer's ranked priorities
+  - Matches stored in `engineer_job_matches` table
+  - Auto-recompute on profile/questionnaire updates
+
+**Database:** `engineer_profiles_spa` table extended with `location_preferences` JSONB, `priorities` JSONB. New `engineer_job_matches` table with scores, reasoning.
+
+**Design:** Inline styles using shared design tokens (`c` for colors, `f` for fonts) from `lib/engineer-design-tokens.ts`. No CSS classes for engineer portal UI.
+
+### Job Ingestion ✅ COMPLETE
+
+External job board scraping and ingestion pipeline.
+
+**Deliverables (all shipped):**
+- Job ingestion API (`POST /api/jobs/ingest`)
+  - Bearer token authentication via `JOBS_INGESTION_API_KEY`
+  - Accepts batch of jobs with company_name, job_title, job_url, location, job_board_source
+  - Deduplication by job_url (upsert logic)
+  - Returns created/updated/duplicate/error counts
+- Job Detective Jr. integration (`github.com/fractal-bootcamp/job-jr`)
+  - BuiltIn job board scraper (NYC, SF, Remote)
+  - Job filtering using JobMatcher patterns (excludes senior, lead, staff, etc.)
+  - Push to portal via ingestion API
+- Automated scraping via GitHub Actions
+  - Cron: Monday 12:00 UTC (completes before 9 AM ET)
+  - Workflow dispatch for manual runs
+  - Environment: `PORTAL_API_URL`, `PORTAL_INGESTION_API_KEY`
+- Match recomputation cron (`/api/cron/recompute-matches`)
+  - Recomputes all engineer-job matches
+  - Triggered by cron schedule
+
+**Database:** `jobs` table with `is_active` flag, `job_board_source`, unique constraint on `job_url`.
 
 ### Phase 3 Remaining — Integration & Scale
 
