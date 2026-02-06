@@ -99,8 +99,11 @@ export default function AdminHiringSpaPage() {
         throw new Error(body.error || 'Failed to compute matches')
       }
       const result = await res.json()
-      alert(`${result.count} match${result.count === 1 ? '' : 'es'} found for ${result.engineer}`)
+      alert(`${result.engineer}: ${result.message}`)
+      // Refresh immediately to pick up the backfilled timestamp,
+      // then again after 30s to pick up computed matches
       loadData()
+      setTimeout(() => loadData(), 30_000)
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Failed to compute matches')
     } finally {
