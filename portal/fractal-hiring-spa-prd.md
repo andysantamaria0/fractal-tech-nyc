@@ -1139,6 +1139,8 @@ Full self-service engineer portal with authentication, onboarding, questionnaire
 
 **Design:** Inline styles using shared design tokens (`c` for colors, `f` for fonts) from `lib/engineer-design-tokens.ts`. No CSS classes for engineer portal UI.
 
+**Critical implementation note:** All engineer portal server components and API routes MUST use `createServiceClient()` for database queries (not `createClient()`). The regular Supabase client's JWT refresh silently fails in Next.js server components, causing RLS to block reads. See Section 13.1 for full details.
+
 ### Job Ingestion ✅ COMPLETE
 
 External job board scraping and ingestion pipeline.
@@ -1205,9 +1207,84 @@ Optimization and analytics.
 
 ---
 
-## 13. Open Questions (Remaining)
+## 13. Known Issues & Resolutions (Bug Tracker)
 
-These are non-blocking for Phase 1 but should be resolved before Phase 3:
+Bugs discovered in production, root causes, and fixes applied. Documented here to prevent regression.
+
+### 13.1 RLS Bypass Required for Engineer Portal Server Components (Feb 6, 2026)
+
+**Severity:** Critical — blocked all engineer onboarding
+**Affected users:** All engineers (Chuqi Jiang, Eric Vo, JY Lee reported)
+**Root cause:** Supabase's server-side client in Next.js App Router server components uses a cookie-based JWT for `auth.uid()`. The `setAll` callback (needed to propagate refreshed tokens) silently fails in server components because they can't set cookies. This means `getUser()` works (direct API call to Supabase Auth) but subsequent DB queries using the regular client have a stale JWT, causing `auth.uid()` to return `null`. RLS policies like `auth_user_id = auth.uid()` then block all reads, returning empty results.
+
+**Symptom:** Server components call `getUser()` successfully, then query the `engineers` table and get no rows back, triggering redirect to `/engineer/onboard` in an infinite loop. API routes return `{"error":"Database error"}` (500).
+
+**Fix:** ALL engineer portal server components and API routes that query the `engineers` table must use `createServiceClient()` (service role key, bypasses RLS) instead of `createClient()` (anon key + user JWT). Auth verification still uses `createClient()` for `getUser()`.
+
+**Files affected:**
+- `app/engineer/(portal)/layout.tsx`
+- `app/engineer/(portal)/dashboard/page.tsx`
+- `app/engineer/(portal)/questionnaire/page.tsx`
+- `app/engineer/(portal)/matches/page.tsx`
+- `app/engineer/(portal)/profile/page.tsx`
+- `app/api/engineer/me/route.ts` (GET and PATCH)
+
+**Rule:** When adding any new engineer portal page or API route, ALWAYS use `createServiceClient()` for DB queries. Only use `createClient()` for `getUser()` auth checks.
+
+### 13.2 Engineer Onboard Email Match Case Missing Status Advancement (Feb 6, 2026)
+
+**Severity:** High — blocked pre-imported engineers from progressing past step 1
+**Affected users:** Engineers whose email was pre-imported into the `engineers` table before they signed up
+**Root cause:** The onboard API (`/api/engineer/onboard`) has three cases: Case 1 (existing by `auth_user_id`), Case 2 (existing by email match), Case 3 (new engineer). Case 2 was missing the `advanceToQuestionnaire` logic that Case 1 had, so pre-imported engineers with no GitHub/portfolio URLs stayed at `draft` status and got stuck in a redirect loop.
+
+**Fix:** Added `advanceToQuestionnaire` logic to Case 2 (email match) and added error handling for the DB update.
+
+**File:** `app/api/engineer/onboard/route.ts`
+
+### 13.3 Engineer Login Redirecting to Company Signup (Feb 6, 2026)
+
+**Severity:** High — engineers landed on company onboarding flow
+**Affected users:** New engineers not yet in the `engineers` table
+**Root cause:** When an authenticated user from `/engineer/login` wasn't found in the `engineers` table, the auth callback and middleware fell through to the company flow, redirecting to `/complete-profile`.
+
+**Fix:**
+- Engineer login page passes `next=/engineer/onboard` in the magic link callback URL
+- Auth callback checks if `next` starts with `/engineer/` and routes to `/engineer/onboard`
+- Middleware routes users on `/engineer/login` to `/engineer/onboard` if not in engineers table
+
+**Files affected:**
+- `app/engineer/login/page.tsx`
+- `app/(auth)/callback/route.ts`
+- `middleware.ts`
+
+### 13.4 Case-Sensitive Email Matching (Feb 6, 2026)
+
+**Severity:** Medium — could cause duplicate records or failed lookups
+**Root cause:** Email lookups used `.eq('email', ...)` which is case-sensitive in PostgreSQL. Users with `John@Gmail.com` wouldn't match a pre-imported record with `john@gmail.com`.
+
+**Fix:** Changed to `.ilike('email', ...)` for case-insensitive matching in:
+- `app/api/engineer/onboard/route.ts`
+- `app/(auth)/callback/route.ts`
+- `middleware.ts`
+
+### 13.5 Onboard Page Routing to Dashboard Instead of Questionnaire (Feb 6, 2026)
+
+**Severity:** Medium — engineers with status `questionnaire`/`crawling` bounced between pages
+**Root cause:** The onboard page redirected all non-`draft` engineers to `/engineer/dashboard`, but the dashboard had no handling for `questionnaire`/`crawling` status, creating a redirect loop.
+
+**Fix:**
+- Onboard page routes `questionnaire`/`crawling` status to `/engineer/questionnaire`
+- Dashboard page redirects `questionnaire`/`crawling` status to `/engineer/questionnaire` as a safety net
+
+**Files affected:**
+- `app/engineer/onboard/page.tsx`
+- `app/engineer/(portal)/dashboard/page.tsx`
+
+---
+
+## 14. Open Questions (Remaining)
+
+These are non-blocking but should be resolved before Phase 3:
 
 | Question | Notes |
 |----------|-------|
