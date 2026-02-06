@@ -107,7 +107,9 @@ export default function EngineerOnboardPage() {
         throw new Error(data.error || 'Failed to create profile')
       }
 
-      router.push('/engineer/questionnaire')
+      // Use replace so the onboard page's useEffect can't race and redirect to dashboard
+      window.location.href = '/engineer/questionnaire'
+      return
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setSubmitting(false)
