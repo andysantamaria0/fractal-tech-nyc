@@ -148,7 +148,7 @@ export async function middleware(request: NextRequest) {
     const { data: engineer } = await serviceClient
       .from('engineers')
       .select('id, auth_user_id, status')
-      .or(`auth_user_id.eq.${user.id}${user.email ? `,email.eq.${user.email}` : ''}`)
+      .or(`auth_user_id.eq.${user.id}${user.email ? `,email.ilike.${user.email}` : ''}`)
       .limit(1)
       .single()
 
@@ -159,6 +159,13 @@ export async function middleware(request: NextRequest) {
       } else {
         url.pathname = '/engineer/onboard'
       }
+      return NextResponse.redirect(url)
+    }
+
+    // Engineer login flow: user not in engineers table yet — send to onboard, not company flow
+    if (request.nextUrl.pathname === '/engineer/login') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/engineer/onboard'
       return NextResponse.redirect(url)
     }
 

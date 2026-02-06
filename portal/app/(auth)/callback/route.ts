@@ -61,7 +61,7 @@ export async function GET(request: Request) {
         const { data: engineer } = await serviceClient
           .from('engineers')
           .select('id, auth_user_id, status')
-          .or(`auth_user_id.eq.${user.id},email.eq.${user.email}`)
+          .or(`auth_user_id.eq.${user.id},email.ilike.${user.email}`)
           .limit(1)
           .single()
 
@@ -78,6 +78,9 @@ export async function GET(request: Request) {
           } else {
             redirectPath = '/engineer/onboard'
           }
+        } else if (next.startsWith('/engineer')) {
+          // Engineer flow: user came from engineer login but has no record yet
+          redirectPath = '/engineer/onboard'
         } else {
           // Company flow: check for existing profile
           const { data: profile } = await supabase
