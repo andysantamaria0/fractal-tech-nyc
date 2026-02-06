@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import EngineerQuestionnaireForm from '@/components/engineer/EngineerQuestionnaireForm'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
@@ -10,7 +10,9 @@ export default async function EngineerQuestionnairePage() {
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  // Use service client to bypass RLS for engineer lookup
+  const serviceClient = await createServiceClient()
+  const { data: profile } = await serviceClient
     .from('engineers')
     .select('id, status, priority_ratings, work_preferences, career_growth, strengths, growth_areas, deal_breakers')
     .eq('auth_user_id', user.id)

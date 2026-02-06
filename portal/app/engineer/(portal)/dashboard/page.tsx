@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import ProfileCompletionBanner from '@/components/engineer/ProfileCompletionBanner'
 import WeeklyAppCounter from '@/components/engineer/WeeklyAppCounter'
@@ -12,7 +12,9 @@ export default async function EngineerDashboardPage() {
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  // Use service client to bypass RLS for engineer lookup
+  const serviceClient = await createServiceClient()
+  const { data: profile } = await serviceClient
     .from('engineers')
     .select('id, status, linkedin_url, github_url, portfolio_url, resume_url')
     .eq('auth_user_id', user.id)
@@ -24,7 +26,7 @@ export default async function EngineerDashboardPage() {
 
   const typedProfile = profile as EngineerProfileSpa
 
-  const { data: matches } = await supabase
+  const { data: matches } = await serviceClient
     .from('engineer_job_matches')
     .select('id, feedback, applied_at')
     .eq('engineer_id', typedProfile.id)

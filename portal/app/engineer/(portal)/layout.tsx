@@ -22,7 +22,7 @@ export default async function EngineerPortalLayout({
   let engineerName: string | undefined
 
   if (isSupabaseConfigured) {
-    const { createClient } = await import('@/lib/supabase/server')
+    const { createClient, createServiceClient } = await import('@/lib/supabase/server')
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -30,7 +30,10 @@ export default async function EngineerPortalLayout({
       redirect('/login')
     }
 
-    const { data: engineerProfile } = await supabase
+    // Use service client to bypass RLS for engineer lookup
+    // (RLS can fail if JWT refresh doesn't propagate to server components)
+    const serviceClient = await createServiceClient()
+    const { data: engineerProfile } = await serviceClient
       .from('engineers')
       .select('id, name')
       .eq('auth_user_id', user.id)
