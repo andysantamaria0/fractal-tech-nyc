@@ -88,26 +88,32 @@ export default function AdminHiringSpaPage() {
   const [data, setData] = useState<OverviewData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [computing, setComputing] = useState<Record<string, boolean>>({})
+  const [matchState, setMatchState] = useState<Record<string, 'starting' | 'pending' | 'error'>>({})
+  const [matchError, setMatchError] = useState<Record<string, string>>({})
 
   async function computeMatches(engineerId: string) {
-    setComputing((prev) => ({ ...prev, [engineerId]: true }))
+    setMatchState((prev) => ({ ...prev, [engineerId]: 'starting' }))
+    setMatchError((prev) => { const next = { ...prev }; delete next[engineerId]; return next })
     try {
       const res = await fetch(`/api/admin/hiring-spa/engineers/${engineerId}/matches`, { method: 'POST' })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
         throw new Error(body.error || 'Failed to compute matches')
       }
-      const result = await res.json()
-      alert(`${result.engineer}: ${result.message}`)
-      // Refresh immediately to pick up the backfilled timestamp,
-      // then again after 30s to pick up computed matches
+      setMatchState((prev) => ({ ...prev, [engineerId]: 'pending' }))
+      // Refresh immediately for the backfilled timestamp, then poll
+      // every 15s until the engineer's stage changes to "Got Matches"
       loadData()
-      setTimeout(() => loadData(), 30_000)
+      let attempts = 0
+      const poll = setInterval(async () => {
+        attempts++
+        await loadData()
+        if (attempts >= 8) clearInterval(poll) // stop after ~2 min
+      }, 15_000)
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed to compute matches')
-    } finally {
-      setComputing((prev) => ({ ...prev, [engineerId]: false }))
+      const msg = e instanceof Error ? e.message : 'Failed to compute matches'
+      setMatchState((prev) => ({ ...prev, [engineerId]: 'error' }))
+      setMatchError((prev) => ({ ...prev, [engineerId]: msg }))
     }
   }
 
@@ -213,21 +219,37 @@ export default function AdminHiringSpaPage() {
                       <td style={tdMono}>{eng.questionnaireCompletedAt ? formatDate(eng.questionnaireCompletedAt) : '\u2014'}</td>
                       <td style={tdMono}>{formatDate(eng.createdAt)}</td>
                       <td style={td}>
-                        {(eng.stage === 'Questionnaire Completed' || eng.stage === 'Questionnaire Started') && eng.status === 'complete' && (
-                          <button
-                            onClick={() => computeMatches(eng.id)}
-                            disabled={computing[eng.id]}
-                            style={{
-                              fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em',
-                              textTransform: 'uppercase', padding: '5px 10px', borderRadius: 4,
-                              backgroundColor: computing[eng.id] ? c.stoneLight : c.charcoal,
-                              color: computing[eng.id] ? c.mist : c.fog,
-                              border: 'none', cursor: computing[eng.id] ? 'wait' : 'pointer',
-                            }}
-                          >
-                            {computing[eng.id] ? 'Computing...' : 'Compute Matches'}
-                          </button>
-                        )}
+                        {(eng.stage === 'Questionnaire Completed' || eng.stage === 'Questionnaire Started') && eng.status === 'complete' && (() => {
+                          const state = matchState[eng.id]
+                          if (state === 'starting') return (
+                            <span style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
+                              Starting...
+                            </span>
+                          )
+                          if (state === 'pending') return (
+                            <span style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.match }}>
+                              Matches pending...
+                            </span>
+                          )
+                          if (state === 'error') return (
+                            <span style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#b44' }}>
+                              {matchError[eng.id] || 'Error'}
+                            </span>
+                          )
+                          return (
+                            <button
+                              onClick={() => computeMatches(eng.id)}
+                              style={{
+                                fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em',
+                                textTransform: 'uppercase', padding: '5px 10px', borderRadius: 4,
+                                backgroundColor: c.charcoal, color: c.fog,
+                                border: 'none', cursor: 'pointer',
+                              }}
+                            >
+                              Compute Matches
+                            </button>
+                          )
+                        })()}
                       </td>
                     </tr>
                   )
