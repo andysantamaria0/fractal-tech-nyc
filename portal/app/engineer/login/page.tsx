@@ -81,7 +81,7 @@ export default function EngineerLoginPage() {
         <motion.h1
           initial={{ opacity: 0, y: drift.login }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: duration.login, ease: ease.page, delay: 0.1 }}
+          transition={{ duration: duration.login, ease: ease.page, delay: 0.15 }}
           style={{
             fontFamily: fonts.mono,
             fontSize: 15,
@@ -98,7 +98,7 @@ export default function EngineerLoginPage() {
         <motion.p
           initial={{ opacity: 0, y: drift.login }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: duration.login, ease: ease.page, delay: 0.2 }}
+          transition={{ duration: duration.login, ease: ease.page, delay: 0.35 }}
           style={{
             fontFamily: fonts.serif,
             fontSize: 'clamp(22px, 3.5vw, 28px)',
@@ -116,7 +116,7 @@ export default function EngineerLoginPage() {
         <motion.p
           initial={{ opacity: 0, y: drift.login }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: duration.login, ease: ease.page, delay: 0.3 }}
+          transition={{ duration: duration.login, ease: ease.page, delay: 0.55 }}
           style={{
             fontFamily: fonts.serif,
             fontSize: 20,
@@ -132,7 +132,7 @@ export default function EngineerLoginPage() {
         <motion.p
           initial={{ opacity: 0, y: drift.login }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: duration.login, ease: ease.page, delay: 0.35 }}
+          transition={{ duration: duration.login, ease: ease.page, delay: 0.7 }}
           style={{
             fontFamily: fonts.mono,
             fontSize: 11,
@@ -154,7 +154,7 @@ export default function EngineerLoginPage() {
         <motion.div
           initial={{ opacity: 0, y: drift.login }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: duration.login, ease: ease.page, delay: 0.45 }}
+          transition={{ duration: duration.login, ease: ease.page, delay: 0.9 }}
           style={{
             backgroundColor: colors.fog,
             border: `1px solid ${colors.stoneLight}`,

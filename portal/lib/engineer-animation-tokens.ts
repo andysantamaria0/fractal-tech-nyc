@@ -24,7 +24,7 @@ export const duration = {
   /** Feedback step transitions */
   feedback: 0.3,
   /** Login card entrance */
-  login: 0.8,
+  login: 1.1,
 }
 
 export const stagger = {
@@ -46,7 +46,7 @@ export const drift = {
   /** Stagger item drift */
   item: 8,
   /** Login card drift */
-  login: 16,
+  login: 12,
   /** Feedback step drift */
   feedback: 4,
 }
