@@ -63,7 +63,10 @@ export default function EngineerOnboardPage() {
       if (res.ok) {
         const data = await res.json()
         if (data.profile && data.profile.status !== 'draft') {
-          router.push('/engineer/dashboard')
+          const dest = (data.profile.status === 'questionnaire' || data.profile.status === 'crawling')
+            ? '/engineer/questionnaire'
+            : '/engineer/dashboard'
+          router.push(dest)
           return
         }
         if (data.profile) {

@@ -20,6 +20,7 @@ export default async function EngineerDashboardPage() {
 
   if (!profile) redirect('/engineer/onboard')
   if (profile.status === 'draft') redirect('/engineer/onboard')
+  if (profile.status === 'questionnaire' || profile.status === 'crawling') redirect('/engineer/questionnaire')
 
   const typedProfile = profile as EngineerProfileSpa
 
