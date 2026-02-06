@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 interface OverviewData {
   engineers: { id: string; name: string; email: string; status: string; stage: string; questionnaireCompletedAt: string | null; createdAt: string }[]
+  applicationCount: number
   applications: {
     total: number
     uniqueEngineers: number
@@ -185,6 +187,11 @@ export default function AdminHiringSpaPage() {
             <div key={stage} style={{ ...card, padding: '16px 20px', flex: '1 1 140px', minWidth: 140, textAlign: 'center' }}>
               <div style={{ fontFamily: f.mono, fontSize: 24, fontWeight: 500, color: colors.color }}>{count}</div>
               <div style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist, marginTop: 4 }}>{stage}</div>
+              {stage === 'Applied' && data.applicationCount > 0 && (
+                <div style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.06em', color: c.graphite, marginTop: 4 }}>
+                  {data.applicationCount} app{data.applicationCount !== 1 ? 's' : ''}
+                </div>
+              )}
             </div>
           )
         })}
@@ -213,7 +220,11 @@ export default function AdminHiringSpaPage() {
                   const colors = stageBadgeColor(eng.stage)
                   return (
                     <tr key={eng.id}>
-                      <td style={td}>{eng.name}</td>
+                      <td style={td}>
+                        <Link href={`/admin/hiring-spa/engineers/${eng.id}/matches`} style={{ color: c.charcoal, textDecoration: 'underline', textUnderlineOffset: 2 }}>
+                          {eng.name}
+                        </Link>
+                      </td>
                       <td style={tdMono}>{eng.email}</td>
                       <td style={td}><span style={badge(colors.bg, colors.color)}>{eng.stage}</span></td>
                       <td style={tdMono}>{eng.questionnaireCompletedAt ? formatDate(eng.questionnaireCompletedAt) : '\u2014'}</td>

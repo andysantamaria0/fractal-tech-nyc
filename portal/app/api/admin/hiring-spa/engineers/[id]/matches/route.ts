@@ -3,6 +3,59 @@ import { withAdmin } from '@/lib/api/admin-helpers'
 import { computeMatchesForEngineer } from '@/lib/hiring-spa/job-matching'
 import { notifyEngineerMatchesReady } from '@/lib/hiring-spa/notifications'
 
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  return withAdmin(async ({ serviceClient }) => {
+    const { id } = await params
+
+    const { data: engineer, error: engErr } = await serviceClient
+      .from('engineers')
+      .select('id, name, email')
+      .eq('id', id)
+      .single()
+
+    if (engErr || !engineer) {
+      return NextResponse.json({ error: 'Engineer not found' }, { status: 404 })
+    }
+
+    const { data: matches, error: matchErr } = await serviceClient
+      .from('engineer_job_matches')
+      .select('id, engineer_id, scanned_job_id, overall_score, dimension_scores, display_rank, feedback, feedback_category, feedback_at, applied_at, created_at, scanned_job:scanned_jobs(company_name, job_title, job_url, location)')
+      .eq('engineer_id', id)
+      .order('display_rank', { ascending: true, nullsFirst: false })
+      .order('overall_score', { ascending: false })
+
+    if (matchErr) {
+      console.error('Failed to fetch matches:', matchErr)
+      return NextResponse.json({ error: 'Failed to fetch matches' }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      engineer: { id: engineer.id, name: engineer.name, email: engineer.email },
+      matches: (matches || []).map((m) => {
+        const job = Array.isArray(m.scanned_job) ? m.scanned_job[0] : m.scanned_job
+        return {
+          id: m.id,
+          displayRank: m.display_rank,
+          overallScore: m.overall_score,
+          dimensionScores: m.dimension_scores,
+          feedback: m.feedback,
+          feedbackCategory: m.feedback_category,
+          feedbackAt: m.feedback_at,
+          appliedAt: m.applied_at,
+          createdAt: m.created_at,
+          jobTitle: job?.job_title || 'Unknown',
+          companyName: job?.company_name || 'Unknown',
+          jobUrl: job?.job_url || null,
+          location: job?.location || null,
+        }
+      }),
+    })
+  })
+}
+
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },

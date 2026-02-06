@@ -115,6 +115,7 @@ export async function GET() {
 
     return NextResponse.json({
       engineers: engineerRows,
+      applicationCount: appList.length,
       applications: {
         total: appList.length,
         uniqueEngineers: engineersWhoApplied.size,
