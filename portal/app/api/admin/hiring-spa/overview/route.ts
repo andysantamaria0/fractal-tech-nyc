@@ -1,202 +1,79 @@
 import { NextResponse } from 'next/server'
 import { withAdmin } from '@/lib/api/admin-helpers'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function joinVal(joined: any, key: string): string | undefined {
-  if (!joined) return undefined
-  if (Array.isArray(joined)) return joined[0]?.[key]
-  return joined[key]
-}
-
 export async function GET() {
   return withAdmin(async ({ serviceClient }) => {
-    const [
-      { data: companies, error: companiesErr },
-      { data: roles, error: rolesErr },
-      { data: engineers, error: engineersErr },
-      { data: matches, error: matchesErr },
-      { data: feedback, error: feedbackErr },
-      { data: jdViews, error: jdViewsErr, count: jdViewCount },
-    ] = await Promise.all([
-      serviceClient
-        .from('hiring_profiles')
-        .select('id, company_id, status, crawl_error, created_at, profiles(name)'),
-      serviceClient
-        .from('hiring_roles')
-        .select('id, hiring_profile_id, title, status, created_at'),
-      serviceClient
-        .from('engineers')
-        .select('id, name, email, status, crawl_error, created_at'),
-      serviceClient
-        .from('hiring_spa_matches')
-        .select('id, role_id, engineer_id, overall_score, decision, decision_at, created_at, hiring_roles(title), engineers(name)')
-        .order('created_at', { ascending: false }),
-      serviceClient
-        .from('match_feedback')
-        .select('id, match_id, hired, rating'),
-      serviceClient
-        .from('jd_page_views')
-        .select('id', { count: 'exact', head: true }),
-    ])
+    const { data: applications, error: applicationsErr } = await serviceClient
+      .from('engineer_job_matches')
+      .select('id, applied_at, feedback, engineer:engineers(name, email), scanned_job:scanned_jobs(company_name, job_title, location)')
+      .not('applied_at', 'is', null)
+      .order('applied_at', { ascending: false })
 
-    // Core tables — fail if these are missing
-    const coreErr = companiesErr || rolesErr || engineersErr || matchesErr
-    if (coreErr) {
-      console.error('Overview query error:', coreErr)
-      return NextResponse.json({ error: 'Failed to fetch overview data' }, { status: 500 })
+    if (applicationsErr) {
+      console.error('Applications query error:', applicationsErr)
+      return NextResponse.json({ error: 'Failed to fetch applications data' }, { status: 500 })
     }
 
-    // Non-critical tables — log and continue with empty data
-    if (feedbackErr) console.warn('match_feedback query failed (table may not exist):', feedbackErr.message)
-    if (jdViewsErr) console.warn('jd_page_views query failed (table may not exist):', jdViewsErr.message)
+    const appList = applications || []
 
-    // --- Companies ---
-    const companyByStatus: Record<string, number> = {}
-    const companyErrors: { id: string; name: string; type: 'company'; error: string }[] = []
-    for (const c of companies || []) {
-      const s = c.status || 'unknown'
-      companyByStatus[s] = (companyByStatus[s] || 0) + 1
-      if (c.crawl_error) {
-        companyErrors.push({
-          id: c.id,
-          name: joinVal(c.profiles, 'name') || c.company_id,
-          type: 'company',
-          error: c.crawl_error,
-        })
+    // Aggregate stats
+    const now = new Date()
+    const startOfWeek = new Date(now)
+    startOfWeek.setDate(now.getDate() - now.getDay())
+    startOfWeek.setHours(0, 0, 0, 0)
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
+    const uniqueEngineers = new Set<string>()
+    const engineerCounts: Record<string, { name: string; email: string; count: number; lastAppliedAt: string }> = {}
+    let thisWeek = 0
+    let thisMonth = 0
+
+    for (const app of appList) {
+      const engineer = Array.isArray(app.engineer) ? app.engineer[0] : app.engineer
+      const email = engineer?.email || 'unknown'
+      const name = engineer?.name || 'Unknown'
+      const appliedAt = new Date(app.applied_at!)
+
+      uniqueEngineers.add(email)
+
+      if (appliedAt >= startOfWeek) thisWeek++
+      if (appliedAt >= startOfMonth) thisMonth++
+
+      if (!engineerCounts[email]) {
+        engineerCounts[email] = { name, email, count: 0, lastAppliedAt: app.applied_at! }
+      }
+      engineerCounts[email].count++
+      if (app.applied_at! > engineerCounts[email].lastAppliedAt) {
+        engineerCounts[email].lastAppliedAt = app.applied_at!
       }
     }
 
-    // --- Roles ---
-    const roleByStatus: Record<string, number> = {}
-    const roleIds = new Set<string>()
-    for (const r of roles || []) {
-      const s = r.status || 'unknown'
-      roleByStatus[s] = (roleByStatus[s] || 0) + 1
-      roleIds.add(r.id)
-    }
+    const byEngineer = Object.values(engineerCounts).sort((a, b) => b.count - a.count)
 
-    // --- Engineers ---
-    const engineerByStatus: Record<string, number> = {}
-    const engineerErrors: { id: string; name: string; type: 'engineer'; error: string }[] = []
-    for (const e of engineers || []) {
-      const s = e.status || 'unknown'
-      engineerByStatus[s] = (engineerByStatus[s] || 0) + 1
-      if (e.crawl_error) {
-        engineerErrors.push({
-          id: e.id,
-          name: e.name,
-          type: 'engineer',
-          error: e.crawl_error,
-        })
-      }
-    }
-
-    // --- Matches ---
-    const matchList = matches || []
-    const rolesWithMatches = new Set<string>()
-    let pendingCount = 0
-    let movedForwardCount = 0
-    let passedCount = 0
-    let scoreSum = 0
-    let scoreCount = 0
-    const recentDecisions: { id: string; roleName: string; engineerName: string; decision: string; decisionAt: string }[] = []
-
-    for (const m of matchList) {
-      rolesWithMatches.add(m.role_id)
-      if (m.decision === null || m.decision === undefined) pendingCount++
-      else if (m.decision === 'moved_forward') movedForwardCount++
-      else if (m.decision === 'passed') passedCount++
-
-      if (m.overall_score != null) {
-        scoreSum += m.overall_score
-        scoreCount++
-      }
-
-      if (m.decision && m.decision_at && recentDecisions.length < 5) {
-        recentDecisions.push({
-          id: m.id,
-          roleName: joinVal(m.hiring_roles, 'title') || 'Unknown',
-          engineerName: joinVal(m.engineers, 'name') || 'Unknown',
-          decision: m.decision,
-          decisionAt: m.decision_at,
-        })
-      }
-    }
-
-    const recentMatches = matchList.slice(0, 5).map((m) => {
+    const list = appList.map((app) => {
+      const engineer = Array.isArray(app.engineer) ? app.engineer[0] : app.engineer
+      const job = Array.isArray(app.scanned_job) ? app.scanned_job[0] : app.scanned_job
       return {
-        id: m.id,
-        roleName: joinVal(m.hiring_roles, 'title') || 'Unknown',
-        engineerName: joinVal(m.engineers, 'name') || 'Unknown',
-        score: m.overall_score,
-        createdAt: m.created_at,
+        id: app.id,
+        engineerName: engineer?.name || 'Unknown',
+        engineerEmail: engineer?.email || '',
+        companyName: job?.company_name || 'Unknown',
+        jobTitle: job?.job_title || 'Unknown',
+        location: job?.location || '',
+        appliedAt: app.applied_at!,
+        feedback: app.feedback || null,
       }
     })
 
-    // --- Roles without matches ---
-    const rolesWithoutMatches = (roles || [])
-      .filter((r) => (r.status === 'active' || r.status === 'published') && !rolesWithMatches.has(r.id))
-      .map((r) => ({ id: r.id, title: r.title, status: r.status }))
-
-    // --- Stale pending matches (> 7 days) ---
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-    const stalePendingMatches = matchList.filter(
-      (m) => !m.decision && new Date(m.created_at).getTime() < sevenDaysAgo
-    ).length
-
-    // --- Feedback ---
-    const feedbackList = feedback || []
-    const hiredCount = feedbackList.filter((f) => f.hired).length
-    const ratingSum = feedbackList.reduce((sum, f) => sum + (f.rating || 0), 0)
-    const ratingCount = feedbackList.filter((f) => f.rating != null).length
-
-    // --- Recent engineers ---
-    const sortedEngineers = [...(engineers || [])].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
-    const recentEngineers = sortedEngineers.slice(0, 5).map((e) => ({
-      id: e.id,
-      name: e.name,
-      status: e.status,
-      createdAt: e.created_at,
-    }))
-
     return NextResponse.json({
-      companies: {
-        total: (companies || []).length,
-        byStatus: companyByStatus,
-        withErrors: companyErrors.length,
-      },
-      roles: {
-        total: (roles || []).length,
-        byStatus: roleByStatus,
-      },
-      engineers: {
-        total: (engineers || []).length,
-        byStatus: engineerByStatus,
-      },
-      matches: {
-        total: matchList.length,
-        pending: pendingCount,
-        movedForward: movedForwardCount,
-        passed: passedCount,
-        avgScore: scoreCount > 0 ? Math.round(scoreSum / scoreCount) : null,
-      },
-      feedback: {
-        total: feedbackList.length,
-        hired: hiredCount,
-        avgRating: ratingCount > 0 ? Math.round((ratingSum / ratingCount) * 10) / 10 : null,
-      },
-      jdViews: jdViewCount || 0,
-      recentActivity: {
-        recentMatches,
-        recentDecisions,
-        recentEngineers,
-      },
-      attention: {
-        crawlErrors: [...companyErrors, ...engineerErrors],
-        rolesWithoutMatches,
-        stalePendingMatches,
+      applications: {
+        total: appList.length,
+        uniqueEngineers: uniqueEngineers.size,
+        thisWeek,
+        thisMonth,
+        byEngineer,
+        list,
       },
     })
   })
