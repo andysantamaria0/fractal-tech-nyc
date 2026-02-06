@@ -88,6 +88,25 @@ export default function AdminHiringSpaPage() {
   const [data, setData] = useState<OverviewData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [computing, setComputing] = useState<Record<string, boolean>>({})
+
+  async function computeMatches(engineerId: string) {
+    setComputing((prev) => ({ ...prev, [engineerId]: true }))
+    try {
+      const res = await fetch(`/api/admin/hiring-spa/engineers/${engineerId}/matches`, { method: 'POST' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || 'Failed to compute matches')
+      }
+      const result = await res.json()
+      alert(`${result.count} match${result.count === 1 ? '' : 'es'} found for ${result.engineer}`)
+      loadData()
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Failed to compute matches')
+    } finally {
+      setComputing((prev) => ({ ...prev, [engineerId]: false }))
+    }
+  }
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -174,11 +193,12 @@ export default function AdminHiringSpaPage() {
                 <th style={th}>Stage</th>
                 <th style={th}>Questionnaire</th>
                 <th style={th}>Signed Up</th>
+                <th style={th}></th>
               </tr>
             </thead>
             <tbody>
               {engineers.length === 0 ? (
-                <tr><td colSpan={5} style={{ ...td, color: c.mist }}>No engineers yet</td></tr>
+                <tr><td colSpan={6} style={{ ...td, color: c.mist }}>No engineers yet</td></tr>
               ) : (
                 engineers.map((eng) => {
                   const colors = stageBadgeColor(eng.stage)
@@ -189,6 +209,23 @@ export default function AdminHiringSpaPage() {
                       <td style={td}><span style={badge(colors.bg, colors.color)}>{eng.stage}</span></td>
                       <td style={tdMono}>{eng.questionnaireCompletedAt ? formatDate(eng.questionnaireCompletedAt) : '\u2014'}</td>
                       <td style={tdMono}>{formatDate(eng.createdAt)}</td>
+                      <td style={td}>
+                        {(eng.stage === 'Questionnaire Completed' || eng.stage === 'Questionnaire Started') && eng.status === 'complete' && (
+                          <button
+                            onClick={() => computeMatches(eng.id)}
+                            disabled={computing[eng.id]}
+                            style={{
+                              fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em',
+                              textTransform: 'uppercase', padding: '5px 10px', borderRadius: 4,
+                              backgroundColor: computing[eng.id] ? c.stoneLight : c.charcoal,
+                              color: computing[eng.id] ? c.mist : c.fog,
+                              border: 'none', cursor: computing[eng.id] ? 'wait' : 'pointer',
+                            }}
+                          >
+                            {computing[eng.id] ? 'Computing...' : 'Compute Matches'}
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   )
                 })
