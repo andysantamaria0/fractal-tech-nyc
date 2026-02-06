@@ -11,7 +11,7 @@ export default async function EngineerQuestionnairePage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
-    .from('engineer_profiles_spa')
+    .from('engineers')
     .select('id, status, priority_ratings, work_preferences, career_growth, strengths, growth_areas, deal_breakers')
     .eq('auth_user_id', user.id)
     .single()

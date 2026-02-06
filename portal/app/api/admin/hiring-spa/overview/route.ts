@@ -25,11 +25,11 @@ export async function GET() {
         .from('hiring_roles')
         .select('id, hiring_profile_id, title, status, created_at'),
       serviceClient
-        .from('engineer_profiles_spa')
+        .from('engineers')
         .select('id, name, email, status, crawl_error, created_at'),
       serviceClient
         .from('hiring_spa_matches')
-        .select('id, role_id, engineer_id, overall_score, decision, decision_at, created_at, hiring_roles(title), engineer_profiles_spa(name)')
+        .select('id, role_id, engineer_id, overall_score, decision, decision_at, created_at, hiring_roles(title), engineers(name)')
         .order('created_at', { ascending: false }),
       serviceClient
         .from('match_feedback')
@@ -116,7 +116,7 @@ export async function GET() {
         recentDecisions.push({
           id: m.id,
           roleName: joinVal(m.hiring_roles, 'title') || 'Unknown',
-          engineerName: joinVal(m.engineer_profiles_spa, 'name') || 'Unknown',
+          engineerName: joinVal(m.engineers, 'name') || 'Unknown',
           decision: m.decision,
           decisionAt: m.decision_at,
         })
@@ -127,7 +127,7 @@ export async function GET() {
       return {
         id: m.id,
         roleName: joinVal(m.hiring_roles, 'title') || 'Unknown',
-        engineerName: joinVal(m.engineer_profiles_spa, 'name') || 'Unknown',
+        engineerName: joinVal(m.engineers, 'name') || 'Unknown',
         score: m.overall_score,
         createdAt: m.created_at,
       }

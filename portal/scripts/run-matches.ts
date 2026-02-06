@@ -61,7 +61,7 @@ async function main() {
 
   // Fetch engineer profile
   const { data: engineer, error: engErr } = await supabase
-    .from('engineer_profiles_spa')
+    .from('engineers')
     .select('*')
     .eq('id', PROFILE_ID)
     .single()
@@ -198,7 +198,7 @@ async function main() {
   // Insert into database
   const batchId = `eng_${PROFILE_ID.slice(0, 8)}_${Date.now()}`
   const insertData = topMatches.map((m, i) => ({
-    engineer_profile_id: PROFILE_ID,
+    engineer_id: PROFILE_ID,
     scanned_job_id: m.job.id,
     overall_score: m.overall_score,
     dimension_scores: m.scores,
@@ -212,7 +212,7 @@ async function main() {
     const { error: insertError } = await supabase
       .from('engineer_job_matches')
       .upsert(insertData, {
-        onConflict: 'engineer_profile_id,scanned_job_id',
+        onConflict: 'engineer_id,scanned_job_id',
       })
 
     if (insertError) {

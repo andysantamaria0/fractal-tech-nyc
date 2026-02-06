@@ -31,7 +31,7 @@ export default async function EngineerPortalLayout({
     }
 
     const { data: engineerProfile } = await supabase
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, name')
       .eq('auth_user_id', user.id)
       .single()

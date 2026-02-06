@@ -57,45 +57,37 @@ export async function GET(request: Request) {
           process.env.SUPABASE_SERVICE_ROLE_KEY!,
         )
 
-        // Check engineer_profiles_spa by auth_user_id or email
-        const { data: engineerProfile } = await serviceClient
-          .from('engineer_profiles_spa')
-          .select('id, auth_user_id')
+        // Check engineers table by auth_user_id or email
+        const { data: engineer } = await serviceClient
+          .from('engineers')
+          .select('id, auth_user_id, status')
           .or(`auth_user_id.eq.${user.id},email.eq.${user.email}`)
           .limit(1)
           .single()
 
-        if (engineerProfile) {
+        if (engineer) {
           // Link auth_user_id if not already set
-          if (!engineerProfile.auth_user_id) {
+          if (!engineer.auth_user_id) {
             await serviceClient
-              .from('engineer_profiles_spa')
+              .from('engineers')
               .update({ auth_user_id: user.id })
-              .eq('id', engineerProfile.id)
+              .eq('id', engineer.id)
           }
-          redirectPath = '/engineer/dashboard'
+          if (engineer.auth_user_id && engineer.status !== 'draft') {
+            redirectPath = '/engineer/dashboard'
+          } else {
+            redirectPath = '/engineer/onboard'
+          }
         } else {
-          // Check engineers table by email (needs onboarding)
-          const { data: engineer } = await serviceClient
-            .from('engineers')
+          // Company flow: check for existing profile
+          const { data: profile } = await supabase
+            .from('profiles')
             .select('id')
-            .eq('email', user.email!)
-            .limit(1)
+            .eq('id', user.id)
             .single()
 
-          if (engineer) {
-            redirectPath = '/engineer/onboard'
-          } else {
-            // Company flow: check for existing profile
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('id')
-              .eq('id', user.id)
-              .single()
-
-            if (!profile) {
-              redirectPath = '/complete-profile'
-            }
+          if (!profile) {
+            redirectPath = '/complete-profile'
           }
         }
       }

@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 
     // Fetch all engineers with complete profiles
     const { data: engineers, error } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, name')
       .eq('status', 'complete')
 

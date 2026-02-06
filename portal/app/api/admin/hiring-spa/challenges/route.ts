@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
     const { data: matches, error } = await serviceClient
       .from('hiring_spa_matches')
-      .select('id, overall_score, challenge_response, challenge_response_at, engineer:engineer_profiles_spa(id, name, email), challenge_submission:challenge_submissions(*)')
+      .select('id, overall_score, challenge_response, challenge_response_at, engineer:engineers(id, name, email), challenge_submission:challenge_submissions(*)')
       .eq('role_id', roleId)
       .not('challenge_response', 'is', null)
       .order('challenge_response_at', { ascending: false })

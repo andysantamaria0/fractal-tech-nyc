@@ -26,7 +26,7 @@ export async function POST(
 
     // Verify the match belongs to this engineer
     const { data: profile } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id')
       .eq('auth_user_id', user.id)
       .single()
@@ -37,11 +37,11 @@ export async function POST(
 
     const { data: match } = await serviceClient
       .from('engineer_job_matches')
-      .select('id, engineer_profile_id')
+      .select('id, engineer_id')
       .eq('id', matchId)
       .single()
 
-    if (!match || match.engineer_profile_id !== profile.id) {
+    if (!match || match.engineer_id !== profile.id) {
       return NextResponse.json({ error: 'Match not found' }, { status: 404 })
     }
 
@@ -88,7 +88,7 @@ export async function POST(
       if (job) {
         // Fetch current preferences
         const { data: profilePrefs } = await serviceClient
-          .from('engineer_profiles_spa')
+          .from('engineers')
           .select('matching_preferences')
           .eq('id', profile.id)
           .single()
@@ -125,7 +125,7 @@ export async function POST(
 
         if (prefsUpdated) {
           await serviceClient
-            .from('engineer_profiles_spa')
+            .from('engineers')
             .update({ matching_preferences: prefs })
             .eq('id', profile.id)
         }
@@ -134,7 +134,7 @@ export async function POST(
 
     trackServerEvent(user.id, feedback === 'applied' ? 'engineer_applied' : 'engineer_not_a_fit', {
       match_id: matchId,
-      engineer_profile_id: profile.id,
+      engineer_id: profile.id,
       ...(feedback === 'not_a_fit' && { category, reason: reason || undefined }),
     })
 

@@ -326,7 +326,6 @@ export interface EngineerProfileSummary {
 
 export interface EngineerProfileSpa {
   id: string
-  engineer_id: string | null
   auth_user_id: string | null
   name: string
   email: string
@@ -334,6 +333,15 @@ export interface EngineerProfileSpa {
   resume_url: string | null
   github_url: string | null
   portfolio_url: string | null
+  photo_url: string | null
+  github_username: string | null
+  focus_areas: string[] | null
+  what_excites_you: string | null
+  availability_start: string | null
+  availability_hours_per_week: number | null
+  availability_duration_weeks: number | null
+  cohort: string | null
+  is_available_for_cycles: boolean | null
   crawl_data: EngineerCrawlData | null
   crawl_error: string | null
   crawl_completed_at: string | null
@@ -401,7 +409,7 @@ export interface MatchingPreferences {
 
 export interface EngineerJobMatch {
   id: string
-  engineer_profile_id: string
+  engineer_id: string
   scanned_job_id: string
   overall_score: number
   dimension_scores: DimensionWeights

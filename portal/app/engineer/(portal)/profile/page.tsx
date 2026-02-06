@@ -13,7 +13,7 @@ export default async function EngineerProfilePage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
-    .from('engineer_profiles_spa')
+    .from('engineers')
     .select('id, name, email, status, linkedin_url, github_url, portfolio_url, resume_url, engineer_dna, profile_summary')
     .eq('auth_user_id', user.id)
     .single()

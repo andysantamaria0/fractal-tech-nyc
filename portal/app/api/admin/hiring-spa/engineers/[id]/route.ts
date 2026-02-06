@@ -9,7 +9,7 @@ export async function GET(
     const { id } = await params
 
     const { data: profile, error } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('*')
       .eq('id', id)
       .single()
@@ -33,7 +33,7 @@ export async function PATCH(
     // Allowed fields for update
     const allowedFields = [
       'name', 'email', 'github_url', 'linkedin_url', 'portfolio_url', 'resume_url',
-      'engineer_id', 'work_preferences', 'career_growth', 'strengths',
+      'work_preferences', 'career_growth', 'strengths',
       'growth_areas', 'deal_breakers', 'status',
     ]
 
@@ -49,7 +49,7 @@ export async function PATCH(
     }
 
     const { data: profile, error } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update(updates)
       .eq('id', id)
       .select()

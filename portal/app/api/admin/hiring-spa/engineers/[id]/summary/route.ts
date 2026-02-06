@@ -11,7 +11,7 @@ export async function POST(
 
     // Fetch the full engineer profile
     const { data: profile, error: fetchError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('*')
       .eq('id', id)
       .single()
@@ -32,7 +32,7 @@ export async function POST(
 
     // Save summary and update status
     const { data: updated, error: updateError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update({
         profile_summary: summary,
         status: 'complete',

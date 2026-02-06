@@ -13,7 +13,7 @@ export async function POST(
 
     // Fetch the engineer profile
     const { data: profile, error: fetchError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, github_url, portfolio_url, status')
       .eq('id', id)
       .single()
@@ -31,7 +31,7 @@ export async function POST(
 
     // Set status to crawling
     const { error: updateError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update({ status: 'crawling', crawl_error: null })
       .eq('id', id)
 

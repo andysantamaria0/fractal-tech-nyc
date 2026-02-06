@@ -303,7 +303,7 @@ export async function computeMatchesForRole(
 
   // Fetch all complete engineer profiles
   const { data: engineers, error: engineerError } = await serviceClient
-    .from('engineer_profiles_spa')
+    .from('engineers')
     .select('*')
     .eq('status', 'complete')
 

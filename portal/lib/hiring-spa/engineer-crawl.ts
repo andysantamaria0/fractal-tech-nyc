@@ -57,7 +57,7 @@ export async function runEngineerCrawlPipeline(
 
     // 4. Check if questionnaire was already completed while we were crawling
     const { data: currentProfile } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('name, questionnaire_completed_at, priority_ratings, work_preferences, career_growth, strengths, growth_areas, deal_breakers')
       .eq('id', engineerProfileId)
       .single()
@@ -66,7 +66,7 @@ export async function runEngineerCrawlPipeline(
 
     // 5. Save results — advance to 'complete' if questionnaire is already done
     const { error: saveError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update({
         crawl_data: crawlData,
         crawl_error: null,
@@ -95,7 +95,7 @@ export async function runEngineerCrawlPipeline(
           dealBreakers: currentProfile.deal_breakers,
         })
         await serviceClient
-          .from('engineer_profiles_spa')
+          .from('engineers')
           .update({ profile_summary: summary })
           .eq('id', engineerProfileId)
       } catch (summaryErr) {
@@ -120,7 +120,7 @@ export async function runEngineerCrawlPipeline(
 
     // Save error state
     await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update({
         status: 'draft',
         crawl_error: errorMessage,

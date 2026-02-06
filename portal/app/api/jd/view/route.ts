@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     } | null = null
 
     const { data: engineer } = await supabase
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id')
       .eq('email', email)
       .single()

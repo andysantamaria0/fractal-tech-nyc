@@ -11,7 +11,7 @@ export default async function EngineerMatchesPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
-    .from('engineer_profiles_spa')
+    .from('engineers')
     .select('id, status')
     .eq('auth_user_id', user.id)
     .single()
@@ -26,14 +26,14 @@ export default async function EngineerMatchesPage() {
     supabase
       .from('engineer_job_matches')
       .select('*, scanned_job:scanned_jobs(*)')
-      .eq('engineer_profile_id', profile.id)
+      .eq('engineer_id', profile.id)
       .is('feedback', null)
       .order('display_rank', { ascending: true })
       .limit(10),
     supabase
       .from('engineer_job_matches')
       .select('*', { count: 'exact', head: true })
-      .eq('engineer_profile_id', profile.id),
+      .eq('engineer_id', profile.id),
   ])
 
   return (

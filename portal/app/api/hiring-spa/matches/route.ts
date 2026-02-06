@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     // RLS ensures company can only read matches for their own roles
     const { data: matches, error } = await supabase
       .from('hiring_spa_matches')
-      .select('*, engineer:engineer_profiles_spa(*), feedback:match_feedback(*)')
+      .select('*, engineer:engineers(*), feedback:match_feedback(*)')
       .eq('role_id', roleId)
       .order('display_rank', { ascending: true })
 

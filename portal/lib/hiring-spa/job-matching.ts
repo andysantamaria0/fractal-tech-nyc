@@ -715,7 +715,7 @@ export async function computeMatchesForEngineer(
 ): Promise<{ matches: Array<{ scanned_job_id: string; overall_score: number; display_rank: number }> }> {
   // Fetch engineer profile
   const { data: engineer, error: engineerError } = await serviceClient
-    .from('engineer_profiles_spa')
+    .from('engineers')
     .select('*')
     .eq('id', engineerProfileId)
     .single()
@@ -768,7 +768,7 @@ export async function computeMatchesForEngineer(
   const { data: existingMatches } = await serviceClient
     .from('engineer_job_matches')
     .select('scanned_job_id')
-    .eq('engineer_profile_id', engineerProfileId)
+    .eq('engineer_id', engineerProfileId)
 
   const existingJobIds = new Set(
     (existingMatches || []).map(m => m.scanned_job_id),
@@ -782,7 +782,7 @@ export async function computeMatchesForEngineer(
     const { data: topExisting } = await serviceClient
       .from('engineer_job_matches')
       .select('scanned_job_id, overall_score, display_rank')
-      .eq('engineer_profile_id', engineerProfileId)
+      .eq('engineer_id', engineerProfileId)
       .is('feedback', null)
       .order('display_rank', { ascending: true })
       .limit(TOP_N)
@@ -800,7 +800,7 @@ export async function computeMatchesForEngineer(
   const { data: notAFitMatches } = await serviceClient
     .from('engineer_job_matches')
     .select('feedback_reason')
-    .eq('engineer_profile_id', engineerProfileId)
+    .eq('engineer_id', engineerProfileId)
     .eq('feedback', 'not_a_fit')
     .not('feedback_reason', 'is', null)
 
@@ -812,7 +812,7 @@ export async function computeMatchesForEngineer(
   const { data: feedbackMatches } = await serviceClient
     .from('engineer_job_matches')
     .select('feedback, dimension_scores')
-    .eq('engineer_profile_id', engineerProfileId)
+    .eq('engineer_id', engineerProfileId)
     .not('feedback', 'is', null)
 
   const feedbackHistory: FeedbackMatch[] = (feedbackMatches || [])
@@ -931,7 +931,7 @@ export async function computeMatchesForEngineer(
 
   // Upsert new matches
   const insertData = topMatches.map((m, i) => ({
-    engineer_profile_id: engineerProfileId,
+    engineer_id: engineerProfileId,
     scanned_job_id: m.job.id,
     overall_score: m.overall_score,
     dimension_scores: m.scores,
@@ -945,7 +945,7 @@ export async function computeMatchesForEngineer(
     const { error: insertError } = await serviceClient
       .from('engineer_job_matches')
       .upsert(insertData, {
-        onConflict: 'engineer_profile_id,scanned_job_id',
+        onConflict: 'engineer_id,scanned_job_id',
       })
 
     if (insertError) {

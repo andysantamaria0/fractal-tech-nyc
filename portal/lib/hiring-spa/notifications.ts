@@ -18,7 +18,7 @@ export async function notifyMatchMovedForward(
   // Fetch match with engineer
   const { data: match, error: matchError } = await serviceClient
     .from('hiring_spa_matches')
-    .select('*, engineer:engineer_profiles_spa(name, email)')
+    .select('*, engineer:engineers(name, email)')
     .eq('id', matchId)
     .single()
 
@@ -89,7 +89,7 @@ export async function notifyEngineerOfMatch(
   // Fetch match with engineer
   const { data: match, error: matchError } = await serviceClient
     .from('hiring_spa_matches')
-    .select('*, engineer:engineer_profiles_spa(name, email)')
+    .select('*, engineer:engineers(name, email)')
     .eq('id', matchId)
     .single()
 
@@ -170,7 +170,7 @@ export async function notifyEngineerMatchesReady(
   if (matchCount <= 0) return
 
   const { data: profile, error } = await serviceClient
-    .from('engineer_profiles_spa')
+    .from('engineers')
     .select('name, email')
     .eq('id', engineerProfileId)
     .single()

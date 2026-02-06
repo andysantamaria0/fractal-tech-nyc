@@ -28,7 +28,7 @@ export async function GET() {
 
     const serviceClient = await createServiceClient()
     const { data: profile } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('matching_preferences')
       .eq('auth_user_id', user.id)
       .single()
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     const serviceClient = await createServiceClient()
 
     const { data: profile } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, matching_preferences')
       .eq('auth_user_id', user.id)
       .single()
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     }
 
     const { error: updateError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update({ matching_preferences: prefs })
       .eq('id', profile.id)
 
@@ -139,7 +139,7 @@ export async function DELETE(request: Request) {
     const serviceClient = await createServiceClient()
 
     const { data: profile } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, matching_preferences')
       .eq('auth_user_id', user.id)
       .single()
@@ -159,7 +159,7 @@ export async function DELETE(request: Request) {
     )
 
     const { error: updateError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update({ matching_preferences: prefs })
       .eq('id', profile.id)
 

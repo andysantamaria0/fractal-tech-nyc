@@ -66,24 +66,19 @@ export default function EngineerOnboardPage() {
           router.push('/engineer/dashboard')
           return
         }
+        if (data.profile) {
+          setEngineer(data.profile)
+          setName(data.profile.name || '')
+          setLinkedinUrl(data.profile.linkedin_url || '')
+          setGithubUrl(data.profile.github_url || '')
+          setPortfolioUrl(data.profile.portfolio_url || '')
+          setResumeUrl(data.profile.resume_url || '')
+          setLoading(false)
+          return
+        }
       }
 
-      const { data: eng } = await supabase
-        .from('engineers')
-        .select('id, name, email, github_url, linkedin_url, portfolio_url, resume_url')
-        .eq('email', user.email!)
-        .single()
-
-      if (eng) {
-        setEngineer(eng)
-        setName(eng.name)
-        setLinkedinUrl(eng.linkedin_url || '')
-        setGithubUrl(eng.github_url || '')
-        setPortfolioUrl(eng.portfolio_url || '')
-        setResumeUrl(eng.resume_url || '')
-      } else {
-        setName(user.user_metadata?.full_name || user.email?.split('@')[0] || '')
-      }
+      setName(user.user_metadata?.full_name || user.email?.split('@')[0] || '')
       setLoading(false)
     }
     loadEngineer()
@@ -99,7 +94,6 @@ export default function EngineerOnboardPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          engineer_id: engineer?.id || null,
           name,
           linkedin_url: linkedinUrl || null,
           github_url: githubUrl || null,

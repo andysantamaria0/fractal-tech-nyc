@@ -13,7 +13,7 @@ export default async function EngineerDashboardPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
-    .from('engineer_profiles_spa')
+    .from('engineers')
     .select('id, status, linkedin_url, github_url, portfolio_url, resume_url')
     .eq('auth_user_id', user.id)
     .single()
@@ -26,7 +26,7 @@ export default async function EngineerDashboardPage() {
   const { data: matches } = await supabase
     .from('engineer_job_matches')
     .select('id, feedback, applied_at')
-    .eq('engineer_profile_id', typedProfile.id)
+    .eq('engineer_id', typedProfile.id)
 
   const weekAgo = new Date()
   weekAgo.setDate(weekAgo.getDate() - 7)

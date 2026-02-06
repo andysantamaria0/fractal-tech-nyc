@@ -15,7 +15,7 @@ export async function POST() {
 
     // Fetch profile
     const { data: profile } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, status')
       .eq('auth_user_id', user.id)
       .single()

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     // Look up profile by email
     const { data: profile, error: lookupError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, status, engineer_dna')
       .eq('email', email.trim().toLowerCase())
       .maybeSingle()
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     // Save questionnaire answers
     const { error: updateError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update({
         work_preferences: work_preferences || null,
         career_growth: career_growth || null,
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     // Update status to complete + save summary
     const { data: updatedProfile, error: finalError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update({
         profile_summary: profileSummary,
         status: 'complete',

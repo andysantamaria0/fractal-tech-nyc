@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
     // Look up engineer by email
     const { data: engineer, error: engineerError } = await supabase
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id')
       .eq('email', email)
       .single()

@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const status = searchParams.get('status')
 
     let query = serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('*')
       .order('created_at', { ascending: false })
 
@@ -29,14 +29,14 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   return withAdmin(async ({ serviceClient }) => {
     const body = await request.json()
-    const { name, email, github_url, linkedin_url, portfolio_url, resume_url, engineer_id } = body
+    const { name, email, github_url, linkedin_url, portfolio_url, resume_url } = body
 
     if (!name || !email) {
       return NextResponse.json({ error: 'name and email are required' }, { status: 400 })
     }
 
     const { data: profile, error } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .insert({
         name,
         email,
@@ -44,7 +44,6 @@ export async function POST(request: Request) {
         linkedin_url: linkedin_url || null,
         portfolio_url: portfolio_url || null,
         resume_url: resume_url || null,
-        engineer_id: engineer_id || null,
         status: 'draft',
       })
       .select()

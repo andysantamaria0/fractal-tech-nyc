@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { engineer_id, name, linkedin_url, github_url, portfolio_url, resume_url } = body
+    const { name, linkedin_url, github_url, portfolio_url, resume_url } = body
 
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
@@ -24,9 +24,9 @@ export async function POST(request: Request) {
 
     const serviceClient = await createServiceClient()
 
-    // Check if profile already exists for this auth user
+    // Check if engineer already exists for this auth user
     const { data: existing } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, status, github_url, portfolio_url')
       .eq('auth_user_id', user.id)
       .single()
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
         !(existing.github_url || existing.portfolio_url)
 
       await serviceClient
-        .from('engineer_profiles_spa')
+        .from('engineers')
         .update({
           name: name.trim(),
           linkedin_url: linkedin_url || null,
@@ -65,9 +65,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ profile: { id: existing.id } })
     }
 
-    // Check if profile exists by email (link it)
+    // Check if engineer exists by email (link auth_user_id)
     const { data: emailMatch } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, auth_user_id, status, github_url, portfolio_url')
       .eq('email', user.email!)
       .single()
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
         emailMatch.status === 'draft'
 
       await serviceClient
-        .from('engineer_profiles_spa')
+        .from('engineers')
         .update({
           auth_user_id: user.id,
           name: name.trim(),
@@ -99,11 +99,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ profile: { id: emailMatch.id } })
     }
 
-    // Create new engineer_profiles_spa record
+    // Create new engineer record (self-service signup)
     const { data: profile, error: insertError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .insert({
-        engineer_id: engineer_id || null,
         auth_user_id: user.id,
         name: name.trim(),
         email: user.email!,
@@ -142,7 +141,7 @@ export async function POST(request: Request) {
     // Trigger crawl if URLs provided
     if (github_url || portfolio_url) {
       await serviceClient
-        .from('engineer_profiles_spa')
+        .from('engineers')
         .update({ status: 'crawling' })
         .eq('id', profile.id)
 
@@ -151,7 +150,7 @@ export async function POST(request: Request) {
       })
     } else {
       await serviceClient
-        .from('engineer_profiles_spa')
+        .from('engineers')
         .update({ status: 'questionnaire' })
         .eq('id', profile.id)
     }

@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     // Check if email already exists
     const { data: existing, error: lookupError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, status, engineer_dna')
       .eq('email', email.trim().toLowerCase())
       .maybeSingle()
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       // If profile is still draft and has URLs, re-trigger crawl
       if (existing.status === 'draft' && (github_url || portfolio_url)) {
         await serviceClient
-          .from('engineer_profiles_spa')
+          .from('engineers')
           .update({
             name: name.trim(),
             github_url: github_url || null,
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     // Create new profile
     const { data: profile, error: insertError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .insert({
         name: name.trim(),
         email: email.trim().toLowerCase(),
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     // Trigger crawl if URLs provided
     if (github_url || portfolio_url) {
       await serviceClient
-        .from('engineer_profiles_spa')
+        .from('engineers')
         .update({ status: 'crawling' })
         .eq('id', profile.id)
 
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     // No URLs — skip crawl, go straight to questionnaire
     await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update({ status: 'questionnaire' })
       .eq('id', profile.id)
 
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
     const serviceClient = await createServiceClient()
 
     const { data: profile, error } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select(
         'id, status, engineer_dna, work_preferences, career_growth, strengths, growth_areas, deal_breakers',
       )

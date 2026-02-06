@@ -21,7 +21,7 @@ export default async function DevPreviewPage({
   const supabase = await createServiceClient()
 
   const { data: profile } = await supabase
-    .from('engineer_profiles_spa')
+    .from('engineers')
     .select('*')
     .eq('email', email)
     .single()
@@ -35,7 +35,7 @@ export default async function DevPreviewPage({
   const { data: matches } = await supabase
     .from('engineer_job_matches')
     .select('*, scanned_job:scanned_jobs(*)')
-    .eq('engineer_profile_id', typedProfile.id)
+    .eq('engineer_id', typedProfile.id)
     .is('feedback', null)
     .order('display_rank', { ascending: true })
     .limit(10)
@@ -43,7 +43,7 @@ export default async function DevPreviewPage({
   const { data: allMatches } = await supabase
     .from('engineer_job_matches')
     .select('id, feedback, applied_at')
-    .eq('engineer_profile_id', typedProfile.id)
+    .eq('engineer_id', typedProfile.id)
 
   const weekAgo = new Date()
   weekAgo.setDate(weekAgo.getDate() - 7)

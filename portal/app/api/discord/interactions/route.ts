@@ -58,7 +58,7 @@ async function handleStatusCommand(interaction: { data: { options?: { name: stri
     const serviceClient = await createServiceClient()
 
     const { data: profile } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, name, email, status, created_at')
       .eq('email', email)
       .single()
@@ -73,7 +73,7 @@ async function handleStatusCommand(interaction: { data: { options?: { name: stri
     const { count: matchCount } = await serviceClient
       .from('engineer_job_matches')
       .select('id', { count: 'exact', head: true })
-      .eq('engineer_profile_id', profile.id)
+      .eq('engineer_id', profile.id)
 
     return NextResponse.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -107,10 +107,10 @@ async function handleStatsCommand() {
 
     const [engineers, completeProfiles, matches, activeJobs] = await Promise.all([
       serviceClient
-        .from('engineer_profiles_spa')
+        .from('engineers')
         .select('id', { count: 'exact', head: true }),
       serviceClient
-        .from('engineer_profiles_spa')
+        .from('engineers')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'complete'),
       serviceClient

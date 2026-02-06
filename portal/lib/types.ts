@@ -15,9 +15,28 @@ export interface Engineer {
   availability_duration_weeks?: number
   linkedin_url?: string
   portfolio_url?: string
+  resume_url?: string
   cohort?: string
   is_available_for_cycles?: boolean
+  // SPA / hiring portal fields
+  auth_user_id?: string
+  crawl_data?: unknown
+  crawl_error?: string
+  crawl_completed_at?: string
+  engineer_dna?: unknown
+  work_preferences?: unknown
+  career_growth?: unknown
+  strengths?: unknown
+  growth_areas?: unknown
+  deal_breakers?: unknown
+  profile_summary?: unknown
+  status?: string
+  priority_ratings?: unknown
+  questionnaire_completed_at?: string
+  matching_preferences?: unknown
+  preferred_locations?: string[]
   created_at?: string
+  updated_at?: string
 }
 
 export interface Company {

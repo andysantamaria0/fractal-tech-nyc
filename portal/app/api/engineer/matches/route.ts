@@ -12,7 +12,7 @@ export async function GET() {
 
     // Fetch profile
     const { data: profile } = await supabase
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id')
       .eq('auth_user_id', user.id)
       .single()
@@ -25,7 +25,7 @@ export async function GET() {
     const { data: matches, error } = await supabase
       .from('engineer_job_matches')
       .select('*, scanned_job:scanned_jobs(*)')
-      .eq('engineer_profile_id', profile.id)
+      .eq('engineer_id', profile.id)
       .is('feedback', null)
       .order('display_rank', { ascending: true })
       .limit(10)

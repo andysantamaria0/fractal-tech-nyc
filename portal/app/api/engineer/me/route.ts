@@ -13,7 +13,7 @@ export async function GET() {
     }
 
     const { data: profile, error } = await supabase
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('*')
       .eq('auth_user_id', user.id)
       .single()
@@ -43,7 +43,7 @@ export async function PATCH(request: Request) {
 
     // Fetch current profile
     const { data: profile } = await supabase
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, github_url, portfolio_url')
       .eq('auth_user_id', user.id)
       .single()
@@ -65,7 +65,7 @@ export async function PATCH(request: Request) {
     // Use service client for update
     const serviceClient = await createServiceClient()
     const { error: updateError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update(updateData)
       .eq('id', profile.id)
 
@@ -81,7 +81,7 @@ export async function PATCH(request: Request) {
     // Re-trigger crawl if URLs changed
     if (urlsChanged) {
       await serviceClient
-        .from('engineer_profiles_spa')
+        .from('engineers')
         .update({ status: 'crawling', crawl_error: null })
         .eq('id', profile.id)
 

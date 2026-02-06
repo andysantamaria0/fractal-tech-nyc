@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     // Fetch profile
     const { data: profile } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .select('id, name, status, engineer_dna')
       .eq('auth_user_id', user.id)
       .single()
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     }
 
     const { error: updateError } = await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update(updatePayload)
       .eq('id', profile.id)
 
@@ -83,14 +83,14 @@ export async function POST(request: Request) {
 
     // Mark as complete immediately so the UI can proceed
     await serviceClient
-      .from('engineer_profiles_spa')
+      .from('engineers')
       .update({ status: 'complete' })
       .eq('id', profile.id)
 
     const isEditing = profile.status === 'complete'
 
     trackServerEvent(user.id, 'engineer_questionnaire_submitted', {
-      engineer_profile_id: profile.id,
+      engineer_id: profile.id,
       is_editing: isEditing,
       crawl_pending: isCrawling,
     })
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
       await serviceClient
         .from('engineer_job_matches')
         .delete()
-        .eq('engineer_profile_id', profile.id)
+        .eq('engineer_id', profile.id)
         .is('feedback', null) // keep matches with feedback for learning
     }
 
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     after(async () => {
       try {
         const { data: fullProfile } = await serviceClient
-          .from('engineer_profiles_spa')
+          .from('engineers')
           .select('*')
           .eq('id', profile.id)
           .single()
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
               dealBreakers: fullProfile.deal_breakers,
             })
             await serviceClient
-              .from('engineer_profiles_spa')
+              .from('engineers')
               .update({ profile_summary: summary })
               .eq('id', profile.id)
           } catch (summaryErr) {

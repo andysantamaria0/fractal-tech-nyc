@@ -45,7 +45,7 @@ async function getMatches(roleId: string): Promise<MatchWithEngineer[]> {
 
   const { data: matches } = await supabase
     .from('hiring_spa_matches')
-    .select('*, engineer:engineer_profiles_spa(*), feedback:match_feedback(*), challenge_submission:challenge_submissions(*)')
+    .select('*, engineer:engineers(*), feedback:match_feedback(*), challenge_submission:challenge_submissions(*)')
     .eq('role_id', roleId)
     .order('display_rank', { ascending: true })
 

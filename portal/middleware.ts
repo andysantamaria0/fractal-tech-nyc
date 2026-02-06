@@ -144,34 +144,22 @@ export async function middleware(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     )
 
-    // Check if user is an engineer first (linked profile)
-    const { data: engineerProfile } = await serviceClient
-      .from('engineer_profiles_spa')
-      .select('id')
-      .eq('auth_user_id', user.id)
+    // Check if user is an engineer (by auth_user_id or email)
+    const { data: engineer } = await serviceClient
+      .from('engineers')
+      .select('id, auth_user_id, status')
+      .or(`auth_user_id.eq.${user.id}${user.email ? `,email.eq.${user.email}` : ''}`)
       .limit(1)
       .single()
 
-    if (engineerProfile) {
+    if (engineer) {
       const url = request.nextUrl.clone()
-      url.pathname = '/engineer/dashboard'
-      return NextResponse.redirect(url)
-    }
-
-    // Check engineers table (needs onboarding)
-    if (user.email) {
-      const { data: engineer } = await serviceClient
-        .from('engineers')
-        .select('id')
-        .eq('email', user.email)
-        .limit(1)
-        .single()
-
-      if (engineer) {
-        const url = request.nextUrl.clone()
+      if (engineer.auth_user_id && engineer.status !== 'draft') {
+        url.pathname = '/engineer/dashboard'
+      } else {
         url.pathname = '/engineer/onboard'
-        return NextResponse.redirect(url)
       }
+      return NextResponse.redirect(url)
     }
 
     // Check if user has a company profile — if not, send them to complete it
