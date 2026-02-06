@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { EngineerProfileSpa } from '@/lib/hiring-spa/types'
 import EngineerProfileView from '@/components/engineer/EngineerProfileView'
 import MatchingPreferencesEditor from '@/components/engineer/MatchingPreferencesEditor'
@@ -12,7 +12,8 @@ export default async function EngineerProfilePage() {
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  const serviceClient = await createServiceClient()
+  const { data: profile } = await serviceClient
     .from('engineers')
     .select('id, name, email, status, linkedin_url, github_url, portfolio_url, resume_url, engineer_dna, profile_summary')
     .eq('auth_user_id', user.id)

@@ -12,7 +12,9 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: profile, error } = await supabase
+    // Use service client to bypass RLS for engineer lookup
+    const serviceClient = await createServiceClient()
+    const { data: profile, error } = await serviceClient
       .from('engineers')
       .select('*')
       .eq('auth_user_id', user.id)
@@ -41,8 +43,9 @@ export async function PATCH(request: Request) {
     const body = await request.json()
     const { linkedin_url, github_url, portfolio_url, resume_url } = body
 
-    // Fetch current profile
-    const { data: profile } = await supabase
+    // Fetch current profile (service client bypasses RLS)
+    const serviceClient = await createServiceClient()
+    const { data: profile } = await serviceClient
       .from('engineers')
       .select('id, github_url, portfolio_url')
       .eq('auth_user_id', user.id)
@@ -62,8 +65,6 @@ export async function PATCH(request: Request) {
       (github_url !== undefined && github_url !== profile.github_url) ||
       (portfolio_url !== undefined && portfolio_url !== profile.portfolio_url)
 
-    // Use service client for update
-    const serviceClient = await createServiceClient()
     const { error: updateError } = await serviceClient
       .from('engineers')
       .update(updateData)

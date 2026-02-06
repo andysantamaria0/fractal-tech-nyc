@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { EngineerJobMatchWithJob } from '@/lib/hiring-spa/types'
 import JobMatchList from '@/components/engineer/JobMatchList'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
@@ -10,7 +10,8 @@ export default async function EngineerMatchesPage() {
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  const serviceClient = await createServiceClient()
+  const { data: profile } = await serviceClient
     .from('engineers')
     .select('id, status')
     .eq('auth_user_id', user.id)
@@ -23,14 +24,14 @@ export default async function EngineerMatchesPage() {
   }
 
   const [{ data: matches }, { count: totalMatchCount }] = await Promise.all([
-    supabase
+    serviceClient
       .from('engineer_job_matches')
       .select('*, scanned_job:scanned_jobs(*)')
       .eq('engineer_id', profile.id)
       .is('feedback', null)
       .order('display_rank', { ascending: true })
       .limit(10),
-    supabase
+    serviceClient
       .from('engineer_job_matches')
       .select('*', { count: 'exact', head: true })
       .eq('engineer_id', profile.id),
