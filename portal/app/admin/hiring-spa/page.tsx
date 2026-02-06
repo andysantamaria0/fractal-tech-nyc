@@ -257,7 +257,7 @@ export default function AdminHiringSpaPage() {
                                 border: 'none', cursor: 'pointer',
                               }}
                             >
-                              Compute Matches
+                              {eng.stage === 'Got Matches' || eng.stage === 'Applied' ? 'Recompute' : 'Compute Matches'}
                             </button>
                           )
                         })()}
