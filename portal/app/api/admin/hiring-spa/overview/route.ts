@@ -59,6 +59,7 @@ export async function GET() {
         status: e.status,
         stage: getStage(e),
         stageIndex: stageOrder.indexOf(getStage(e)),
+        questionnaireCompletedAt: e.questionnaire_completed_at,
         createdAt: e.created_at,
       }))
       .sort((a, b) => b.stageIndex - a.stageIndex)

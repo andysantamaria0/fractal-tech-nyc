@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 interface OverviewData {
-  engineers: { id: string; name: string; email: string; status: string; stage: string; createdAt: string }[]
+  engineers: { id: string; name: string; email: string; status: string; stage: string; questionnaireCompletedAt: string | null; createdAt: string }[]
   applications: {
     total: number
     uniqueEngineers: number
@@ -172,12 +172,13 @@ export default function AdminHiringSpaPage() {
                 <th style={th}>Name</th>
                 <th style={th}>Email</th>
                 <th style={th}>Stage</th>
+                <th style={th}>Questionnaire</th>
                 <th style={th}>Signed Up</th>
               </tr>
             </thead>
             <tbody>
               {engineers.length === 0 ? (
-                <tr><td colSpan={4} style={{ ...td, color: c.mist }}>No engineers yet</td></tr>
+                <tr><td colSpan={5} style={{ ...td, color: c.mist }}>No engineers yet</td></tr>
               ) : (
                 engineers.map((eng) => {
                   const colors = stageBadgeColor(eng.stage)
@@ -186,6 +187,7 @@ export default function AdminHiringSpaPage() {
                       <td style={td}>{eng.name}</td>
                       <td style={tdMono}>{eng.email}</td>
                       <td style={td}><span style={badge(colors.bg, colors.color)}>{eng.stage}</span></td>
+                      <td style={tdMono}>{eng.questionnaireCompletedAt ? formatDate(eng.questionnaireCompletedAt) : '\u2014'}</td>
                       <td style={tdMono}>{formatDate(eng.createdAt)}</td>
                     </tr>
                   )
