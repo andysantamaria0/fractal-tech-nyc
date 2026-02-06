@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     // Mark as complete immediately so the UI can proceed
     await serviceClient
       .from('engineers')
-      .update({ status: 'complete' })
+      .update({ status: 'complete', questionnaire_completed_at: new Date().toISOString() })
       .eq('id', profile.id)
 
     const isEditing = profile.status === 'complete'

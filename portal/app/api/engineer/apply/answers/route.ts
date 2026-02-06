@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       .update({
         profile_summary: profileSummary,
         status: 'complete',
+        questionnaire_completed_at: new Date().toISOString(),
       })
       .eq('id', profile.id)
       .select('id, status, profile_summary')
