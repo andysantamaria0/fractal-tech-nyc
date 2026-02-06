@@ -66,10 +66,11 @@ export async function POST(request: Request) {
     }
 
     // Check if engineer exists by email (link auth_user_id)
+    // Use ilike for case-insensitive matching (emails may have been imported with different casing)
     const { data: emailMatch } = await serviceClient
       .from('engineers')
       .select('id, auth_user_id, status, github_url, portfolio_url')
-      .eq('email', user.email!)
+      .ilike('email', user.email!)
       .single()
 
     if (emailMatch) {
@@ -77,7 +78,13 @@ export async function POST(request: Request) {
         !emailMatch.github_url && !emailMatch.portfolio_url &&
         emailMatch.status === 'draft'
 
-      await serviceClient
+      // If no URLs to crawl and still in draft, advance to questionnaire
+      const advanceToQuestionnaire = !needsCrawl &&
+        emailMatch.status === 'draft' &&
+        !(github_url || portfolio_url) &&
+        !(emailMatch.github_url || emailMatch.portfolio_url)
+
+      const { error: updateError } = await serviceClient
         .from('engineers')
         .update({
           auth_user_id: user.id,
@@ -87,8 +94,14 @@ export async function POST(request: Request) {
           portfolio_url: portfolio_url || null,
           resume_url: resume_url || null,
           ...(needsCrawl ? { status: 'crawling' } : {}),
+          ...(advanceToQuestionnaire ? { status: 'questionnaire' } : {}),
         })
         .eq('id', emailMatch.id)
+
+      if (updateError) {
+        console.error('[engineer/onboard] Email-match update error:', updateError)
+        return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 })
+      }
 
       if (needsCrawl) {
         after(async () => {
