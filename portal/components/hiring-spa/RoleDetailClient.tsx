@@ -30,6 +30,7 @@ export default function RoleDetailClient({ role: initialRole, initialMatches = [
     !!(initialRole.jd_feedback || initialRole.dimension_weights_raw)
   )
   const feedbackDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const challengeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const updateRole = useCallback(async (updates: Record<string, unknown>) => {
     setError('')
@@ -82,8 +83,14 @@ export default function RoleDetailClient({ role: initialRole, initialMatches = [
     await updateRole({ challenge_enabled: !role.challenge_enabled })
   }, [role.challenge_enabled, updateRole])
 
-  const handleChallengePrompt = useCallback(async (prompt: string) => {
-    await updateRole({ challenge_prompt: prompt })
+  const handleChallengePrompt = useCallback((prompt: string) => {
+    setRole(prev => ({ ...prev, challenge_prompt: prompt }))
+    if (challengeDebounceRef.current) {
+      clearTimeout(challengeDebounceRef.current)
+    }
+    challengeDebounceRef.current = setTimeout(async () => {
+      await updateRole({ challenge_prompt: prompt })
+    }, 1200)
   }, [updateRole])
 
   const handleCopyLink = useCallback(() => {

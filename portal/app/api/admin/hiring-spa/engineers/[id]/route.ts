@@ -60,6 +60,10 @@ export async function PATCH(
       return NextResponse.json({ error: 'Failed to update engineer profile' }, { status: 500 })
     }
 
+    if (!profile) {
+      return NextResponse.json({ error: 'Engineer profile not found' }, { status: 404 })
+    }
+
     return NextResponse.json({ profile })
   })
 }

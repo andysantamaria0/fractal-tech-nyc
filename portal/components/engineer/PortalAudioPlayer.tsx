@@ -12,10 +12,10 @@ export default function PortalAudioPlayer() {
   const [muted, setMuted] = useState(true)
   const [needsInteraction, setNeedsInteraction] = useState(false)
 
-  // Load mute preference from localStorage on mount
+  // Load mute preference from localStorage on mount (default to muted if no preference stored)
   useEffect(() => {
     const stored = localStorage.getItem(MUTE_KEY)
-    const shouldMute = stored === 'true'
+    const shouldMute = stored === null ? true : stored === 'true'
     setMuted(shouldMute)
 
     const audio = audioRef.current

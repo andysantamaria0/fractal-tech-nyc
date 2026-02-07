@@ -79,13 +79,11 @@ export async function POST(request: Request) {
 
     const mergedContradictions = [...otherSectionContradictions, ...newContradictions]
 
-    // Save merged contradictions
-    if (mergedContradictions.length > 0) {
-      await supabase
-        .from('hiring_profiles')
-        .update({ contradictions: mergedContradictions })
-        .eq('company_id', user.id)
-    }
+    // Save merged contradictions (always update, even when empty, to clear resolved ones)
+    await supabase
+      .from('hiring_profiles')
+      .update({ contradictions: mergedContradictions })
+      .eq('company_id', user.id)
 
     return NextResponse.json({
       success: true,

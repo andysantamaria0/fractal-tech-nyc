@@ -97,6 +97,7 @@ export default function DimensionWeightSliders({ weightsRaw, onSave }: Props) {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const latestLocal = useRef(local)
+  const isInitialMount = useRef(true)
   latestLocal.current = local
 
   const handleChange = useCallback((key: keyof DimensionWeightsRaw, value: number) => {
@@ -104,8 +105,13 @@ export default function DimensionWeightSliders({ weightsRaw, onSave }: Props) {
     setSaveStatus('idle')
   }, [])
 
-  // Auto-save with 1200ms debounce
+  // Auto-save with 1200ms debounce (skip initial mount)
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
+
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
     }

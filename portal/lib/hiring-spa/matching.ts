@@ -165,9 +165,9 @@ export async function scoreEngineerForRole(
 
   // Dimension weights (for context)
   userPrompt += '## Dimension Weights (company priorities)\n\n'
-  const weights = role.dimension_weights
+  const weights = role.dimension_weights ?? { mission: 20, technical: 20, culture: 20, environment: 20, dna: 20 }
   for (const key of DIMENSION_KEYS) {
-    userPrompt += `${key}: ${weights[key]}%\n`
+    userPrompt += `${key}: ${weights[key] ?? 20}%\n`
   }
   userPrompt += '\n'
 
@@ -357,12 +357,13 @@ export async function computeMatchesForRole(
       if (belowThreshold) continue
 
       // Compute weighted overall score
-      const weights = typedRole.dimension_weights
+      const weights = typedRole.dimension_weights ?? { mission: 20, technical: 20, culture: 20, environment: 20, dna: 20 }
       let weightedSum = 0
       let weightTotal = 0
       for (const key of DIMENSION_KEYS) {
-        weightedSum += result.scores[key] * weights[key]
-        weightTotal += weights[key]
+        const w = weights[key] ?? 20
+        weightedSum += result.scores[key] * w
+        weightTotal += w
       }
       const overall_score = Math.max(0, Math.min(100, Math.round(weightedSum / (weightTotal || 1))))
 

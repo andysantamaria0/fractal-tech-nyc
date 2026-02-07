@@ -22,6 +22,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
 
+    if (!user.email) {
+      return NextResponse.json({ error: 'Email is required. Please sign up with an email address.' }, { status: 400 })
+    }
+
     const serviceClient = await createServiceClient()
 
     // Check if engineer already exists for this auth user

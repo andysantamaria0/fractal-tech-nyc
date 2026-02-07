@@ -56,8 +56,12 @@ export default function InteractiveJDView({ jd, feedback, onFeedbackChange, onRe
     onFeedbackChange(updated)
   }, [fb, onFeedbackChange])
 
-  const essential = jd.requirements.filter(r => r.category === 'essential')
-  const niceToHave = jd.requirements.filter(r => r.category === 'nice_to_have')
+  const essential = jd.requirements
+    .map((r, i) => ({ req: r, originalIndex: i }))
+    .filter(({ req }) => req.category === 'essential')
+  const niceToHave = jd.requirements
+    .map((r, i) => ({ req: r, originalIndex: i }))
+    .filter(({ req }) => req.category === 'nice_to_have')
 
   const renderRequirement = (req: typeof jd.requirements[0], globalIndex: number) => {
     const reqFb = fb.requirements[globalIndex] ?? { status: null }
@@ -167,9 +171,6 @@ export default function InteractiveJDView({ jd, feedback, onFeedbackChange, onRe
     )
   }
 
-  // Global indices: essentials 0..N-1, nice-to-have N..M-1
-  const niceStartIndex = essential.length
-
   return (
     <div>
       {/* Review hint */}
@@ -184,7 +185,7 @@ export default function InteractiveJDView({ jd, feedback, onFeedbackChange, onRe
           <>
             <span className="spa-jd-category-label">Essential</span>
             <ul className="spa-jd-requirements">
-              {essential.map((req, i) => renderRequirement(req, i))}
+              {essential.map(({ req, originalIndex }) => renderRequirement(req, originalIndex))}
             </ul>
           </>
         )}
@@ -192,7 +193,7 @@ export default function InteractiveJDView({ jd, feedback, onFeedbackChange, onRe
           <div style={{ marginTop: 20 }}>
             <span className="spa-jd-category-label">Nice to Have</span>
             <ul className="spa-jd-requirements">
-              {niceToHave.map((req, i) => renderRequirement(req, niceStartIndex + i))}
+              {niceToHave.map(({ req, originalIndex }) => renderRequirement(req, originalIndex))}
             </ul>
           </div>
         )}

@@ -32,6 +32,13 @@ export async function POST(request: Request) {
       )
     }
 
+    if (!user.email) {
+      return NextResponse.json(
+        { error: 'Email is required. Please sign up with an email address.' },
+        { status: 400 }
+      )
+    }
+
     // Input length validation
     if (name.length > 100) {
       return NextResponse.json({ error: 'Name must be 100 characters or less' }, { status: 400 })
