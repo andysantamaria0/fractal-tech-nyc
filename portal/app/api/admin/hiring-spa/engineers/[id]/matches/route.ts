@@ -3,6 +3,8 @@ import { withAdmin } from '@/lib/api/admin-helpers'
 import { computeMatchesForEngineer } from '@/lib/hiring-spa/job-matching'
 import { notifyEngineerMatchesReady } from '@/lib/hiring-spa/notifications'
 
+export const maxDuration = 60
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },

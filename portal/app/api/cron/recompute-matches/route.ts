@@ -4,6 +4,8 @@ import { sendDiscordWebhook } from '@/lib/discord'
 import { computeMatchesForEngineer } from '@/lib/hiring-spa/job-matching'
 import { notifyEngineerMatchesReady } from '@/lib/hiring-spa/notifications'
 
+export const maxDuration = 60
+
 // Cron endpoint: re-match all complete engineers against new jobs.
 // The matching function skips previously-scored jobs, so only new
 // jobs added since the last run get scored.

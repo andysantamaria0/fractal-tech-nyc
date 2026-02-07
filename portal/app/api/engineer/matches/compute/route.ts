@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { computeMatchesForEngineer } from '@/lib/hiring-spa/job-matching'
 
+export const maxDuration = 60
+
 export async function POST() {
   try {
     const supabase = await createClient()
