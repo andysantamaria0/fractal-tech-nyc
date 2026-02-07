@@ -90,32 +90,25 @@ export default function AdminHiringSpaPage() {
   const [data, setData] = useState<OverviewData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [matchState, setMatchState] = useState<Record<string, 'starting' | 'pending' | 'error'>>({})
-  const [matchError, setMatchError] = useState<Record<string, string>>({})
+  const [matchState, setMatchState] = useState<Record<string, 'computing' | 'done' | 'error'>>({})
+  const [matchResult, setMatchResult] = useState<Record<string, string>>({})
 
   async function computeMatches(engineerId: string) {
-    setMatchState((prev) => ({ ...prev, [engineerId]: 'starting' }))
-    setMatchError((prev) => { const next = { ...prev }; delete next[engineerId]; return next })
+    setMatchState((prev) => ({ ...prev, [engineerId]: 'computing' }))
+    setMatchResult((prev) => { const next = { ...prev }; delete next[engineerId]; return next })
     try {
       const res = await fetch(`/api/admin/hiring-spa/engineers/${engineerId}/matches`, { method: 'POST' })
+      const body = await res.json().catch(() => ({}))
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
         throw new Error(body.error || 'Failed to compute matches')
       }
-      setMatchState((prev) => ({ ...prev, [engineerId]: 'pending' }))
-      // Refresh immediately for the backfilled timestamp, then poll
-      // every 15s until the engineer's stage changes to "Got Matches"
+      setMatchState((prev) => ({ ...prev, [engineerId]: 'done' }))
+      setMatchResult((prev) => ({ ...prev, [engineerId]: `${body.matchCount} matches` }))
       loadData()
-      let attempts = 0
-      const poll = setInterval(async () => {
-        attempts++
-        await loadData()
-        if (attempts >= 8) clearInterval(poll) // stop after ~2 min
-      }, 15_000)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to compute matches'
       setMatchState((prev) => ({ ...prev, [engineerId]: 'error' }))
-      setMatchError((prev) => ({ ...prev, [engineerId]: msg }))
+      setMatchResult((prev) => ({ ...prev, [engineerId]: msg }))
     }
   }
 
@@ -232,19 +225,19 @@ export default function AdminHiringSpaPage() {
                       <td style={td}>
                         {eng.questionnaireCompletedAt && eng.status === 'complete' && (() => {
                           const state = matchState[eng.id]
-                          if (state === 'starting') return (
-                            <span style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.mist }}>
-                              Starting...
+                          if (state === 'computing') return (
+                            <span style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.match }}>
+                              Computing matches...
                             </span>
                           )
-                          if (state === 'pending') return (
-                            <span style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.match }}>
-                              Matches pending...
+                          if (state === 'done') return (
+                            <span style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#5a8a5a' }}>
+                              {matchResult[eng.id]}
                             </span>
                           )
                           if (state === 'error') return (
-                            <span style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#b44' }}>
-                              {matchError[eng.id] || 'Error'}
+                            <span style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#b44', maxWidth: 200, display: 'inline-block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {matchResult[eng.id] || 'Error'}
                             </span>
                           )
                           return (
