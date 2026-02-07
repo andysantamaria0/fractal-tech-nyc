@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       .from('profiles')
       .select('id, website_url, github_org, company_linkedin, has_hiring_spa_access')
       .eq('id', companyId)
-      .single()
+      .maybeSingle()
 
     if (companyError || !company) {
       return NextResponse.json({ error: 'Company not found' }, { status: 404 })

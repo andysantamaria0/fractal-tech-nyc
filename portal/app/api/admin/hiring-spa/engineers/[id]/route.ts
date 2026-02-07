@@ -12,7 +12,7 @@ export async function GET(
       .from('engineers')
       .select('*')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (error || !profile) {
       return NextResponse.json({ error: 'Engineer profile not found' }, { status: 404 })
@@ -53,7 +53,7 @@ export async function PATCH(
       .update(updates)
       .eq('id', id)
       .select()
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error('Update engineer profile error:', error)

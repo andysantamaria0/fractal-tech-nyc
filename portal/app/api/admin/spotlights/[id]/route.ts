@@ -16,7 +16,7 @@ export async function GET(
       .from('spotlight_content')
       .select('*')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !spotlight) {
       return NextResponse.json({ error: 'Spotlight not found' }, { status: 404 })
@@ -58,7 +58,7 @@ export async function PATCH(
       .update(updates)
       .eq('id', id)
       .select()
-      .single()
+      .maybeSingle()
 
     if (updateError) {
       console.error('Update spotlight error:', updateError)

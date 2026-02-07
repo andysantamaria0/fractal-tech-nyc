@@ -29,7 +29,7 @@ export default async function AdminLayout({
       .from('profiles')
       .select('name, is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.is_admin) {
       redirect('/dashboard')

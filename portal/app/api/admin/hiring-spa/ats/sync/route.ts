@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       .select('api_key, provider')
       .eq('company_id', companyId)
       .eq('provider', 'greenhouse')
-      .single()
+      .maybeSingle()
 
     if (connError || !connection) {
       return NextResponse.json(

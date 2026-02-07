@@ -17,7 +17,7 @@ export async function GET(
         preferred_engineer:engineers!feature_submissions_preferred_engineer_id_fkey (id, name)
       `)
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !submission) {
       return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
@@ -40,7 +40,7 @@ export async function PATCH(
       .from('feature_submissions')
       .select('*')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (!current) {
       return NextResponse.json({ error: 'Submission not found' }, { status: 404 })

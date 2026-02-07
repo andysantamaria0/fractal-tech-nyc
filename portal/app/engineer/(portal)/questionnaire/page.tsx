@@ -16,7 +16,7 @@ export default async function EngineerQuestionnairePage() {
     .from('engineers')
     .select('id, status, priority_ratings, work_preferences, career_growth, strengths, growth_areas, deal_breakers')
     .eq('auth_user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!profile) redirect('/engineer/onboard')
 

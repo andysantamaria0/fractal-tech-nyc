@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       .select('id')
       .eq('public_slug', slug)
       .eq('status', 'active')
-      .single()
+      .maybeSingle()
 
     if (roleError || !role) {
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       .from('engineers')
       .select('id')
       .eq('email', email)
-      .single()
+      .maybeSingle()
 
     if (engineerError || !engineer) {
       return NextResponse.json({ error: 'Engineer not found' }, { status: 404 })

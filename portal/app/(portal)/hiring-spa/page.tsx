@@ -25,7 +25,7 @@ async function getProfile(): Promise<HiringProfile | null> {
     .from('hiring_profiles')
     .select('*')
     .eq('company_id', user.id)
-    .single()
+    .maybeSingle()
 
   return profile as HiringProfile | null
 }

@@ -29,7 +29,7 @@ export async function syncGreenhouseRoles({
     .from('hiring_profiles')
     .select('id')
     .eq('company_id', companyId)
-    .single()
+    .maybeSingle()
 
   if (profileError || !profile) {
     throw new Error('Company has no hiring profile — run a crawl first')

@@ -11,7 +11,7 @@ export async function isAdmin(): Promise<boolean> {
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   return profile?.is_admin === true
 }
@@ -39,7 +39,7 @@ export async function verifyAdmin(): Promise<{ error?: NextResponse; userId?: st
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!profile?.is_admin) {
     return { error: NextResponse.json({ error: 'Not authorized' }, { status: 403 }) }

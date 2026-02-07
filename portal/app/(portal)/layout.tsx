@@ -27,7 +27,7 @@ export default async function PortalLayout({
       .from('profiles')
       .select('name, is_admin, has_hiring_spa_access')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     userName = profile?.name
     isAdmin = profile?.is_admin === true

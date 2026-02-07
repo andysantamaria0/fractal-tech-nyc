@@ -61,7 +61,7 @@ async function handleStatusCommand(interaction: { data: { options?: { name: stri
       .from('engineers')
       .select('id, name, email, status, created_at')
       .eq('email', email)
-      .single()
+      .maybeSingle()
 
     if (!profile) {
       return NextResponse.json({

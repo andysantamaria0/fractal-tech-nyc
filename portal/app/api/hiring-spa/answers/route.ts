@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       .from('hiring_profiles')
       .select('crawl_data, contradictions')
       .eq('company_id', user.id)
-      .single()
+      .maybeSingle()
 
     let newContradictions: Contradiction[] = []
 

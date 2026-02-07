@@ -20,7 +20,7 @@ export async function POST() {
       .from('profiles')
       .select('id, company_linkedin, website_url, github_org, has_hiring_spa_access')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
@@ -36,7 +36,7 @@ export async function POST() {
       .from('hiring_profiles')
       .select('status')
       .eq('company_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (existingProfile && existingProfile.status !== 'draft') {
       return NextResponse.json({

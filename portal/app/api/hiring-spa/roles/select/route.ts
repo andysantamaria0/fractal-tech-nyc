@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       .from('hiring_profiles')
       .select('id, discovered_roles, status')
       .eq('company_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile || profile.status !== 'discovering_roles') {
       return NextResponse.json({ error: 'No discovered roles available' }, { status: 400 })
@@ -88,7 +88,7 @@ export async function PATCH() {
       .from('hiring_profiles')
       .select('id, status')
       .eq('company_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile || profile.status !== 'discovering_roles') {
       return NextResponse.json({ error: 'Not in discovering_roles state' }, { status: 400 })

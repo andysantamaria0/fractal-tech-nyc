@@ -23,7 +23,7 @@ export default async function DashboardPage() {
 
     // Run independent queries in parallel
     const [cohortResult, spotlightResult, engineerResult] = await Promise.all([
-      supabase.from('cohort_settings').select('*').eq('is_active', true).single(),
+      supabase.from('cohort_settings').select('*').eq('is_active', true).maybeSingle(),
       supabase.from('spotlight_content').select('*').eq('is_active', true).order('display_order', { ascending: true }).limit(3),
       supabase.from('engineers').select('*').eq('is_available_for_cycles', true).order('created_at', { ascending: false }).limit(6),
     ])

@@ -40,7 +40,7 @@ export default function CompleteProfilePage() {
         .from('profiles')
         .select('id')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       if (profile) {
         router.push('/dashboard')

@@ -107,7 +107,7 @@ export async function ingestJob(
       .from('scanned_jobs')
       .select('id, fingerprint')
       .eq('job_url', job.job_url)
-      .single()
+      .maybeSingle()
 
     if (existingByUrl) {
       // Update last_seen_at and potentially description if newer is better
@@ -135,7 +135,7 @@ export async function ingestJob(
       .select('id, job_url, description')
       .eq('fingerprint', fingerprint)
       .eq('is_active', true)
-      .single()
+      .maybeSingle()
 
     if (existingByFingerprint) {
       // Duplicate found - update last_seen if this source has better data

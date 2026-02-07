@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       .from('engineers')
       .select('id, status, github_url, portfolio_url')
       .eq('auth_user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (existing) {
       // Update URLs and trigger crawl if needed
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       .from('engineers')
       .select('id, auth_user_id, status, github_url, portfolio_url')
       .ilike('email', user.email!)
-      .single()
+      .maybeSingle()
 
     if (emailMatch) {
       const needsCrawl = (github_url || portfolio_url) &&

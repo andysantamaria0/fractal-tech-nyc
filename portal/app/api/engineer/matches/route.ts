@@ -17,7 +17,7 @@ export async function GET() {
       .from('engineers')
       .select('id')
       .eq('auth_user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })

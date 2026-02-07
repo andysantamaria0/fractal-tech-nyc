@@ -37,7 +37,7 @@ export async function PATCH(
       })
       .eq('id', id)
       .select('*')
-      .single()
+      .maybeSingle()
 
     if (error || !match) {
       return NextResponse.json({ error: 'Match not found or update failed' }, { status: 404 })

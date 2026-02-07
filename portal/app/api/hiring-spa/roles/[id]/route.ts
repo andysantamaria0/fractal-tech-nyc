@@ -80,7 +80,7 @@ export async function GET(
       .from('hiring_roles')
       .select('*')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (error || !role) {
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })
@@ -122,7 +122,7 @@ export async function PATCH(
       .from('hiring_roles')
       .select('*')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !currentRole) {
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })

@@ -21,7 +21,7 @@ async function getRoles(): Promise<HiringRole[]> {
     .from('hiring_profiles')
     .select('id')
     .eq('company_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!profile) return []
 

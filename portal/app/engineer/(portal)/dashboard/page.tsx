@@ -18,7 +18,7 @@ export default async function EngineerDashboardPage() {
     .from('engineers')
     .select('id, status, linkedin_url, github_url, portfolio_url, resume_url')
     .eq('auth_user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!profile) redirect('/engineer/onboard')
   if (profile.status === 'draft') redirect('/engineer/onboard')

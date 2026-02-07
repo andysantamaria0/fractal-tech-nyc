@@ -31,7 +31,7 @@ export async function GET() {
       .from('engineers')
       .select('matching_preferences')
       .eq('auth_user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       .from('engineers')
       .select('id, matching_preferences')
       .eq('auth_user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
@@ -142,7 +142,7 @@ export async function DELETE(request: Request) {
       .from('engineers')
       .select('id, matching_preferences')
       .eq('auth_user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })

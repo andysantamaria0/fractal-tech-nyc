@@ -25,7 +25,7 @@ export async function POST() {
       .from('profiles')
       .select('name, email, company_linkedin, company_stage')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (profileError || !profile) {
       return NextResponse.json(

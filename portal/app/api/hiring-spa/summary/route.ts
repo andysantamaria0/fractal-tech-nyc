@@ -26,7 +26,7 @@ export async function POST() {
       .from('hiring_profiles')
       .select('company_dna, technical_environment, culture_answers, mission_answers, team_dynamics_answers, contradictions')
       .eq('company_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })

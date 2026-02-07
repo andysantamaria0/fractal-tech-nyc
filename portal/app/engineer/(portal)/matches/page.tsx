@@ -15,7 +15,7 @@ export default async function EngineerMatchesPage() {
     .from('engineers')
     .select('id, status')
     .eq('auth_user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!profile) redirect('/engineer/onboard')
 

@@ -15,7 +15,7 @@ export async function GET() {
       .from('hiring_profiles')
       .select('id, company_id, status, crawl_completed_at, company_dna, technical_environment, contradictions, culture_answers, mission_answers, team_dynamics_answers, profile_summary, created_at, updated_at')
       .eq('company_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (error || !profile) {
       return NextResponse.json({ profile: null })

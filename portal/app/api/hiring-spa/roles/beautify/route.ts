@@ -34,7 +34,7 @@ export async function POST(request: Request) {
           .from('hiring_roles')
           .select('*')
           .eq('id', rid)
-          .single()
+          .maybeSingle()
 
         if (batchRoleError || !batchRole) continue
         const typedBatchRole = batchRole as HiringRole
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
           .from('hiring_profiles')
           .select('company_dna, technical_environment, profile_summary')
           .eq('id', typedBatchRole.hiring_profile_id)
-          .single()
+          .maybeSingle()
 
         const batchExtracted = await extractFromText(typedBatchRole.title, typedBatchRole.source_content)
         const batchBeautified = await beautifyJD({
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       .from('hiring_roles')
       .select('*')
       .eq('id', role_id)
-      .single()
+      .maybeSingle()
 
     if (roleError || !role) {
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
       .from('hiring_profiles')
       .select('company_dna, technical_environment, profile_summary')
       .eq('id', typedRole.hiring_profile_id)
-      .single()
+      .maybeSingle()
 
     // Build extracted JD from stored content
     const extracted = await extractFromText(typedRole.title, typedRole.source_content)

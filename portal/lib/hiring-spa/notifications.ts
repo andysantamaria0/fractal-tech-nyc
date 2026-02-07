@@ -52,7 +52,7 @@ export async function notifyMatchMovedForward(
     .from('profiles')
     .select('company_name')
     .eq('id', profile.company_id)
-    .single()
+    .maybeSingle()
 
   const companyName = companyProfile?.company_name || 'Unknown Company'
   const rawEngineer = match.engineer as { name: string } | { name: string }[] | null
@@ -129,7 +129,7 @@ export async function notifyEngineerOfMatch(
     .from('profiles')
     .select('company_name')
     .eq('id', profile.company_id)
-    .single()
+    .maybeSingle()
 
   const companyName = companyProfile?.company_name || 'Unknown Company'
   const rawEngineer2 = match.engineer as { name: string; email: string } | { name: string; email: string }[] | null

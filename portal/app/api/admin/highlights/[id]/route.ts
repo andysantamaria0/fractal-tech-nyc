@@ -16,7 +16,7 @@ export async function GET(
       .from('weekly_highlights')
       .select('*')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !highlight) {
       return NextResponse.json({ error: 'Highlight not found' }, { status: 404 })
@@ -58,7 +58,7 @@ export async function PATCH(
       .update(updates)
       .eq('id', id)
       .select()
-      .single()
+      .maybeSingle()
 
     if (updateError) {
       console.error('Update highlight error:', updateError)

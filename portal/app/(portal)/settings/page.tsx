@@ -31,7 +31,7 @@ export default function SettingsPage() {
           .from('profiles')
           .select('newsletter_optin, is_admin')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
 
         if (profile) {
           setNewsletterOptin(profile.newsletter_optin ?? false)

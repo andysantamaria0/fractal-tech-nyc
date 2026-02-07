@@ -12,7 +12,7 @@ export async function GET(
       .from('profiles')
       .select('id, name, email, company_name, company_linkedin, company_stage, newsletter_optin, hubspot_contact_id, hubspot_company_id, has_hiring_spa_access, website_url, github_org, created_at')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !company) {
       return NextResponse.json({ error: 'Company not found' }, { status: 404 })
@@ -40,7 +40,7 @@ export async function PATCH(
       .update(updates)
       .eq('id', id)
       .select('id, name, email, company_name, company_linkedin, company_stage, newsletter_optin, hubspot_contact_id, hubspot_company_id, has_hiring_spa_access, website_url, github_org, created_at')
-      .single()
+      .maybeSingle()
 
     if (updateError) {
       console.error('Update company error:', updateError)

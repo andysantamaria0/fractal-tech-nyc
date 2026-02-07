@@ -31,7 +31,7 @@ export async function POST(
       .from('challenge_submissions')
       .select('id, auto_score')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !submission) {
       return NextResponse.json({ error: 'Submission not found' }, { status: 404 })

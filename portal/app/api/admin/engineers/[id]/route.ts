@@ -20,7 +20,7 @@ export async function PATCH(
       .update(updates)
       .eq('id', id)
       .select()
-      .single()
+      .maybeSingle()
 
     if (updateError) {
       console.error('Update engineer error:', updateError)

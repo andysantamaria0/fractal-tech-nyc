@@ -48,7 +48,7 @@ export default function EngineerProfilePage() {
         .from('engineers')
         .select('*')
         .eq('email', user.email!)
-        .single()
+        .maybeSingle()
 
       if (engineer) {
         setIsNew(false)

@@ -20,7 +20,7 @@ export async function GET(
       .from('match_feedback')
       .select('*')
       .eq('match_id', id)
-      .single()
+      .maybeSingle()
 
     return NextResponse.json({ feedback: (feedback as MatchFeedback) || null })
   } catch (error) {

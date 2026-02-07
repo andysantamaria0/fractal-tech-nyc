@@ -16,7 +16,7 @@ export async function POST(
       .from('engineers')
       .select('id, github_url, portfolio_url, status')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !profile) {
       return NextResponse.json({ error: 'Engineer profile not found' }, { status: 404 })

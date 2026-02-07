@@ -24,7 +24,7 @@ export default async function DevPreviewPage({
     .from('engineers')
     .select('*')
     .eq('email', email)
-    .single()
+    .maybeSingle()
 
   if (!profile) {
     return <div style={{ padding: 48, fontFamily: f.serif, color: c.charcoal }}>No profile found for {email}</div>

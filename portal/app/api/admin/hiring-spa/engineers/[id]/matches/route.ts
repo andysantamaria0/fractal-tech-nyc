@@ -16,7 +16,7 @@ export async function GET(
       .from('engineers')
       .select('id, name, email')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (engErr || !engineer) {
       return NextResponse.json({ error: 'Engineer not found' }, { status: 404 })
@@ -79,7 +79,7 @@ export async function POST(
       .from('engineers')
       .select('id, name, status, questionnaire_completed_at, priority_ratings')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (error || !engineer) {
       return NextResponse.json({ error: 'Engineer not found' }, { status: 404 })

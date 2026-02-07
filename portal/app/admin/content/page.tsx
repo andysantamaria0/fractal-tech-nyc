@@ -82,7 +82,7 @@ export default function AdminContentPage() {
         .from('cohort_settings')
         .select('*')
         .eq('is_active', true)
-        .single()
+        .maybeSingle()
 
       if (activeCohort) {
         setCohortStartDate(activeCohort.start_date)

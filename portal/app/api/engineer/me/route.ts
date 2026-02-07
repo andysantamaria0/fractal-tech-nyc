@@ -18,9 +18,9 @@ export async function GET() {
       .from('engineers')
       .select('*')
       .eq('auth_user_id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
@@ -49,7 +49,7 @@ export async function PATCH(request: Request) {
       .from('engineers')
       .select('id, github_url, portfolio_url')
       .eq('auth_user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })

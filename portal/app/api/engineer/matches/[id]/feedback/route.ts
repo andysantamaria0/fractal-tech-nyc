@@ -29,7 +29,7 @@ export async function POST(
       .from('engineers')
       .select('id')
       .eq('auth_user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
@@ -39,7 +39,7 @@ export async function POST(
       .from('engineer_job_matches')
       .select('id, engineer_id')
       .eq('id', matchId)
-      .single()
+      .maybeSingle()
 
     if (!match || match.engineer_id !== profile.id) {
       return NextResponse.json({ error: 'Match not found' }, { status: 404 })
@@ -87,7 +87,7 @@ export async function POST(
           .from('scanned_jobs')
           .select('location, company_name, company_domain')
           .eq('id', matchData.scanned_job_id)
-          .single()
+          .maybeSingle()
         job = data
       }
 

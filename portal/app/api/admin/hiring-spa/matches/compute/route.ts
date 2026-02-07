@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       .from('hiring_roles')
       .select('id, beautified_jd, status')
       .eq('id', role_id)
-      .single()
+      .maybeSingle()
 
     if (roleError || !role) {
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })

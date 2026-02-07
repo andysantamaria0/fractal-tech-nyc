@@ -37,7 +37,7 @@ export default async function EngineerPortalLayout({
       .from('engineers')
       .select('id, name')
       .eq('auth_user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!engineerProfile) {
       redirect('/engineer/onboard')

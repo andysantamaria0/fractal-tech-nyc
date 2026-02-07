@@ -17,7 +17,7 @@ export async function GET() {
       .from('hiring_profiles')
       .select('id')
       .eq('company_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile) {
       return NextResponse.json({ roles: [] })
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       .from('hiring_profiles')
       .select('id')
       .eq('company_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile) {
       return NextResponse.json({ error: 'No hiring profile found. Complete your profile first.' }, { status: 400 })

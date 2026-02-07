@@ -30,7 +30,7 @@ async function getRole(id: string): Promise<HiringRole | null> {
     .from('hiring_roles')
     .select('*')
     .eq('id', id)
-    .single()
+    .maybeSingle()
 
   return (role as HiringRole) || null
 }

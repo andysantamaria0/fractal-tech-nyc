@@ -110,7 +110,7 @@ export async function middleware(request: NextRequest) {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.is_admin) {
       const url = request.nextUrl.clone()
@@ -125,7 +125,7 @@ export async function middleware(request: NextRequest) {
       .from('profiles')
       .select('has_hiring_spa_access')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.has_hiring_spa_access) {
       const url = request.nextUrl.clone()
@@ -190,7 +190,7 @@ export async function middleware(request: NextRequest) {
       .from('profiles')
       .select('id')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     const url = request.nextUrl.clone()
     url.pathname = profile ? '/dashboard' : '/complete-profile'

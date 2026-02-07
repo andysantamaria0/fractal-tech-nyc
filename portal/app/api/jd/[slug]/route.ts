@@ -15,7 +15,7 @@ export async function GET(
       .select('id, title, public_slug, status')
       .eq('public_slug', slug)
       .eq('status', 'active')
-      .single()
+      .maybeSingle()
 
     if (error || !role) {
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })
@@ -34,14 +34,14 @@ export async function GET(
         .from('hiring_profiles')
         .select('company_id')
         .eq('id', hiringRole.hiring_profile_id)
-        .single()
+        .maybeSingle()
 
       if (hiringProfile) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('company_name')
           .eq('id', hiringProfile.company_id)
-          .single()
+          .maybeSingle()
 
         companyName = profile?.company_name || ''
       }

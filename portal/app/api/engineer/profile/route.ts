@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       .from('engineers')
       .select('id')
       .eq('email', user.email!)
-      .single()
+      .maybeSingle()
 
     const engineerData = {
       name,

@@ -31,7 +31,7 @@ async function handleCohortUpdate(request: Request) {
       .from('cohort_settings')
       .select('*')
       .eq('is_active', true)
-      .single()
+      .maybeSingle()
 
     if (!cohort) {
       return NextResponse.json({ error: 'No active cohort' }, { status: 404 })
@@ -63,7 +63,7 @@ async function handleCohortUpdate(request: Request) {
       .select('title, description')
       .eq('week_number', currentWeek)
       .eq('cohort_start_date', cohort.start_date)
-      .single()
+      .maybeSingle()
 
     // Get engineer count
     const { count: engineerCount } = await serviceClient

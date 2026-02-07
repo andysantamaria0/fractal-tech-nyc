@@ -76,7 +76,7 @@ export async function POST(request: Request) {
         .from('profiles')
         .select('name, hubspot_contact_id, hubspot_company_id')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       if (profile) {
         const noteContent = [
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
         .from('profiles')
         .select('name, email')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       if (userProfile?.email && process.env.RESEND_API_KEY) {
         const resend = new Resend(process.env.RESEND_API_KEY)

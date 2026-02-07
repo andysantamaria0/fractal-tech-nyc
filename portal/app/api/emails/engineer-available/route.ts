@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.is_admin) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       .from('engineers')
       .select('name, focus_areas, what_excites_you')
       .eq('id', engineer_id)
-      .single()
+      .maybeSingle()
 
     if (!engineer) {
       return NextResponse.json({ error: 'Engineer not found' }, { status: 404 })

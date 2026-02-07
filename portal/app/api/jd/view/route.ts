@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       .select('id, title, beautified_jd, status, challenge_enabled, challenge_prompt')
       .eq('public_slug', slug)
       .eq('status', 'active')
-      .single()
+      .maybeSingle()
 
     if (error || !role) {
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
       .from('engineers')
       .select('id')
       .eq('email', email)
-      .single()
+      .maybeSingle()
 
     if (engineer) {
       const { data: match } = await supabase
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
         .select('id, overall_score, dimension_scores, highlight_quote, challenge_response, engineer_decision, engineer_notified_at')
         .eq('role_id', role.id)
         .eq('engineer_id', engineer.id)
-        .single()
+        .maybeSingle()
 
       if (match) {
         matchData = {

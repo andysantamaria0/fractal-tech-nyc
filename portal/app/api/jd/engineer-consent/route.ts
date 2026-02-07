@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       .from('hiring_roles')
       .select('id, title, hiring_profile_id')
       .eq('public_slug', slug)
-      .single()
+      .maybeSingle()
 
     if (roleError || !role) {
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       .from('engineers')
       .select('id, name')
       .eq('email', email)
-      .single()
+      .maybeSingle()
 
     if (engineerError || !engineer) {
       return NextResponse.json({ error: 'Engineer not found' }, { status: 404 })
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       .select('id, engineer_notified_at')
       .eq('role_id', role.id)
       .eq('engineer_id', engineer.id)
-      .single()
+      .maybeSingle()
 
     if (matchError || !match) {
       return NextResponse.json({ error: 'Match not found' }, { status: 404 })
@@ -80,13 +80,13 @@ export async function POST(request: Request) {
         .from('hiring_profiles')
         .select('company_id')
         .eq('id', role.hiring_profile_id)
-        .single()
+        .maybeSingle()
 
       const { data: companyProfile } = await supabase
         .from('profiles')
         .select('company_name')
         .eq('id', profile?.company_id)
-        .single()
+        .maybeSingle()
 
       const companyName = companyProfile?.company_name || 'Unknown Company'
       const engineerName = engineer.name || 'Unknown Engineer'

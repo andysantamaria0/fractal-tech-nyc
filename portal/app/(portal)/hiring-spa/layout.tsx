@@ -25,7 +25,7 @@ export default async function HiringSpaLayout({
       .from('profiles')
       .select('has_hiring_spa_access')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.has_hiring_spa_access) {
       redirect('/dashboard')
