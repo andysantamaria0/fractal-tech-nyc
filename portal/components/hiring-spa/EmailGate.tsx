@@ -1,13 +1,10 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import type { BeautifiedJD, DimensionWeights } from '@/lib/hiring-spa/types'
+import type { BeautifiedJD } from '@/lib/hiring-spa/types'
 
 export interface MatchData {
-  id: string
   overall_score: number
-  dimension_scores: DimensionWeights
-  highlight_quote: string | null
   challenge_response: string | null
   engineer_decision: 'interested' | 'not_interested' | null
   engineer_notified_at: string | null
