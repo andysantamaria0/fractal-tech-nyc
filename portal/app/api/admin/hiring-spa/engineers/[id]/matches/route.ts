@@ -58,12 +58,22 @@ export async function GET(
   })
 }
 
+// Prevent concurrent match computations for the same engineer
+const computingSet = new Set<string>()
+
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   return withAdmin(async ({ serviceClient }) => {
     const { id } = await params
+
+    if (computingSet.has(id)) {
+      return NextResponse.json(
+        { error: 'Match computation already in progress for this engineer' },
+        { status: 409 },
+      )
+    }
 
     const { data: engineer, error } = await serviceClient
       .from('engineers')
@@ -97,6 +107,7 @@ export async function POST(
         .eq('id', id)
     }
 
+    computingSet.add(id)
     try {
       const result = await computeMatchesForEngineer(id, serviceClient)
       if (result.matches.length > 0) {
@@ -115,6 +126,8 @@ export async function POST(
         { error: `Match computation failed: ${msg}` },
         { status: 500 },
       )
+    } finally {
+      computingSet.delete(id)
     }
   })
 }

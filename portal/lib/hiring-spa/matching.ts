@@ -258,10 +258,24 @@ export async function scoreEngineerForRole(
     jsonStr = fenceMatch[1].trim()
   }
 
-  const parsed = JSON.parse(jsonStr) as ScoreResult
+  let parsed: ScoreResult
+  try {
+    parsed = JSON.parse(jsonStr) as ScoreResult
+  } catch {
+    throw new Error(`Failed to parse scoring JSON: ${jsonStr.slice(0, 200)}`)
+  }
 
   if (!parsed.scores || !parsed.reasoning || !parsed.highlight_quote) {
     throw new Error('Match score output missing required fields')
+  }
+
+  // Clamp all dimension scores to [0, 100]
+  for (const key of DIMENSION_KEYS) {
+    if (typeof parsed.scores[key] === 'number') {
+      parsed.scores[key] = Math.max(0, Math.min(100, Math.round(parsed.scores[key])))
+    } else {
+      parsed.scores[key] = 0
+    }
   }
 
   return parsed
@@ -350,7 +364,7 @@ export async function computeMatchesForRole(
         weightedSum += result.scores[key] * weights[key]
         weightTotal += weights[key]
       }
-      const overall_score = Math.round(weightedSum / (weightTotal || 1))
+      const overall_score = Math.max(0, Math.min(100, Math.round(weightedSum / (weightTotal || 1))))
 
       scored.push({
         engineer,

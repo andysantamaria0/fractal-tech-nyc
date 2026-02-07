@@ -79,11 +79,15 @@ export async function POST(
         .eq('id', matchId)
         .single()
 
-      const { data: job } = matchData ? await serviceClient
-        .from('scanned_jobs')
-        .select('location, company_name, company_domain')
-        .eq('id', matchData.scanned_job_id)
-        .single() : { data: null }
+      let job: { location: string | null; company_name: string | null; company_domain: string | null } | null = null
+      if (matchData?.scanned_job_id) {
+        const { data } = await serviceClient
+          .from('scanned_jobs')
+          .select('location, company_name, company_domain')
+          .eq('id', matchData.scanned_job_id)
+          .single()
+        job = data
+      }
 
       if (job) {
         // Fetch current preferences
@@ -115,7 +119,7 @@ export async function POST(
           }
         }
 
-        if (category === 'company_not_interesting') {
+        if (category === 'company_not_interesting' && job.company_domain) {
           if (!prefs.excluded_company_domains.includes(job.company_domain)) {
             prefs.excluded_company_domains.push(job.company_domain)
             prefsUpdated = true

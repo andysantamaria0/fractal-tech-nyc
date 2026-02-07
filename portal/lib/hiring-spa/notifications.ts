@@ -55,7 +55,9 @@ export async function notifyMatchMovedForward(
     .single()
 
   const companyName = companyProfile?.company_name || 'Unknown Company'
-  const engineerName = (match.engineer as { name: string })?.name || 'Unknown Engineer'
+  const rawEngineer = match.engineer as { name: string } | { name: string }[] | null
+  const engineerObj = Array.isArray(rawEngineer) ? rawEngineer[0] : rawEngineer
+  const engineerName = engineerObj?.name || 'Unknown Engineer'
   const dimensionScores = match.dimension_scores as DimensionWeights
 
   const html = MatchMovedForwardEmail({
@@ -70,12 +72,17 @@ export async function notifyMatchMovedForward(
   // Send to Fractal team
   const fractalEmail = process.env.FRACTAL_NOTIFICATION_EMAIL || 'team@fractaltech.nyc'
 
-  await resend.emails.send({
-    from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
-    to: fractalEmail,
-    subject: `${companyName} wants to move forward with ${engineerName} for ${role.title}`,
-    html,
-  })
+  try {
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
+      to: fractalEmail,
+      subject: `${companyName} wants to move forward with ${engineerName} for ${role.title}`,
+      html,
+    })
+  } catch (err) {
+    console.error(`[notifications] Failed to send match-moved-forward email for match ${matchId}:`, err)
+    throw err
+  }
 }
 
 /**
@@ -125,7 +132,8 @@ export async function notifyEngineerOfMatch(
     .single()
 
   const companyName = companyProfile?.company_name || 'Unknown Company'
-  const engineer = match.engineer as { name: string; email: string }
+  const rawEngineer2 = match.engineer as { name: string; email: string } | { name: string; email: string }[] | null
+  const engineer = Array.isArray(rawEngineer2) ? rawEngineer2[0] : rawEngineer2
   const engineerEmail = engineer?.email
 
   if (!engineerEmail) {
@@ -143,12 +151,17 @@ export async function notifyEngineerOfMatch(
     jdUrl,
   })
 
-  await resend.emails.send({
-    from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
-    to: engineerEmail,
-    subject: `${companyName} is interested in you for ${role.title}`,
-    html,
-  })
+  try {
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
+      to: engineerEmail,
+      subject: `${companyName} is interested in you for ${role.title}`,
+      html,
+    })
+  } catch (err) {
+    console.error(`[notifications] Failed to send engineer-of-match email for match ${matchId}:`, err)
+    throw err
+  }
 
   // Mark engineer as notified
   await serviceClient
@@ -192,12 +205,17 @@ export async function notifyEngineerMatchesReady(
     dashboardUrl,
   })
 
-  await resend.emails.send({
-    from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
-    to: profile.email,
-    subject: `Your top ${matchCount} job match${matchCount === 1 ? '' : 'es'} ${matchCount === 1 ? 'is' : 'are'} ready`,
-    html,
-  })
+  try {
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'Fractal <portal@fractaltech.nyc>',
+      to: profile.email,
+      subject: `Your top ${matchCount} job match${matchCount === 1 ? '' : 'es'} ${matchCount === 1 ? 'is' : 'are'} ready`,
+      html,
+    })
+  } catch (err) {
+    console.error(`[notifications] Failed to send matches-ready email to ${profile.email}:`, err)
+    throw err
+  }
 
   console.log(`[notifications] Sent matches-ready email to ${profile.email} (${matchCount} matches)`)
 }

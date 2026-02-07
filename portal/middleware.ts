@@ -149,13 +149,24 @@ export async function middleware(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     )
 
-    // Check if user is an engineer (by auth_user_id or email)
-    const { data: engineer } = await serviceClient
+    // Check if user is an engineer (by auth_user_id first, then email)
+    let engineer: { id: string; auth_user_id: string | null; status: string } | null = null
+    const { data: byAuthId } = await serviceClient
       .from('engineers')
       .select('id, auth_user_id, status')
-      .or(`auth_user_id.eq.${user.id}${user.email ? `,email.ilike.${user.email}` : ''}`)
+      .eq('auth_user_id', user.id)
       .limit(1)
-      .single()
+      .maybeSingle()
+    engineer = byAuthId
+    if (!engineer && user.email) {
+      const { data: byEmail } = await serviceClient
+        .from('engineers')
+        .select('id, auth_user_id, status')
+        .ilike('email', user.email)
+        .limit(1)
+        .maybeSingle()
+      engineer = byEmail
+    }
 
     if (engineer) {
       const url = request.nextUrl.clone()

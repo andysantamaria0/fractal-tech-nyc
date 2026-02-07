@@ -57,13 +57,24 @@ export async function GET(request: Request) {
           process.env.SUPABASE_SERVICE_ROLE_KEY!,
         )
 
-        // Check engineers table by auth_user_id or email
-        const { data: engineer } = await serviceClient
+        // Check engineers table by auth_user_id first, then email
+        let engineer: { id: string; auth_user_id: string | null; status: string } | null = null
+        const { data: byAuthId } = await serviceClient
           .from('engineers')
           .select('id, auth_user_id, status')
-          .or(`auth_user_id.eq.${user.id},email.ilike.${user.email}`)
+          .eq('auth_user_id', user.id)
           .limit(1)
-          .single()
+          .maybeSingle()
+        engineer = byAuthId
+        if (!engineer && user.email) {
+          const { data: byEmail } = await serviceClient
+            .from('engineers')
+            .select('id, auth_user_id, status')
+            .ilike('email', user.email)
+            .limit(1)
+            .maybeSingle()
+          engineer = byEmail
+        }
 
         if (engineer) {
           // Link auth_user_id if not already set
@@ -117,12 +128,18 @@ export async function GET(request: Request) {
   return NextResponse.redirect(`${origin}/login?error=auth`)
 }
 
+const ALLOWED_HOSTS = new Set([
+  'partners.fractaltech.nyc',
+  'eng.fractaltech.nyc',
+  'fractal-partners-portal.vercel.app',
+])
+
 function buildRedirect(request: Request, origin: string, path: string) {
   const forwardedHost = request.headers.get('x-forwarded-host')
   const isLocalEnv = process.env.NODE_ENV === 'development'
   if (isLocalEnv) {
     return NextResponse.redirect(`${origin}${path}`)
-  } else if (forwardedHost) {
+  } else if (forwardedHost && ALLOWED_HOSTS.has(forwardedHost)) {
     return NextResponse.redirect(`https://${forwardedHost}${path}`)
   } else {
     return NextResponse.redirect(`${origin}${path}`)

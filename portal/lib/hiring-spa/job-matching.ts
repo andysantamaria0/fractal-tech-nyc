@@ -827,7 +827,7 @@ export async function computeMatchesForEngineer(
           learnedAdjustments,
         )
         const recencyBoost = getRecencyBoost(job)
-        const overall_score = Math.min(100, baseScore + recencyBoost)
+        const overall_score = Math.max(0, Math.min(100, baseScore + recencyBoost))
 
         return {
           job,
