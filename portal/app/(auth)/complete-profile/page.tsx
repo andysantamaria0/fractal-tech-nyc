@@ -52,6 +52,13 @@ export default function CompleteProfilePage() {
     checkAuth()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  function normalizeUrl(value: string): string {
+    const trimmed = value.trim()
+    if (!trimmed) return ''
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+    return `https://${trimmed}`
+  }
+
   async function handleProfileSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -64,17 +71,20 @@ export default function CompleteProfilePage() {
       return
     }
 
+    const normalizedWebsite = normalizeUrl(websiteUrl)
+    const normalizedLinkedin = normalizeUrl(companyLinkedin)
+
     // Upsert profile to handle retries gracefully
     const profileData: Record<string, unknown> = {
       id: user.id,
       name,
       email: user.email!,
-      company_linkedin: companyLinkedin,
+      company_linkedin: normalizedLinkedin,
       company_stage: companyStage,
       newsletter_optin: newsletterOptin,
     }
-    if (websiteUrl) {
-      profileData.website_url = websiteUrl
+    if (normalizedWebsite) {
+      profileData.website_url = normalizedWebsite
     }
 
     const { error: profileError } = await supabase.from('profiles').upsert(profileData)
@@ -169,7 +179,7 @@ export default function CompleteProfilePage() {
                 <label htmlFor="companyLinkedin">Company LinkedIn URL *</label>
                 <input
                   id="companyLinkedin"
-                  type="url"
+                  type="text"
                   className="form-input"
                   placeholder="https://linkedin.com/company/..."
                   value={companyLinkedin}
@@ -182,7 +192,7 @@ export default function CompleteProfilePage() {
                 <label htmlFor="websiteUrl">Company Website</label>
                 <input
                   id="websiteUrl"
-                  type="url"
+                  type="text"
                   className="form-input"
                   placeholder="https://yourcompany.com"
                   value={websiteUrl}

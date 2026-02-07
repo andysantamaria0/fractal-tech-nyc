@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Engineer } from '@/lib/types'
 
 const PAGE_SIZE = 20
@@ -23,9 +23,11 @@ export default function EngineersTable({ engineers, onSelect, selectedId, onTogg
   const pageEngineers = engineers.slice(start, start + PAGE_SIZE)
 
   // Reset to page 1 if filters change and current page is out of range
-  if (page > totalPages && totalPages > 0) {
-    setPage(1)
-  }
+  useEffect(() => {
+    if (page > totalPages && totalPages > 0) {
+      setPage(1)
+    }
+  }, [page, totalPages])
 
   if (engineers.length === 0) {
     return (

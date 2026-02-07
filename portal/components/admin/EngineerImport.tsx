@@ -228,13 +228,20 @@ export default function EngineerImport({ onImported }: { onImported?: () => void
 
     const reader = new FileReader()
     reader.onload = (evt) => {
-      const text = evt.target?.result as string
+      const text = evt.target?.result
+      if (typeof text !== 'string') {
+        setError('Failed to read file contents')
+        return
+      }
       const parsed = parseCSV(text)
       if (parsed.length === 0) {
         setError('No data rows found. Ensure CSV has a header row with at least: name/Full name, email, github/Github')
         return
       }
       setRows(parsed.map(validateRow))
+    }
+    reader.onerror = () => {
+      setError('Failed to read file')
     }
     reader.readAsText(file)
   }

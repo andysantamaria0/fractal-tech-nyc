@@ -58,6 +58,8 @@ export async function POST(
 
     if (feedback === 'applied') {
       updateData.applied_at = now
+      updateData.feedback_category = null
+      updateData.feedback_reason = null
     }
 
     const { error: updateError } = await serviceClient

@@ -8,6 +8,7 @@ export async function GET() {
       .from('engineers')
       .select('*')
       .order('name')
+      .limit(1000)
 
     if (fetchError) {
       console.error('Fetch engineers error:', fetchError)

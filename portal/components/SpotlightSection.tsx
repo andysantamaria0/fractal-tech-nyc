@@ -17,6 +17,16 @@ export default function SpotlightSection({
 }) {
   if (items.length === 0) return null
 
+  function isValidEmbedUrl(url: string | undefined): boolean {
+    if (!url) return false
+    try {
+      const parsed = new URL(url)
+      return parsed.protocol === 'https:'
+    } catch {
+      return false
+    }
+  }
+
   function handleVideoPlay(item: SpotlightItem) {
     trackEvent('spotlight_video_played', {
       content_id: item.id,
@@ -30,7 +40,7 @@ export default function SpotlightSection({
       <div className="window-content" style={{ padding: 0 }}>
         {items.map((item) => (
           <div key={item.id} className="spotlight-content">
-            {item.content_type === 'video' && item.content_url && (
+            {item.content_type === 'video' && isValidEmbedUrl(item.content_url) && (
               <>
                 <div
                   className="spotlight-video-wrapper"
@@ -72,7 +82,7 @@ export default function SpotlightSection({
                 </p>
               </>
             )}
-            {item.content_type === 'embed' && item.content_url && (
+            {item.content_type === 'embed' && isValidEmbedUrl(item.content_url) && (
               <>
                 <div className="spotlight-video-wrapper">
                   <iframe

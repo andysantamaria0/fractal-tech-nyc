@@ -12,13 +12,21 @@ export async function GET() {
   // Use service client to bypass RLS for cross-table lookups
   const serviceClient = await createServiceClient()
 
-  // Check engineers table (by auth_user_id or email)
-  const { data: engineer } = await serviceClient
+  // Check engineers table (by auth_user_id or email) — use sequential queries to avoid .or() injection
+  const { data: engineerById } = await serviceClient
     .from('engineers')
     .select('id')
-    .or(`auth_user_id.eq.${user.id},email.eq.${user.email}`)
+    .eq('auth_user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
+
+  const engineer = engineerById ?? (user.email ? (await serviceClient
+    .from('engineers')
+    .select('id')
+    .eq('email', user.email)
+    .limit(1)
+    .maybeSingle()
+  ).data : null)
 
   if (engineer) {
     return NextResponse.json({ userType: 'engineer' })

@@ -59,13 +59,11 @@ export async function POST(request: Request) {
     }
 
     // Get the company's hiring profile
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile } = await supabase
       .from('hiring_profiles')
       .select('id')
       .eq('company_id', user.id)
       .single()
-
-    console.log('POST /roles — user.id:', user.id, 'user.email:', user.email, 'profile:', profile, 'error:', profileError?.message)
 
     if (!profile) {
       return NextResponse.json({ error: 'No hiring profile found. Complete your profile first.' }, { status: 400 })
