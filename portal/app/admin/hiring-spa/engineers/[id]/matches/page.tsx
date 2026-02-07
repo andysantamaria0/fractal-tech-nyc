@@ -96,7 +96,7 @@ function feedbackBadge(match: MatchRow) {
 function scoreCell(score: number) {
   return (
     <td style={{ ...tdMono, textAlign: 'center' }}>
-      {(score * 100).toFixed(0)}
+      {Math.round(score)}
     </td>
   )
 }
@@ -220,7 +220,7 @@ export default function AdminEngineerMatchesPage() {
                     <td style={td}>{m.companyName}</td>
                     <td style={tdMono}>{m.location || '\u2014'}</td>
                     <td style={{ ...tdMono, textAlign: 'center', fontWeight: 600 }}>
-                      {(m.overallScore * 100).toFixed(0)}
+                      {Math.round(m.overallScore)}
                     </td>
                     {scoreCell(m.dimensionScores.mission)}
                     {scoreCell(m.dimensionScores.technical)}
