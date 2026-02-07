@@ -10,6 +10,14 @@ interface SpotlightDetailProps {
 
 type ContentType = 'video' | 'text' | 'embed'
 
+function isValidPreviewUrl(url: string): boolean {
+  try {
+    return new URL(url.trim()).protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 const labelStyle: React.CSSProperties = {
   display: 'block',
   marginBottom: 'var(--space-2)',
@@ -248,7 +256,7 @@ export default function SpotlightDetail({
         </div>
 
         {/* Preview */}
-        {(contentType === 'video' || contentType === 'embed') && contentUrl.trim() && (
+        {(contentType === 'video' || contentType === 'embed') && isValidPreviewUrl(contentUrl) && (
           <div className="admin-detail-section" style={{ marginTop: 'var(--space-4)' }}>
             <div className="section-label">Preview</div>
             <div style={{ border: '2px solid var(--color-charcoal)', borderRadius: 2, overflow: 'hidden' }}>

@@ -37,7 +37,7 @@ export async function GET() {
     .from('profiles')
     .select('id')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   if (profile) {
     return NextResponse.json({ userType: 'company' })

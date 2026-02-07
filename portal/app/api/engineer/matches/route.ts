@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function GET() {
   try {
@@ -10,8 +10,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const serviceClient = await createServiceClient()
+
     // Fetch profile
-    const { data: profile } = await supabase
+    const { data: profile } = await serviceClient
       .from('engineers')
       .select('id')
       .eq('auth_user_id', user.id)
@@ -22,7 +24,7 @@ export async function GET() {
     }
 
     // Fetch top 10 matches with job details
-    const { data: matches, error } = await supabase
+    const { data: matches, error } = await serviceClient
       .from('engineer_job_matches')
       .select('*, scanned_job:scanned_jobs(*)')
       .eq('engineer_id', profile.id)
