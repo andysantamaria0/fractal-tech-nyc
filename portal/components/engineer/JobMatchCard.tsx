@@ -49,6 +49,7 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
   const [reasonFocused, setReasonFocused] = useState(false)
 
   const job = match.scanned_job
+  if (!job) return null
 
   const ruleSuggestion = useMemo((): RuleSuggestion | null => {
     if (!selectedCategory) return null
@@ -162,7 +163,7 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
             minWidth: 60, textAlign: 'right',
           }}
         >
-          {match.overall_score}%
+          {match.overall_score ?? 0}%
         </motion.div>
       </motion.button>
 
@@ -187,8 +188,9 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
 
               <div style={{ marginBottom: 24 }}>
                 {DIMENSION_ORDER.map((key, i) => {
-                  const score = (match.dimension_scores as DimensionWeights)[key]
-                  const matchReasoning = (match.reasoning as MatchReasoning)[key]
+                  const dims = match.dimension_scores as DimensionWeights | null
+                  const score = Math.max(0, Math.min(100, dims?.[key] ?? 0))
+                  const matchReasoning = (match.reasoning as MatchReasoning | null)?.[key]
                   return (
                     <div key={key} style={{ marginBottom: 16 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>

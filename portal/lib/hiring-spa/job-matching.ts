@@ -90,28 +90,17 @@ async function parallelMap<T, R>(
   fn: (item: T) => Promise<R>,
   concurrency: number,
 ): Promise<R[]> {
-  const results: R[] = []
-  const executing: Promise<void>[] = []
+  const results: R[] = new Array(items.length)
+  let nextIndex = 0
 
-  for (const item of items) {
-    const p = fn(item).then(result => {
-      results.push(result)
-    })
-    executing.push(p)
-
-    if (executing.length >= concurrency) {
-      await Promise.race(executing)
-      // Remove settled promises
-      for (let i = executing.length - 1; i >= 0; i--) {
-        const settled = await Promise.race([executing[i], Promise.resolve('pending')])
-        if (settled !== 'pending') {
-          executing.splice(i, 1)
-        }
-      }
+  async function worker() {
+    while (nextIndex < items.length) {
+      const i = nextIndex++
+      results[i] = await fn(items[i])
     }
   }
 
-  await Promise.all(executing)
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()))
   return results
 }
 
@@ -541,10 +530,24 @@ export async function scoreJobForEngineer(
     jsonStr = fenceMatch[1].trim()
   }
 
-  const parsed = JSON.parse(jsonStr) as ScoreResult
+  let parsed: ScoreResult
+  try {
+    parsed = JSON.parse(jsonStr) as ScoreResult
+  } catch {
+    throw new Error(`Failed to parse scoring JSON: ${jsonStr.slice(0, 200)}`)
+  }
 
   if (!parsed.scores || !parsed.reasoning || !parsed.highlight_quote) {
     throw new Error('Match score output missing required fields')
+  }
+
+  // Clamp all dimension scores to [0, 100]
+  for (const key of DIMENSION_KEYS) {
+    if (typeof parsed.scores[key] === 'number') {
+      parsed.scores[key] = Math.max(0, Math.min(100, Math.round(parsed.scores[key])))
+    } else {
+      parsed.scores[key] = 0
+    }
   }
 
   return parsed
