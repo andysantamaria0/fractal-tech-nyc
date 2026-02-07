@@ -23,8 +23,8 @@ const MIN_DIMENSION_SCORE = 40
 const MIN_PREFILTER_SCORE = 50 // threshold to pass pre-filter
 const TOP_N = 10
 const MAX_JOBS_PER_COMPANY = 2
-const SCORING_CONCURRENCY = 5
-const PREFILTER_CONCURRENCY = 10 // higher concurrency for fast pre-filter
+const SCORING_CONCURRENCY = 8
+const PREFILTER_CONCURRENCY = 25 // high concurrency for fast pre-filter
 const PREFILTER_TOP_N = 30 // how many jobs pass to detailed scoring
 
 // Recency boost: jobs posted recently get a score bump
