@@ -94,7 +94,12 @@ export async function middleware(request: NextRequest) {
   ) {
     const url = request.nextUrl.clone()
     const redirectTo = request.nextUrl.pathname
-    url.pathname = '/login'
+    // Engineers go to engineer login, never the company portal
+    if (request.nextUrl.pathname.startsWith('/engineer')) {
+      url.pathname = '/engineer/login'
+    } else {
+      url.pathname = '/login'
+    }
     url.searchParams.set('redirect', redirectTo)
     return NextResponse.redirect(url)
   }
