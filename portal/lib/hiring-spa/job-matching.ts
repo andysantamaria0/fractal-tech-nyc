@@ -9,23 +9,19 @@ import type {
   MatchingPreferences,
 } from './types'
 
-// Two-stage scoring: Haiku for quick pre-filter, Sonnet for detailed scoring
-const MODEL_PREFILTER = 'claude-haiku-4-5-20251001'
+// Two-stage scoring: rule-based pre-filter, then Sonnet for detailed scoring
 const MODEL_DETAILED = 'claude-sonnet-4-20250514'
 const MAX_TOKENS = 4096
-const MAX_TOKENS_PREFILTER = 256
 
 const DIMENSION_KEYS: (keyof DimensionWeights)[] = [
   'mission', 'technical', 'culture', 'environment', 'dna',
 ]
 
 const MIN_DIMENSION_SCORE = 40
-const MIN_PREFILTER_SCORE = 50 // threshold to pass pre-filter
 const TOP_N = 10
 const MAX_JOBS_PER_COMPANY = 2
-const SCORING_CONCURRENCY = 8
-const PREFILTER_CONCURRENCY = 25 // high concurrency for fast pre-filter
-const PREFILTER_TOP_N = 30 // how many jobs pass to detailed scoring
+const SCORING_CONCURRENCY = 5 // keep under Anthropic 50 RPM rate limit
+const PREFILTER_TOP_N = 20 // how many jobs pass to detailed scoring
 
 // Recency boost: jobs posted recently get a score bump
 const RECENCY_BOOST_MAX = 5 // max points added for brand new jobs
@@ -50,88 +46,40 @@ function getRecencyBoost(job: ScannedJob): number {
   return Math.round(RECENCY_BOOST_MAX * (1 - daysOld / RECENCY_BOOST_DAYS))
 }
 
-const PREFILTER_SYSTEM_PROMPT = `You are a job matching pre-filter. Given an engineer's key skills and preferences, and a job posting, quickly assess if this job is potentially a good match.
-
-Respond with JSON only:
-{"score": <0-100>, "reason": "<10 words max>"}
-
-Score guide:
-- 70+: Likely good match, worth detailed review
-- 50-69: Maybe, some alignment
-- <50: Probably not a fit
-
-Be fast and decisive. When in doubt, let it through (score higher).`
-
 /**
- * Quick pre-filter scoring using Haiku.
- * Returns a rough score to decide if job should get detailed scoring.
+ * Rule-based pre-filter: score jobs by keyword/skill overlap with engineer.
+ * No API calls — instant, no rate limits, deterministic.
+ * Returns 0-100 score based on how many engineer skills appear in the job text.
  */
-async function prefilterJob(
+function prefilterJobRuleBased(
   job: ScannedJob,
-  engineerSummary: string,
-  client: Anthropic,
-): Promise<{ score: number; reason: string }> {
-  const prompt = `Engineer: ${engineerSummary}
+  engineerKeywords: string[],
+): number {
+  if (engineerKeywords.length === 0) return 50 // no data, neutral score
 
-Job: ${job.job_title} at ${job.company_name}
-Location: ${job.location || 'Not specified'}
-${job.description ? `Description: ${job.description.slice(0, 1500)}` : ''}
-
-Score this match.`
-
-  const response = await client.messages.create({
-    model: MODEL_PREFILTER,
-    max_tokens: MAX_TOKENS_PREFILTER,
-    system: PREFILTER_SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  const textBlock = response.content.find((block) => block.type === 'text')
-  if (!textBlock || textBlock.type !== 'text') {
-    return { score: 60, reason: 'No response' } // let it through on error
+  const jobText = `${job.job_title} ${job.description || ''}`.toLowerCase()
+  let hits = 0
+  for (const kw of engineerKeywords) {
+    if (jobText.includes(kw.toLowerCase())) hits++
   }
-
-  try {
-    let jsonStr = textBlock.text.trim()
-    const fenceMatch = jsonStr.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/)
-    if (fenceMatch) {
-      jsonStr = fenceMatch[1].trim()
-    }
-    const parsed = JSON.parse(jsonStr)
-    return {
-      score: typeof parsed.score === 'number' ? parsed.score : 60,
-      reason: parsed.reason || '',
-    }
-  } catch {
-    return { score: 60, reason: 'Parse error' } // let it through on error
-  }
+  // Scale: 0 hits = 20, all hits = 95
+  return Math.min(95, 20 + Math.round((hits / engineerKeywords.length) * 75))
 }
 
 /**
- * Build a concise engineer summary for pre-filtering.
+ * Collect all searchable keywords from an engineer's profile.
  */
-function buildEngineerSummary(engineer: EngineerProfileSpa): string {
-  const parts: string[] = []
-
+function getEngineerKeywords(engineer: EngineerProfileSpa): string[] {
+  const keywords: string[] = []
   if (engineer.engineer_dna) {
-    const dna = engineer.engineer_dna
-    if (dna.topSkills?.length) parts.push(`Skills: ${dna.topSkills.slice(0, 5).join(', ')}`)
-    if (dna.languages?.length) parts.push(`Languages: ${dna.languages.slice(0, 5).join(', ')}`)
-    if (dna.senioritySignal) parts.push(`Level: ${dna.senioritySignal}`)
+    keywords.push(...(engineer.engineer_dna.topSkills || []))
+    keywords.push(...(engineer.engineer_dna.languages || []))
+    keywords.push(...(engineer.engineer_dna.frameworks || []))
   }
-
-  if (engineer.profile_summary) {
-    const ps = engineer.profile_summary
-    if (ps.technicalIdentity) parts.push(`Identity: ${ps.technicalIdentity}`)
-    if (ps.bestFitSignals?.length) parts.push(`Best fit: ${ps.bestFitSignals.slice(0, 3).join(', ')}`)
-    if (ps.dealBreakers?.length) parts.push(`Avoid: ${ps.dealBreakers.slice(0, 3).join(', ')}`)
+  if (engineer.profile_summary?.bestFitSignals) {
+    keywords.push(...engineer.profile_summary.bestFitSignals)
   }
-
-  if (engineer.preferred_locations?.length) {
-    parts.push(`Locations: ${engineer.preferred_locations.join(', ')}`)
-  }
-
-  return parts.join('. ') || 'No profile data'
+  return keywords
 }
 
 /**
@@ -827,41 +775,27 @@ export async function computeMatchesForEngineer(
     console.log(`[job-matching] Using learned adjustments from ${feedbackHistory.length} feedback items`)
   }
 
+  // STAGE 1: Rule-based pre-filter (no API calls, instant)
+  const engineerKeywords = getEngineerKeywords(typedEngineer)
+  console.log(`[job-matching] Pre-filtering ${newJobs.length} jobs by keyword overlap (${engineerKeywords.length} keywords)...`)
+
+  const prefilterResults = newJobs.map(job => ({
+    job,
+    score: prefilterJobRuleBased(job, engineerKeywords),
+  }))
+
+  prefilterResults.sort((a, b) => b.score - a.score)
+  const candidatesForDetailed = prefilterResults
+    .slice(0, PREFILTER_TOP_N)
+    .map(r => r.job)
+
+  console.log(`[job-matching] Top ${candidatesForDetailed.length} jobs selected for detailed scoring...`)
+
   // Initialize Anthropic client
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     throw new Error('ANTHROPIC_API_KEY not set')
   }
-  const client = new Anthropic({ apiKey })
-
-  // Build concise engineer summary for pre-filtering
-  const engineerSummary = buildEngineerSummary(typedEngineer)
-
-  // STAGE 1: Quick pre-filter with Haiku to narrow down candidates
-  console.log(`[job-matching] Pre-filtering ${newJobs.length} jobs with Haiku...`)
-
-  const prefilterResults = await parallelMap(
-    newJobs,
-    async (job) => {
-      try {
-        const result = await prefilterJob(job, engineerSummary, client)
-        return { job, score: result.score, reason: result.reason }
-      } catch (err) {
-        console.error(`Pre-filter failed for job ${job.id}:`, err)
-        return { job, score: 60, reason: 'Error' } // let through on error
-      }
-    },
-    PREFILTER_CONCURRENCY,
-  )
-
-  // Sort by pre-filter score and take top N for detailed scoring
-  prefilterResults.sort((a, b) => b.score - a.score)
-  const candidatesForDetailed = prefilterResults
-    .filter(r => r.score >= MIN_PREFILTER_SCORE)
-    .slice(0, PREFILTER_TOP_N)
-    .map(r => r.job)
-
-  console.log(`[job-matching] ${candidatesForDetailed.length} jobs passed pre-filter, running detailed scoring...`)
 
   // STAGE 2: Detailed scoring with Sonnet on pre-filtered candidates
   type ScoredJob = {
