@@ -119,11 +119,10 @@ export async function GET(request: NextRequest) {
 
     const serviceClient = await createServiceClient()
 
+    // Only return id and status — sensitive profile data requires authentication
     const { data: profile, error } = await serviceClient
       .from('engineers')
-      .select(
-        'id, status, engineer_dna, work_preferences, career_growth, strengths, growth_areas, deal_breakers',
-      )
+      .select('id, status')
       .eq('email', email.trim().toLowerCase())
       .maybeSingle()
 

@@ -43,6 +43,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Engineer not found' }, { status: 404 })
     }
 
+    // Verify match exists and engineer was notified
+    const { data: match } = await supabase
+      .from('hiring_spa_matches')
+      .select('id, engineer_notified_at')
+      .eq('role_id', role.id)
+      .eq('engineer_id', engineer.id)
+      .not('engineer_notified_at', 'is', null)
+      .maybeSingle()
+
+    if (!match) {
+      return NextResponse.json({ error: 'Match not found' }, { status: 404 })
+    }
+
     // Update match record
     const { error: updateError } = await supabase
       .from('hiring_spa_matches')
@@ -50,8 +63,7 @@ export async function POST(request: Request) {
         challenge_response: response,
         challenge_response_at: new Date().toISOString(),
       })
-      .eq('role_id', role.id)
-      .eq('engineer_id', engineer.id)
+      .eq('id', match.id)
 
     if (updateError) {
       console.error('Error updating challenge response:', updateError)

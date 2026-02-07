@@ -49,12 +49,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Engineer not found' }, { status: 404 })
     }
 
-    // Find the match
+    // Find the match (must have been officially notified)
     const { data: match, error: matchError } = await supabase
       .from('hiring_spa_matches')
       .select('id, engineer_notified_at')
       .eq('role_id', role.id)
       .eq('engineer_id', engineer.id)
+      .not('engineer_notified_at', 'is', null)
       .maybeSingle()
 
     if (matchError || !match) {

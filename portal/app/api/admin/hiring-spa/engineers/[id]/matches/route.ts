@@ -75,6 +75,25 @@ export async function POST(
       )
     }
 
+    // DB-level guard: prevent concurrent computation across serverless instances
+    const { data: recentMatch } = await serviceClient
+      .from('engineer_job_matches')
+      .select('created_at')
+      .eq('engineer_id', id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (recentMatch) {
+      const ageMs = Date.now() - new Date(recentMatch.created_at).getTime()
+      if (ageMs < 120_000) {
+        return NextResponse.json(
+          { error: 'Matches were recently computed. Please wait before recomputing.' },
+          { status: 409 },
+        )
+      }
+    }
+
     const { data: engineer, error } = await serviceClient
       .from('engineers')
       .select('id, name, status, questionnaire_completed_at, priority_ratings')

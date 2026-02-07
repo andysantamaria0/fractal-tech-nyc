@@ -43,25 +43,12 @@ export async function POST(request: Request) {
       })
 
     // Look up engineer profile by email
+    // Look up match state (without exposing scores to unauthenticated endpoint)
     let matchData: {
-      id: string
-      overall_score: number
-      dimension_scores: DimensionWeights
-      highlight_quote: string | null
+      has_match: boolean
       challenge_response: string | null
       engineer_decision: 'interested' | 'not_interested' | null
-      engineer_notified_at: string | null
-      challenge_submission?: {
-        id: string
-        submitted_at: string
-        auto_score: number | null
-        auto_reasoning: string | null
-        human_score: number | null
-        human_feedback: string | null
-        reviewer_name: string | null
-        reviewer_linkedin_url: string | null
-        final_score: number | null
-      } | null
+      challenge_submitted: boolean
     } | null = null
 
     const { data: engineer } = await supabase
@@ -73,30 +60,25 @@ export async function POST(request: Request) {
     if (engineer) {
       const { data: match } = await supabase
         .from('hiring_spa_matches')
-        .select('id, overall_score, dimension_scores, highlight_quote, challenge_response, engineer_decision, engineer_notified_at')
+        .select('id, challenge_response, engineer_decision')
         .eq('role_id', role.id)
         .eq('engineer_id', engineer.id)
         .maybeSingle()
 
       if (match) {
-        matchData = {
-          id: match.id,
-          overall_score: match.overall_score,
-          dimension_scores: match.dimension_scores as DimensionWeights,
-          highlight_quote: match.highlight_quote,
-          challenge_response: match.challenge_response,
-          engineer_decision: match.engineer_decision,
-          engineer_notified_at: match.engineer_notified_at,
-        }
-
-        // Fetch challenge submission if exists
+        // Check if challenge submission exists
         const { data: submission } = await supabase
           .from('challenge_submissions')
-          .select('id, submitted_at, auto_score, auto_reasoning, human_score, human_feedback, reviewer_name, reviewer_linkedin_url, final_score')
+          .select('id')
           .eq('match_id', match.id)
           .maybeSingle()
 
-        matchData.challenge_submission = submission || null
+        matchData = {
+          has_match: true,
+          challenge_response: match.challenge_response,
+          engineer_decision: match.engineer_decision,
+          challenge_submitted: !!submission,
+        }
       }
     }
 

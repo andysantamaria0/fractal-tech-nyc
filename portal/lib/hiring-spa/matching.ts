@@ -326,11 +326,13 @@ export async function computeMatchesForRole(
   }
 
   if (!engineers || engineers.length === 0) {
-    // No engineers to match — clear existing and return empty
+    // No engineers to match — clear only undecided matches
     await serviceClient
       .from('hiring_spa_matches')
       .delete()
       .eq('role_id', roleId)
+      .is('decision', null)
+      .is('engineer_decision', null)
 
     return { matches: [] }
   }
@@ -384,21 +386,32 @@ export async function computeMatchesForRole(
   scored.sort((a, b) => b.overall_score - a.overall_score)
   const topMatches = scored.slice(0, TOP_N)
 
-  // Delete existing matches for this role
+  // Preserve matches where company or engineer has already acted
   await serviceClient
     .from('hiring_spa_matches')
     .delete()
     .eq('role_id', roleId)
+    .is('decision', null)
+    .is('engineer_decision', null)
 
-  // Insert new matches
-  const insertData = topMatches.map((m, i) => ({
+  // Get IDs of preserved (decided) matches so we don't duplicate them
+  const { data: preservedMatches } = await serviceClient
+    .from('hiring_spa_matches')
+    .select('engineer_id')
+    .eq('role_id', roleId)
+
+  const preservedIds = new Set((preservedMatches || []).map(m => m.engineer_id))
+
+  // Insert new matches, excluding engineers with existing decided matches
+  const newTopMatches = topMatches.filter(m => !preservedIds.has(m.engineer.id))
+  const insertData = newTopMatches.map((m, i) => ({
     role_id: roleId,
     engineer_id: m.engineer.id,
     overall_score: m.overall_score,
     dimension_scores: m.scores,
     reasoning: m.reasoning,
     highlight_quote: m.highlight_quote,
-    display_rank: i + 1,
+    display_rank: preservedIds.size + i + 1,
   }))
 
   if (insertData.length > 0) {
@@ -412,10 +425,17 @@ export async function computeMatchesForRole(
   }
 
   return {
-    matches: topMatches.map((m, i) => ({
-      engineer_id: m.engineer.id,
-      overall_score: m.overall_score,
-      display_rank: i + 1,
-    })),
+    matches: [
+      ...Array.from(preservedIds).map((id, i) => ({
+        engineer_id: id,
+        overall_score: -1, // preserved, score not recomputed
+        display_rank: i + 1,
+      })),
+      ...newTopMatches.map((m, i) => ({
+        engineer_id: m.engineer.id,
+        overall_score: m.overall_score,
+        display_rank: preservedIds.size + i + 1,
+      })),
+    ],
   }
 }
