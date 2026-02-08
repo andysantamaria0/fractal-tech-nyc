@@ -49,6 +49,10 @@ export async function GET(request: Request) {
     if (!error) {
       let redirectPath = next
 
+      // Cross-subdomain cookie set by /engineer/login — survives even when
+      // Supabase strips the ?next= param during redirect. See CLAUDE.md.
+      const isEngineerFlow = cookieStore.get('x-engineer-flow')?.value === '1'
+
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         // Use service client to check engineer tables (bypasses RLS)
@@ -89,14 +93,12 @@ export async function GET(request: Request) {
           } else {
             redirectPath = '/engineer/onboard'
           }
-        } else if (next.startsWith('/engineer')) {
-          // Engineer flow: user came from engineer login but has no record yet
+        } else if (isEngineerFlow || next.startsWith('/engineer')) {
+          // Engineer flow: cookie or query param confirms this is an engineer
           redirectPath = '/engineer/onboard'
         } else {
-          // No engineer record — check if this is a company user or a new engineer.
-          // Company users ALWAYS have a profiles row (created by admin invite),
-          // so a user with no profiles record is a new engineer whose `next`
-          // param was lost during the Supabase redirect (Site URL ≠ eng subdomain).
+          // No engineer record, no engineer cookie, no engineer next param.
+          // Check for company profile to decide where to send them.
           const { data: profile } = await supabase
             .from('profiles')
             .select('id')
@@ -104,10 +106,9 @@ export async function GET(request: Request) {
             .maybeSingle()
 
           if (profile) {
-            // Has company profile — company flow
             redirectPath = next
           } else {
-            // No engineer record AND no company profile → new engineer
+            // No record anywhere — send to engineer onboard as safe default
             redirectPath = '/engineer/onboard'
           }
         }
@@ -124,6 +125,14 @@ export async function GET(request: Request) {
         }
         response.cookies.set(name, value, cookieOptions)
       })
+      // Clear the engineer flow cookie now that we've used it
+      if (isEngineerFlow) {
+        response.cookies.set('x-engineer-flow', '', {
+          maxAge: 0,
+          path: '/',
+          domain: '.fractaltech.nyc',
+        })
+      }
       return response
     }
   }

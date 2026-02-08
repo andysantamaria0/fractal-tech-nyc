@@ -51,6 +51,15 @@ export default function EngineerLoginPage() {
       return
     }
 
+    // Set a cross-subdomain cookie so the callback knows this is an engineer,
+    // even if Supabase redirects the magic link to partners.fractaltech.nyc
+    // and drops the ?next= parameter. See CLAUDE.md for the full explanation.
+    if (window.location.hostname.endsWith('.fractaltech.nyc')) {
+      document.cookie = 'x-engineer-flow=1; domain=.fractaltech.nyc; path=/; max-age=600; SameSite=Lax; Secure'
+    } else {
+      document.cookie = 'x-engineer-flow=1; path=/; max-age=600; SameSite=Lax'
+    }
+
     setSent(true)
     setLoading(false)
   }

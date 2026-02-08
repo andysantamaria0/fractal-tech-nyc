@@ -22,11 +22,17 @@ Supabase magic links redirect through Supabase's auth server to the project's **
 
 ### The Defenses (multi-layered, do NOT remove any)
 
-1. **Middleware hard guard** (`middleware.ts`): If `host.startsWith('eng.')`, redirect ALL company pages (`/`, `/login`, `/signup`, `/complete-profile`, `/dashboard`, `/cycles/*`, `/settings/*`, `/hiring-spa/*`) to engineer equivalents. This runs BEFORE any auth logic.
+1. **Cross-subdomain cookie** (`app/engineer/login/page.tsx` + `app/(auth)/callback/route.ts`): When the engineer login page sends a magic link, it sets `x-engineer-flow=1` cookie on `.fractaltech.nyc` domain. The callback reads this cookie — if present, routes to `/engineer/onboard` regardless of profiles/engineers table state. This is the PRIMARY defense because it does not depend on query params or database state.
 
-2. **Callback route fallback** (`app/(auth)/callback/route.ts`): If user has no engineer record AND no profiles record, redirect to `/engineer/onboard` (not `/complete-profile`). Rationale: company users ALWAYS have a profiles row created by admin invite. A profileless user is always an engineer.
+2. **Middleware hard guard** (`middleware.ts`): If `host.startsWith('eng.')`, redirect ALL company pages (`/`, `/login`, `/signup`, `/complete-profile`, `/dashboard`, `/cycles/*`, `/settings/*`, `/hiring-spa/*`) to engineer equivalents. This runs BEFORE any auth logic.
 
-3. **Middleware auth-page redirect** (`middleware.ts` line ~182): Authenticated user on `/engineer/login` with no engineer record → `/engineer/onboard`.
+3. **Callback route fallback** (`app/(auth)/callback/route.ts`): If user has no engineer record AND no profiles record, redirect to `/engineer/onboard` (not `/complete-profile`). Rationale: company users ALWAYS have a profiles row created by admin invite. A profileless user is always an engineer. NOTE: This fallback can be defeated if the bug previously ran and created a stale profiles row — that's why the cookie (defense #1) exists.
+
+4. **Middleware auth-page redirect** (`middleware.ts` line ~182): Authenticated user on `/engineer/login` with no engineer record → `/engineer/onboard`.
+
+### Why the profiles table is NOT a reliable signal
+
+The bug itself creates stale `profiles` rows. When an engineer gets redirected to `/complete-profile` and fills out the form, a `profiles` row is created. This row then permanently defeats any "no profile = engineer" check. The cookie is the only reliable signal because it's set BEFORE the magic link is sent, not after.
 
 ### When Modifying Auth Flow
 
@@ -34,6 +40,8 @@ Supabase magic links redirect through Supabase's auth server to the project's **
 - Verify the user sees `/engineer/onboard`, NOT `/complete-profile`
 - Check that the `?next=` parameter survives the Supabase redirect (it often doesn't — that's why we have the fallback)
 - NEVER assume `next` parameter will be present in the callback
+- NEVER use the `profiles` table as a signal for "is this a company user" — the bug creates stale profiles rows
+- The `x-engineer-flow` cookie on `.fractaltech.nyc` is the source of truth — do NOT remove it
 
 ## Architecture Notes
 
