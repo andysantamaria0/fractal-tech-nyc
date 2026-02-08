@@ -471,6 +471,26 @@ export interface DiscoveredRole {
   confidence: number
 }
 
+// Ad-hoc JD match (admin tool)
+
+export interface AdHocMatch {
+  id: string
+  jd_url: string
+  jd_title: string
+  jd_raw_text: string | null
+  jd_sections: { heading: string; content: string }[] | null
+  source_platform: string | null
+  engineer_id: string
+  admin_user_id: string | null
+  overall_score: number
+  dimension_scores: DimensionWeights
+  reasoning: MatchReasoning
+  highlight_quote: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
 // Hiring profile status
 export type HiringProfileStatus = 'draft' | 'crawling' | 'discovering_roles' | 'questionnaire' | 'complete'
 

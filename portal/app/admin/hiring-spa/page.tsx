@@ -166,7 +166,19 @@ export default function AdminHiringSpaPage() {
     <div style={{ maxWidth: 960, margin: '0 auto', padding: 48, WebkitFontSmoothing: 'antialiased' }}>
       {/* Header */}
       <p style={label}>Admin</p>
-      <h1 style={{ ...heading, marginBottom: 8 }}>Engineer Pipeline</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+        <h1 style={heading}>Engineer Pipeline</h1>
+        <Link
+          href="/admin/hiring-spa/adhoc-match"
+          style={{
+            fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em',
+            textTransform: 'uppercase', padding: '8px 16px', borderRadius: 4,
+            backgroundColor: c.charcoal, color: c.fog, textDecoration: 'none',
+          }}
+        >
+          Ad-Hoc JD Match
+        </Link>
+      </div>
       <p style={{ fontFamily: f.serif, fontSize: 15, color: c.graphite, margin: '0 0 40px 0' }}>
         {engineers.length} engineers across the funnel
       </p>
