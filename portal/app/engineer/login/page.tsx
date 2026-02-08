@@ -51,9 +51,15 @@ export default function EngineerLoginPage() {
       return
     }
 
-    // Set a cross-subdomain cookie so the callback knows this is an engineer,
-    // even if Supabase redirects the magic link to partners.fractaltech.nyc
-    // and drops the ?next= parameter. See CLAUDE.md for the full explanation.
+    // Tag this email server-side so the callback routes to /engineer/onboard
+    // even if the magic link opens in a different browser (cookie won't help there).
+    fetch('/api/engineer/mark-flow', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    }).catch(() => {}) // best-effort, cookie is backup
+
+    // Cookie backup for same-browser flows
     if (window.location.hostname.endsWith('.fractaltech.nyc')) {
       document.cookie = 'x-engineer-flow=1; domain=.fractaltech.nyc; path=/; max-age=600; SameSite=Lax; Secure'
     } else {

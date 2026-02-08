@@ -80,6 +80,18 @@ export async function GET(request: Request) {
           engineer = byEmail
         }
 
+        // Server-side intent: survives across browsers (unlike cookies).
+        // Set by /api/engineer/mark-flow when magic link is sent.
+        let hasLoginIntent = false
+        if (user.email) {
+          const { data: intent } = await serviceClient
+            .from('engineer_login_intents')
+            .select('email')
+            .eq('email', user.email.toLowerCase())
+            .maybeSingle()
+          hasLoginIntent = !!intent
+        }
+
         if (engineer) {
           // Link auth_user_id if not already set
           if (!engineer.auth_user_id) {
@@ -93,12 +105,11 @@ export async function GET(request: Request) {
           } else {
             redirectPath = '/engineer/onboard'
           }
-        } else if (isEngineerFlow || next.startsWith('/engineer')) {
-          // Engineer flow: cookie or query param confirms this is an engineer
+        } else if (hasLoginIntent || isEngineerFlow || next.startsWith('/engineer')) {
+          // Engineer flow confirmed by: DB intent (cross-browser), cookie (same-browser), or query param
           redirectPath = '/engineer/onboard'
         } else {
-          // No engineer record, no engineer cookie, no engineer next param.
-          // Check for company profile to decide where to send them.
+          // No engineer signals at all — check company profile
           const { data: profile } = await supabase
             .from('profiles')
             .select('id')
@@ -108,9 +119,17 @@ export async function GET(request: Request) {
           if (profile) {
             redirectPath = next
           } else {
-            // No record anywhere — send to engineer onboard as safe default
+            // No record anywhere — safe default to engineer onboard
             redirectPath = '/engineer/onboard'
           }
+        }
+
+        // Clean up the login intent now that we've used it
+        if (hasLoginIntent && user.email) {
+          await serviceClient
+            .from('engineer_login_intents')
+            .delete()
+            .eq('email', user.email.toLowerCase())
         }
       }
 

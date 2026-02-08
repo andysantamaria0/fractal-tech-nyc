@@ -22,7 +22,9 @@ Supabase magic links redirect through Supabase's auth server to the project's **
 
 ### The Defenses (multi-layered, do NOT remove any)
 
-1. **Cross-subdomain cookie** (`app/engineer/login/page.tsx` + `app/(auth)/callback/route.ts`): When the engineer login page sends a magic link, it sets `x-engineer-flow=1` cookie on `.fractaltech.nyc` domain. The callback reads this cookie — if present, routes to `/engineer/onboard` regardless of profiles/engineers table state. This is the PRIMARY defense because it does not depend on query params or database state.
+1. **Server-side login intent** (`engineer_login_intents` table + `app/api/engineer/mark-flow/route.ts`): When the engineer login page sends a magic link, it also writes the user's email to the `engineer_login_intents` table. The callback checks this table. This is the PRIMARY defense — it works across browsers, devices, and subdomains. Cleaned up after use.
+
+1b. **Cross-subdomain cookie** (backup): The engineer login page also sets `x-engineer-flow=1` cookie on `.fractaltech.nyc` domain. Works in same-browser flows even if the DB write fails.
 
 2. **Middleware hard guard** (`middleware.ts`): If `host.startsWith('eng.')`, redirect ALL company pages (`/`, `/login`, `/signup`, `/complete-profile`, `/dashboard`, `/cycles/*`, `/settings/*`, `/hiring-spa/*`) to engineer equivalents. This runs BEFORE any auth logic.
 
