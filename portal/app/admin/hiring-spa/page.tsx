@@ -104,7 +104,7 @@ export default function AdminHiringSpaPage() {
       }
       setMatchState((prev) => ({ ...prev, [engineerId]: 'done' }))
       setMatchResult((prev) => ({ ...prev, [engineerId]: `${body.matchCount} matches` }))
-      loadData()
+      loadData(true)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to compute matches'
       setMatchState((prev) => ({ ...prev, [engineerId]: 'error' }))
@@ -112,8 +112,8 @@ export default function AdminHiringSpaPage() {
     }
   }
 
-  const loadData = useCallback(async () => {
-    setLoading(true)
+  const loadData = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     setError(null)
     try {
       const res = await fetch('/api/admin/hiring-spa/overview')
@@ -124,7 +124,7 @@ export default function AdminHiringSpaPage() {
       console.error('Failed to load hiring spa overview:', e)
       setError('Failed to load overview data')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [])
 

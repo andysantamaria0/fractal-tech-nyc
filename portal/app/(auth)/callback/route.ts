@@ -118,6 +118,18 @@ export async function GET(request: Request) {
           }
         } else if (hasLoginIntent || isEngineerFlow || next.startsWith('/engineer')) {
           // Engineer flow confirmed by: DB intent (cross-browser), cookie (same-browser), or query param
+          // Create a draft engineer record so the admin dashboard can see them immediately.
+          // Best-effort: duplicate auth_user_id/email returns error (not thrown), safely ignored.
+          if (user.email) {
+            await serviceClient
+              .from('engineers')
+              .insert({
+                auth_user_id: user.id,
+                email: user.email,
+                name: user.email.split('@')[0],
+                status: 'draft',
+              })
+          }
           redirectPath = '/engineer/onboard'
         } else {
           // No engineer signals at all — check company profile
