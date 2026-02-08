@@ -9,7 +9,13 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    initPostHog()
+    // Defer PostHog init to avoid blocking interactions (INP).
+    // Session recording + event listeners are heavy; let the page settle first.
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(() => initPostHog())
+    } else {
+      setTimeout(initPostHog, 1)
+    }
   }, [])
 
   useEffect(() => {
