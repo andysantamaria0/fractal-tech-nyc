@@ -6,10 +6,12 @@ import { cookies } from 'next/headers'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const rawNext = searchParams.get('next') ?? '/dashboard'
+  const rawNext = searchParams.get('next') ?? null
 
   // Validate redirect target to prevent open redirects
-  const next = (rawNext.startsWith('/') && !rawNext.startsWith('//')) ? rawNext : '/dashboard'
+  // loginRedirect (from cookie) is resolved below after cookieStore is available;
+  // final `next` is computed after we can read the cookie.
+  const nextFromParam = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : null
 
   if (code) {
     const cookieStore = await cookies()
@@ -48,6 +50,15 @@ export async function GET(request: Request) {
     // Check engineer flow cookie BEFORE exchange — it's on .fractaltech.nyc
     // so it's available here even when Supabase redirected to partners subdomain.
     const isEngineerFlow = cookieStore.get('x-engineer-flow')?.value === '1'
+
+    // Redirect target from login page (survives Google OAuth round-trip via cookie)
+    const loginRedirectRaw = cookieStore.get('x-login-redirect')?.value
+    const loginRedirect = loginRedirectRaw
+      ? decodeURIComponent(loginRedirectRaw)
+      : null
+    // Resolve final next: query param > cookie > default
+    const safeLoginRedirect = loginRedirect && loginRedirect.startsWith('/') && !loginRedirect.startsWith('//') ? loginRedirect : null
+    const next = nextFromParam ?? safeLoginRedirect ?? '/dashboard'
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
@@ -173,6 +184,14 @@ export async function GET(request: Request) {
           maxAge: 0,
           path: '/',
           domain: '.fractaltech.nyc',
+        })
+      }
+      // Clear login redirect cookie now that we've used it
+      if (loginRedirect) {
+        response.cookies.set('x-login-redirect', '', {
+          maxAge: 0,
+          path: '/',
+          ...(process.env.NODE_ENV === 'production' && { domain: '.fractaltech.nyc' }),
         })
       }
       return response

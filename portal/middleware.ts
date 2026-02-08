@@ -87,6 +87,17 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Helper: copy refreshed session cookies from supabaseResponse onto a redirect.
+  // Without this, token refreshes triggered by getUser() above are lost when we
+  // return a NextResponse.redirect() instead of supabaseResponse.
+  function redirectWithCookies(url: URL) {
+    const response = NextResponse.redirect(url)
+    supabaseResponse.headers.getSetCookie().forEach((cookie) => {
+      response.headers.append('set-cookie', cookie)
+    })
+    return response
+  }
+
   // Dev bypass: skip access control but still handle auth-page redirects below
   if (isDev && !user) {
     return supabaseResponse
@@ -136,7 +147,7 @@ export async function middleware(request: NextRequest) {
     if (!profile?.is_admin) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
+      return redirectWithCookies(url)
     }
   }
 
@@ -151,7 +162,7 @@ export async function middleware(request: NextRequest) {
     if (!profile?.has_hiring_spa_access) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
+      return redirectWithCookies(url)
     }
   }
 
@@ -196,14 +207,14 @@ export async function middleware(request: NextRequest) {
       } else {
         url.pathname = '/engineer/onboard'
       }
-      return NextResponse.redirect(url)
+      return redirectWithCookies(url)
     }
 
     // Engineer login flow: user not in engineers table yet — send to onboard, not company flow
     if (request.nextUrl.pathname === '/engineer/login') {
       const url = request.nextUrl.clone()
       url.pathname = '/engineer/onboard'
-      return NextResponse.redirect(url)
+      return redirectWithCookies(url)
     }
 
     // Check if user has a company profile — if not, send them to complete it
@@ -215,7 +226,7 @@ export async function middleware(request: NextRequest) {
 
     const url = request.nextUrl.clone()
     url.pathname = profile ? '/dashboard' : '/complete-profile'
-    return NextResponse.redirect(url)
+    return redirectWithCookies(url)
   }
 
   return supabaseResponse

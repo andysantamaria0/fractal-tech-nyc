@@ -71,6 +71,17 @@ export default function LoginPage() {
   async function handleGoogleLogin() {
     trackEvent('google_oauth_clicked', { page: 'login' })
     setLoading(true)
+
+    // Persist redirect target so callback can honor it after the OAuth round-trip.
+    // Stored as a cookie (survives the Supabase → Google → Supabase → callback chain)
+    // because Supabase may strip query params from the redirectTo URL.
+    if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+      const isProduction = window.location.hostname.endsWith('.fractaltech.nyc')
+      const domainAttr = isProduction ? '; domain=.fractaltech.nyc' : ''
+      const secureAttr = isProduction ? '; secure' : ''
+      document.cookie = `x-login-redirect=${encodeURIComponent(redirectParam)}; path=/${domainAttr}${secureAttr}; samesite=lax; max-age=600`
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
