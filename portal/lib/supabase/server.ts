@@ -1,6 +1,11 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+// Cross-subdomain cookies: eng.fractaltech.nyc and partners.fractaltech.nyc
+// share Supabase cookies so PKCE code_verifier + session survive across subdomains.
+const CROSS_DOMAIN_OPTS = process.env.NODE_ENV === 'production'
+  ? { domain: '.fractaltech.nyc' as const } : undefined
+
 export async function createClient() {
   const cookieStore = await cookies()
 
@@ -8,6 +13,7 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      ...(CROSS_DOMAIN_OPTS && { cookieOptions: CROSS_DOMAIN_OPTS }),
       cookies: {
         getAll() {
           return cookieStore.getAll()

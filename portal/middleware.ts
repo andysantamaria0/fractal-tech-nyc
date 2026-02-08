@@ -49,10 +49,15 @@ export async function middleware(request: NextRequest) {
     request,
   })
 
+  // Cross-subdomain cookies so PKCE + session work across eng/partners subdomains
+  const crossDomainOpts = process.env.NODE_ENV === 'production'
+    ? { domain: '.fractaltech.nyc' as const } : undefined
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      ...(crossDomainOpts && { cookieOptions: crossDomainOpts }),
       cookies: {
         getAll() {
           return request.cookies.getAll()
