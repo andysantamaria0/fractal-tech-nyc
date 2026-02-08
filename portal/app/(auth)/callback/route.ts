@@ -93,15 +93,22 @@ export async function GET(request: Request) {
           // Engineer flow: user came from engineer login but has no record yet
           redirectPath = '/engineer/onboard'
         } else {
-          // Company flow: check for existing profile
+          // No engineer record — check if this is a company user or a new engineer.
+          // Company users ALWAYS have a profiles row (created by admin invite),
+          // so a user with no profiles record is a new engineer whose `next`
+          // param was lost during the Supabase redirect (Site URL ≠ eng subdomain).
           const { data: profile } = await supabase
             .from('profiles')
             .select('id')
             .eq('id', user.id)
             .maybeSingle()
 
-          if (!profile) {
-            redirectPath = '/complete-profile'
+          if (profile) {
+            // Has company profile — company flow
+            redirectPath = next
+          } else {
+            // No engineer record AND no company profile → new engineer
+            redirectPath = '/engineer/onboard'
           }
         }
       }

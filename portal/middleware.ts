@@ -7,12 +7,28 @@ const isSupabaseConfigured =
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('xxx.supabase.co')
 
 export async function middleware(request: NextRequest) {
-  // Engineer subdomain: redirect root to engineer login
+  // Engineer subdomain: NEVER show company pages. Engineers must only see
+  // /engineer/* routes. This is the hard guard — no matter how a user arrives
+  // (lost query params, stale links, redirects), the eng subdomain always
+  // funnels to engineer flows.
   const host = request.headers.get('host') || ''
-  if (host.startsWith('eng.') && request.nextUrl.pathname === '/') {
-    const url = request.nextUrl.clone()
-    url.pathname = '/engineer/login'
-    return NextResponse.redirect(url)
+  if (host.startsWith('eng.')) {
+    const p = request.nextUrl.pathname
+    if (p === '/') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/engineer/login'
+      return NextResponse.redirect(url)
+    }
+    if (p === '/complete-profile' || p === '/login' || p === '/signup' || p === '/early-access') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/engineer/login'
+      return NextResponse.redirect(url)
+    }
+    if (p === '/dashboard' || p.startsWith('/cycles') || p.startsWith('/settings') || p.startsWith('/hiring-spa')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/engineer/onboard'
+      return NextResponse.redirect(url)
+    }
   }
 
   const isDev = process.env.NODE_ENV !== 'production'
