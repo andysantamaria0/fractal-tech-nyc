@@ -214,7 +214,7 @@ export default function AdminEngineerMatchesPage() {
                   <th style={{ ...th, textAlign: 'center' }}>Culture</th>
                   <th style={{ ...th, textAlign: 'center' }}>Env</th>
                   <th style={{ ...th, textAlign: 'center' }}>DNA</th>
-                  <th style={th}>Feedback</th>
+                  <th style={{ ...th, whiteSpace: 'nowrap' }}>Feedback</th>
                   <th style={th}>Applied</th>
                 </tr>
               </thead>
