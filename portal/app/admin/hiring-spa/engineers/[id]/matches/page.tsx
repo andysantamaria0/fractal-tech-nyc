@@ -1,10 +1,18 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 import type { DimensionWeights } from '@/lib/hiring-spa/types'
+
+interface MatchReasoning {
+  mission: string
+  technical: string
+  culture: string
+  environment: string
+  dna: string
+}
 
 interface MatchRow {
   id: string
@@ -20,6 +28,8 @@ interface MatchRow {
   companyName: string
   jobUrl: string | null
   location: string | null
+  reasoning: MatchReasoning | null
+  highlightQuote: string | null
 }
 
 interface MatchesData {
@@ -106,6 +116,7 @@ export default function AdminEngineerMatchesPage() {
   const [data, setData] = useState<MatchesData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -207,30 +218,80 @@ export default function AdminEngineerMatchesPage() {
                 </tr>
               </thead>
               <tbody>
-                {matches.map((m, i) => (
-                  <tr key={m.id}>
-                    <td style={{ ...tdMono, textAlign: 'center' }}>{m.displayRank ?? i + 1}</td>
-                    <td style={td}>
-                      {m.jobUrl ? (
-                        <a href={m.jobUrl} target="_blank" rel="noopener noreferrer" style={{ color: c.charcoal, textDecoration: 'underline', textUnderlineOffset: 2 }}>
-                          {m.jobTitle}
-                        </a>
-                      ) : m.jobTitle}
-                    </td>
-                    <td style={td}>{m.companyName}</td>
-                    <td style={tdMono}>{m.location || '\u2014'}</td>
-                    <td style={{ ...tdMono, textAlign: 'center', fontWeight: 600 }}>
-                      {Math.round(m.overallScore)}
-                    </td>
-                    {scoreCell(m.dimensionScores.mission)}
-                    {scoreCell(m.dimensionScores.technical)}
-                    {scoreCell(m.dimensionScores.culture)}
-                    {scoreCell(m.dimensionScores.environment)}
-                    {scoreCell(m.dimensionScores.dna)}
-                    <td style={td}>{feedbackBadge(m)}</td>
-                    <td style={tdMono}>{m.appliedAt ? formatDate(m.appliedAt) : '\u2014'}</td>
-                  </tr>
-                ))}
+                {matches.map((m, i) => {
+                  const isExpanded = expandedId === m.id
+                  return (
+                    <React.Fragment key={m.id}>
+                      <tr
+                        onClick={() => setExpandedId(isExpanded ? null : m.id)}
+                        style={{ cursor: 'pointer', transition: 'background-color 150ms ease' }}
+                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)')}
+                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
+                      >
+                        <td style={{ ...tdMono, textAlign: 'center' }}>{m.displayRank ?? i + 1}</td>
+                        <td style={td}>
+                          {m.jobUrl ? (
+                            <a
+                              href={m.jobUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              style={{ color: c.charcoal, textDecoration: 'underline', textUnderlineOffset: 2 }}
+                            >
+                              {m.jobTitle}
+                            </a>
+                          ) : m.jobTitle}
+                        </td>
+                        <td style={td}>{m.companyName}</td>
+                        <td style={tdMono}>{m.location || '\u2014'}</td>
+                        <td style={{ ...tdMono, textAlign: 'center', fontWeight: 600 }}>
+                          {Math.round(m.overallScore)}
+                        </td>
+                        {scoreCell(m.dimensionScores.mission)}
+                        {scoreCell(m.dimensionScores.technical)}
+                        {scoreCell(m.dimensionScores.culture)}
+                        {scoreCell(m.dimensionScores.environment)}
+                        {scoreCell(m.dimensionScores.dna)}
+                        <td style={td}>{feedbackBadge(m)}</td>
+                        <td style={tdMono}>{m.appliedAt ? formatDate(m.appliedAt) : '\u2014'}</td>
+                      </tr>
+                      {isExpanded && (m.reasoning || m.highlightQuote) && (
+                        <tr>
+                          <td colSpan={12} style={{ padding: '0 16px 16px 16px', backgroundColor: 'rgba(0,0,0,0.015)' }}>
+                            {m.highlightQuote && (
+                              <p style={{
+                                fontFamily: f.serif, fontSize: 14, fontStyle: 'italic',
+                                color: c.charcoal, margin: '16px 0 12px 0', lineHeight: 1.6,
+                              }}>
+                                &ldquo;{m.highlightQuote}&rdquo;
+                              </p>
+                            )}
+                            {m.reasoning && (
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 24px', marginTop: 12 }}>
+                                {(['mission', 'technical', 'culture', 'environment', 'dna'] as const).map(dim => (
+                                  <div key={dim} style={{ padding: '8px 0' }}>
+                                    <span style={{
+                                      fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em',
+                                      textTransform: 'uppercase', color: c.honey,
+                                    }}>
+                                      {dim} ({Math.round(m.dimensionScores[dim])})
+                                    </span>
+                                    <p style={{
+                                      fontFamily: f.serif, fontSize: 13, color: c.graphite,
+                                      margin: '4px 0 0 0', lineHeight: 1.5,
+                                    }}>
+                                      {m.reasoning[dim]}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  )
+                })}
               </tbody>
             </table>
           )}

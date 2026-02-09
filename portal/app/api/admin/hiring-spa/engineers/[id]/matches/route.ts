@@ -24,7 +24,7 @@ export async function GET(
 
     const { data: matches, error: matchErr } = await serviceClient
       .from('engineer_job_matches')
-      .select('id, engineer_id, scanned_job_id, overall_score, dimension_scores, display_rank, feedback, feedback_category, feedback_at, applied_at, created_at, scanned_job:scanned_jobs(company_name, job_title, job_url, location)')
+      .select('id, engineer_id, scanned_job_id, overall_score, dimension_scores, reasoning, highlight_quote, display_rank, feedback, feedback_category, feedback_at, applied_at, created_at, scanned_job:scanned_jobs(company_name, job_title, job_url, location)')
       .eq('engineer_id', id)
       .order('display_rank', { ascending: true, nullsFirst: false })
       .order('overall_score', { ascending: false })
@@ -52,6 +52,8 @@ export async function GET(
           companyName: job?.company_name || 'Unknown',
           jobUrl: job?.job_url || null,
           location: job?.location || null,
+          reasoning: m.reasoning || null,
+          highlightQuote: m.highlight_quote || null,
         }
       }),
     })
