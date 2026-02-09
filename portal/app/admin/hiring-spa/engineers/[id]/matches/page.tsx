@@ -284,7 +284,7 @@ export default function AdminEngineerMatchesPage() {
                                       fontFamily: f.serif, fontSize: 13, color: c.graphite,
                                       margin: '4px 0 0 0', lineHeight: 1.5,
                                     }}>
-                                      {m.reasoning[dim]}
+                                      {m.reasoning![dim]}
                                     </p>
                                   </div>
                                 ))}
