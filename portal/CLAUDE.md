@@ -45,6 +45,45 @@ The bug itself creates stale `profiles` rows. When an engineer gets redirected t
 - NEVER use the `profiles` table as a signal for "is this a company user" — the bug creates stale profiles rows
 - The `x-engineer-flow` cookie on `.fractaltech.nyc` is the source of truth — do NOT remove it
 
+## Engineer Job Matching System
+
+### How Matching Works
+1. Engineer completes questionnaire (5 text sections + priority sliders + locations)
+2. `computeMatchesForEngineer()` in `lib/hiring-spa/job-matching.ts` runs:
+   - Pre-filters: location, tech stack compatibility, exclusion preferences, deduplication
+   - Rule-based keyword pre-filter selects top 20 candidates
+   - Claude Sonnet scores each candidate across 5 dimensions (0-100): mission, technical, culture, environment, dna
+   - Weighted score computed using engineer's priority_ratings sliders
+   - Per-dimension minimum threshold (MIN_DIMENSION_SCORE = 40) rejects poor fits
+   - Top 10 matches (max 2 per company) stored in `engineer_job_matches`
+
+### Sparse Questionnaire Data (Feb 2026)
+**Problem:** Engineers who submit with empty text fields (only sliders + locations) got 0 matches because Claude scored culture/environment/dna conservatively (~20-35) and the MIN_DIMENSION_SCORE=40 threshold rejected everything.
+
+**Fix (commits cdfe531..f9aea3d):**
+- `getQuestionnaireCompleteness()` detects sparse profiles (< 3 of 5 sections filled)
+- SYSTEM_PROMPT instructs Claude to score 50 (neutral) when no preference data exists
+- User prompt annotated with "Note on Data Completeness" for sparse profiles
+- MIN_DIMENSION_SCORE threshold skipped on questionnaire-dependent dimensions (culture, environment, dna) for sparse profiles; always enforced on technical and mission
+- Client-side + server-side validation now requires >= 1 non-empty answer per section
+
+**Key files:**
+| File | What it does |
+|------|-------------|
+| `lib/hiring-spa/job-matching.ts` | Matching algorithm, scoring, thresholds |
+| `lib/hiring-spa/engineer-summary.ts` | AI profile summary generation |
+| `components/engineer/EngineerQuestionnaireForm.tsx` | Questionnaire UI + client validation |
+| `app/api/engineer/questionnaire/route.ts` | Questionnaire save + server validation |
+| `app/api/admin/hiring-spa/engineers/[id]/matches/route.ts` | Admin API: fetch + compute matches |
+| `app/admin/hiring-spa/engineers/[id]/matches/page.tsx` | Admin UI: match scores + expandable reasoning |
+
+**If matches break:**
+- Check `MIN_DIMENSION_SCORE` (line ~20) — lowering it = more matches, raising = fewer
+- Check `PREFILTER_TOP_N` (line ~24) — controls how many jobs reach Claude scoring
+- Sparse detection threshold is `filled < 3` in `getQuestionnaireCompleteness()`
+- Questionnaire-dependent dimensions list: culture, environment, dna
+- The SYSTEM_PROMPT "score 50 when no data" guideline affects all scoring, not just sparse profiles
+
 ## Architecture Notes
 
 ### Subdomain Routing
