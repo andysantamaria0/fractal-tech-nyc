@@ -30,6 +30,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Priority ratings are required' }, { status: 400 })
     }
 
+    // Validate each section has at least 1 non-empty answer
+    const sectionEntries = [
+      { key: 'work_preferences', label: 'Work Preferences', data: work_preferences },
+      { key: 'career_growth', label: 'Career Growth', data: career_growth },
+      { key: 'strengths', label: 'Strengths', data: strengths },
+      { key: 'growth_areas', label: 'Growth Areas', data: growth_areas },
+      { key: 'deal_breakers', label: 'Deal Breakers', data: deal_breakers },
+    ]
+
+    const missingSections = sectionEntries
+      .filter(({ data }) => {
+        if (!data || typeof data !== 'object') return true
+        return !Object.values(data).some(v => typeof v === 'string' && (v as string).trim().length > 0)
+      })
+      .map(({ label }) => label)
+
+    if (missingSections.length > 0) {
+      return NextResponse.json({
+        error: `Please answer at least one question in each section. Missing: ${missingSections.join(', ')}`,
+        missing_sections: missingSections,
+      }, { status: 400 })
+    }
+
     const serviceClient = await createServiceClient()
 
     // Fetch profile

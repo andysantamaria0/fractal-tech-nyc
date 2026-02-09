@@ -57,6 +57,7 @@ export default function EngineerQuestionnaireForm({ profile, isEditing }: Props)
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [sectionErrors, setSectionErrors] = useState<Record<string, string>>({})
 
   const [priorities, setPriorities] = useState<PriorityRatings>(
     profile.priority_ratings || {
@@ -114,12 +115,39 @@ export default function EngineerQuestionnaireForm({ profile, isEditing }: Props)
         [questionId]: value,
       },
     }))
+    // Clear section error when user types a non-empty answer
+    if (value.trim()) {
+      setSectionErrors(prev => {
+        if (!prev[sectionKey]) return prev
+        const next = { ...prev }
+        delete next[sectionKey]
+        return next
+      })
+    }
+  }
+
+  function validateSections(): boolean {
+    const errors: Record<string, string> = {}
+    for (const section of ENGINEER_SECTIONS) {
+      const sectionAnswers = answers[section.answersKey] || {}
+      const hasContent = Object.values(sectionAnswers).some(
+        v => typeof v === 'string' && v.trim().length > 0
+      )
+      if (!hasContent) {
+        errors[section.answersKey] = `Please answer at least one question in "${section.title}".`
+      }
+    }
+    setSectionErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSaving(true)
     setError('')
+
+    if (!validateSections()) return
+
+    setSaving(true)
 
     try {
       const allLocations = [...selectedLocations, ...customLocations]
@@ -257,6 +285,15 @@ export default function EngineerQuestionnaireForm({ profile, isEditing }: Props)
           <p style={{ fontFamily: f.serif, fontSize: 14, color: c.graphite, margin: '0 0 20px 0', lineHeight: 1.6 }}>
             {section.description}
           </p>
+          {sectionErrors[section.answersKey] && (
+            <div style={{
+              fontFamily: f.mono, fontSize: 12, color: '#8B3A3A',
+              backgroundColor: 'rgba(139, 58, 58, 0.08)', border: '1px solid rgba(139, 58, 58, 0.2)',
+              borderRadius: 6, padding: '8px 12px', marginBottom: 16,
+            }}>
+              {sectionErrors[section.answersKey]}
+            </div>
+          )}
           {section.questions.map(q => (
             <div key={q.id} style={{ marginBottom: 20 }}>
               <label

@@ -131,6 +131,26 @@ export async function generateEngineerProfileSummary(
     userPrompt += '\n'
   }
 
+  // Check if questionnaire data is sparse
+  const questionnaireSections = [
+    input.workPreferences,
+    input.careerGrowth,
+    input.strengths,
+    input.growthAreas,
+    input.dealBreakers,
+  ]
+  const filledSections = questionnaireSections.filter(section => {
+    if (!section || typeof section !== 'object') return false
+    return Object.values(section).some(v => typeof v === 'string' && v.trim().length > 0)
+  }).length
+
+  if (filledSections < 3) {
+    userPrompt += '## Note on Data Completeness\n\n'
+    userPrompt += `Only ${filledSections} of 5 questionnaire sections have answers. `
+    userPrompt += 'Flag any inferred preferences as uncertain. Focus the summary on what is known from the technical DNA and available answers. '
+    userPrompt += 'Do not fabricate preferences where data is missing.\n\n'
+  }
+
   userPrompt += 'Produce the JSON profile summary now.'
 
   const response = await client.messages.create({

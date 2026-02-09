@@ -104,6 +104,43 @@ async function parallelMap<T, R>(
   return results
 }
 
+// Questionnaire section keys that map to dimensions
+const QUESTIONNAIRE_SECTION_KEYS = [
+  'work_preferences',
+  'career_growth',
+  'strengths',
+  'growth_areas',
+  'deal_breakers',
+] as const
+
+// Dimensions that depend on questionnaire data (not just engineer_dna)
+const QUESTIONNAIRE_DEPENDENT_DIMENSIONS: (keyof DimensionWeights)[] = [
+  'culture', 'environment', 'dna',
+]
+
+/**
+ * Check which questionnaire sections have actual non-empty content.
+ * Returns the count of filled sections and list of empty section keys.
+ */
+function getQuestionnaireCompleteness(engineer: EngineerProfileSpa): {
+  filledSections: number
+  totalSections: number
+  isSparse: boolean
+} {
+  let filled = 0
+  for (const key of QUESTIONNAIRE_SECTION_KEYS) {
+    const section = engineer[key] as Record<string, string> | null
+    if (section && Object.values(section).some(v => typeof v === 'string' && v.trim().length > 0)) {
+      filled++
+    }
+  }
+  return {
+    filledSections: filled,
+    totalSections: QUESTIONNAIRE_SECTION_KEYS.length,
+    isSparse: filled < 3,
+  }
+}
+
 const SYSTEM_PROMPT = `You are a matching engine for a job platform. Given an engineer's profile and a job posting, score how well the job fits the engineer across 5 dimensions.
 
 Each dimension is scored 0-100:
@@ -136,6 +173,7 @@ Guidelines:
 - Be calibrated: 80+ means genuinely strong, 50-70 is moderate, below 40 is a poor fit
 - Ground scores in specific evidence from both the engineer profile and job description
 - Don't inflate scores — honest calibration is more valuable than optimism
+- When no preference data exists for a dimension (e.g. culture, environment), score 50 (neutral) rather than scoring low. Only score below 50 when there is concrete evidence of a mismatch.
 - The highlight_quote should be specific and memorable, not generic`
 
 // Map shorthand location names to patterns for matching
@@ -498,6 +536,15 @@ export async function scoreJobForEngineer(
     userPrompt += '\n'
   }
 
+  // Sparse data annotation
+  const completeness = getQuestionnaireCompleteness(engineer)
+  if (completeness.isSparse) {
+    userPrompt += '## Note on Data Completeness\n\n'
+    userPrompt += `This engineer has only filled ${completeness.filledSections} of ${completeness.totalSections} questionnaire sections. `
+    userPrompt += 'For dimensions where no preference data exists (culture, environment, dna), score 50 (neutral) rather than penalizing. '
+    userPrompt += 'Only deviate from 50 when there is concrete evidence from the available data.\n\n'
+  }
+
   // Job details
   userPrompt += '## Job Posting\n\n'
   userPrompt += `Title: ${job.job_title}\n`
@@ -816,9 +863,17 @@ export async function computeMatchesForEngineer(
         const result = await scoreJobForEngineer(job, typedEngineer, notAFitReasons, preferences)
 
         // Check minimum threshold: every dimension must be >= 40
-        const belowThreshold = DIMENSION_KEYS.some(
-          key => result.scores[key] < MIN_DIMENSION_SCORE,
-        )
+        // For sparse profiles, skip threshold on questionnaire-dependent dimensions
+        // that lack source data. Always enforce on technical and mission.
+        const completeness = getQuestionnaireCompleteness(typedEngineer)
+        const belowThreshold = DIMENSION_KEYS.some(key => {
+          if (result.scores[key] >= MIN_DIMENSION_SCORE) return false
+          // For sparse profiles, only enforce threshold on data-backed dimensions
+          if (completeness.isSparse && QUESTIONNAIRE_DEPENDENT_DIMENSIONS.includes(key)) {
+            return false
+          }
+          return true
+        })
         if (belowThreshold) return null
 
         const baseScore = computeWeightedScore(
