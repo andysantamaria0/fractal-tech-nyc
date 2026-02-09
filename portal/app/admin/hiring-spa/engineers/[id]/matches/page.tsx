@@ -203,6 +203,7 @@ export default function AdminEngineerMatchesPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
+                  <th style={{ ...th, width: 32 }}></th>
                   <th style={{ ...th, textAlign: 'center', width: 50 }}>Rank</th>
                   <th style={th}>Job Title</th>
                   <th style={th}>Company</th>
@@ -228,6 +229,9 @@ export default function AdminEngineerMatchesPage() {
                         onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)')}
                         onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
                       >
+                        <td style={{ ...tdMono, textAlign: 'center', fontSize: 14, color: c.mist, transition: 'transform 150ms ease', transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                          &#9656;
+                        </td>
                         <td style={{ ...tdMono, textAlign: 'center' }}>{m.displayRank ?? i + 1}</td>
                         <td style={td}>
                           {m.jobUrl ? (
@@ -255,9 +259,9 @@ export default function AdminEngineerMatchesPage() {
                         <td style={td}>{feedbackBadge(m)}</td>
                         <td style={tdMono}>{m.appliedAt ? formatDate(m.appliedAt) : '\u2014'}</td>
                       </tr>
-                      {isExpanded && (m.reasoning || m.highlightQuote) && (
+                      {isExpanded && (
                         <tr>
-                          <td colSpan={12} style={{ padding: '0 16px 16px 16px', backgroundColor: 'rgba(0,0,0,0.015)' }}>
+                          <td colSpan={13} style={{ padding: '0 16px 16px 16px', backgroundColor: 'rgba(0,0,0,0.015)', borderBottom: `1px solid ${c.stoneLight}` }}>
                             {m.highlightQuote && (
                               <p style={{
                                 fontFamily: f.serif, fontSize: 14, fontStyle: 'italic',
@@ -266,7 +270,7 @@ export default function AdminEngineerMatchesPage() {
                                 &ldquo;{m.highlightQuote}&rdquo;
                               </p>
                             )}
-                            {m.reasoning && (
+                            {m.reasoning ? (
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 24px', marginTop: 12 }}>
                                 {(['mission', 'technical', 'culture', 'environment', 'dna'] as const).map(dim => (
                                   <div key={dim} style={{ padding: '8px 0' }}>
@@ -285,6 +289,13 @@ export default function AdminEngineerMatchesPage() {
                                   </div>
                                 ))}
                               </div>
+                            ) : (
+                              <p style={{
+                                fontFamily: f.serif, fontSize: 13, color: c.mist,
+                                margin: '16px 0 0 0', fontStyle: 'italic',
+                              }}>
+                                No reasoning data available. Recompute matches to generate reasoning.
+                              </p>
                             )}
                           </td>
                         </tr>
