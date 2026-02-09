@@ -65,13 +65,13 @@ const cardTitle: React.CSSProperties = {
 const th: React.CSSProperties = {
   fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em',
   textTransform: 'uppercase', color: c.mist, fontWeight: 400,
-  padding: '12px 16px', textAlign: 'left',
+  padding: '12px 10px', textAlign: 'left', whiteSpace: 'nowrap',
   borderBottom: `1px solid ${c.stoneLight}`,
 }
 
 const td: React.CSSProperties = {
   fontFamily: f.serif, fontSize: 14, color: c.charcoal,
-  padding: '12px 16px', borderBottom: `1px solid ${c.stoneLight}`,
+  padding: '12px 10px', borderBottom: `1px solid ${c.stoneLight}`,
 }
 
 const tdMono: React.CSSProperties = {
@@ -214,7 +214,7 @@ export default function AdminEngineerMatchesPage() {
                   <th style={{ ...th, textAlign: 'center' }}>Culture</th>
                   <th style={{ ...th, textAlign: 'center' }}>Env</th>
                   <th style={{ ...th, textAlign: 'center' }}>DNA</th>
-                  <th style={{ ...th, whiteSpace: 'nowrap' }}>Feedback</th>
+                  <th style={th}>Feedback</th>
                   <th style={th}>Applied</th>
                 </tr>
               </thead>
