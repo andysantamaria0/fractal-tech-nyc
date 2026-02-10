@@ -108,7 +108,33 @@ function addStructuralWhitespace($: ReturnType<typeof load>, container: ReturnTy
   }
 }
 
+/**
+ * Try to extract job description from JSON-LD structured data (schema.org/JobPosting).
+ * Many ATS platforms (especially Ashby) embed the full JD here even when the body is client-rendered.
+ */
+function extractFromJsonLd($: ReturnType<typeof load>): { title: string; text: string } | null {
+  for (const el of $('script[type="application/ld+json"]').toArray()) {
+    try {
+      const data = JSON.parse($(el).html() || '')
+      if (data['@type'] === 'JobPosting' && data.description) {
+        const title = data.title || ''
+        // description is HTML — parse it to plain text
+        const desc$ = load(data.description)
+        const text = desc$.root().text().replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n\n').trim()
+        if (text.length > 100) return { title, text }
+      }
+    } catch { /* ignore malformed JSON-LD */ }
+  }
+  return null
+}
+
 function extractContent($: ReturnType<typeof load>, ats: ATSConfig | null): { title: string; text: string } {
+  // Try JSON-LD first — it's the most reliable source for SPAs like Ashby
+  const jsonLd = extractFromJsonLd($)
+  if (jsonLd && jsonLd.text) {
+    return { title: jsonLd.title || $('title').first().text().trim(), text: jsonLd.text }
+  }
+
   // Remove non-content elements
   $('script, style, noscript, iframe, svg, nav, header, footer').remove()
   $('[role="navigation"], [role="banner"], [role="contentinfo"]').remove()
