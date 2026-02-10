@@ -99,16 +99,12 @@ export async function POST(
           .eq('id', profile.id)
           .maybeSingle()
 
-        const prefs = (profilePrefs?.matching_preferences || {
-          excluded_locations: [],
-          excluded_companies: [],
-          excluded_company_domains: [],
-          excluded_keywords: [],
-        }) as {
-          excluded_locations: string[]
-          excluded_companies: string[]
-          excluded_company_domains: string[]
-          excluded_keywords: string[]
+        const raw = (profilePrefs?.matching_preferences || {}) as Record<string, unknown>
+        const prefs = {
+          excluded_locations: (raw.excluded_locations || []) as string[],
+          excluded_companies: (raw.excluded_companies || []) as string[],
+          excluded_company_domains: (raw.excluded_company_domains || []) as string[],
+          excluded_keywords: (raw.excluded_keywords || []) as string[],
         }
 
         let prefsUpdated = false
