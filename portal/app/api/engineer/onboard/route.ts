@@ -130,9 +130,9 @@ export async function POST(request: Request) {
         status: 'draft',
       })
       .select('id, status')
-      .single()
+      .maybeSingle()
 
-    if (insertError) {
+    if (insertError || !profile) {
       console.error('[engineer/onboard] Insert error:', insertError)
       return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 })
     }

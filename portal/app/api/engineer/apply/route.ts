@@ -71,9 +71,9 @@ export async function POST(request: NextRequest) {
         status: 'draft',
       })
       .select('id, status, engineer_dna')
-      .single()
+      .maybeSingle()
 
-    if (insertError) {
+    if (insertError || !profile) {
       console.error('[engineer-apply] Insert error:', insertError)
       return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 })
     }

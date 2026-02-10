@@ -722,7 +722,7 @@ export async function computeMatchesForEngineer(
     .from('engineers')
     .select('*')
     .eq('id', engineerProfileId)
-    .single()
+    .maybeSingle()
 
   if (engineerError || !engineer) {
     throw new Error(`Engineer profile not found: ${engineerProfileId}`)

@@ -94,9 +94,9 @@ export async function POST(request: Request) {
         .update(engineerData)
         .eq('id', existing.id)
         .select()
-        .single()
+        .maybeSingle()
 
-      if (updateError) {
+      if (updateError || !updated) {
         console.error('Engineer update error:', updateError)
         return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 })
       }
@@ -111,9 +111,9 @@ export async function POST(request: Request) {
           is_available_for_cycles: false,
         })
         .select()
-        .single()
+        .maybeSingle()
 
-      if (insertError) {
+      if (insertError || !created) {
         console.error('Engineer insert error:', insertError)
         return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 })
       }

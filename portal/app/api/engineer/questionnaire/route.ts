@@ -135,7 +135,7 @@ export async function POST(request: Request) {
           .from('engineers')
           .select('*')
           .eq('id', profile.id)
-          .single()
+          .maybeSingle()
 
         if (fullProfile) {
           try {

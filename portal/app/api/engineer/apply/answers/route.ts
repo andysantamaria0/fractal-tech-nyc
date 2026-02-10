@@ -73,9 +73,9 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', profile.id)
       .select('id, status, profile_summary')
-      .single()
+      .maybeSingle()
 
-    if (finalError) {
+    if (finalError || !updatedProfile) {
       console.error('[engineer-apply-answers] Final update error:', finalError)
       return NextResponse.json({ error: 'Failed to finalize profile' }, { status: 500 })
     }
