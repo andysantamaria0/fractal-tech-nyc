@@ -41,7 +41,7 @@ export default function EngineerLoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/callback?next=/engineer/onboard`,
+        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/engineer/onboard`,
       },
     })
 

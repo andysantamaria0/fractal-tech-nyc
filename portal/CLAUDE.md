@@ -92,14 +92,17 @@ The bug itself creates stale `profiles` rows. When an engineer gets redirected t
 - Both served by the same Next.js app; middleware differentiates by `host` header
 
 ### Auth Flow
-- Supabase magic link OTP (PKCE flow)
-- Callback at `/callback` exchanges code for session
+- Supabase magic link OTP (PKCE flow) for engineers, email/password + Google OAuth (implicit flow) for companies
+- **Two callback paths** (do NOT consolidate):
+  - `app/api/auth/callback/route.ts` — Server-side Route Handler for PKCE code exchange (magic links). Exchanges code, sets session cookies in HTTP response, redirects to final page. This is the reliable path.
+  - `app/(auth)/callback/page.tsx` — Client-side component for implicit flow (Google OAuth hash fragments). If it receives a `?code=` param, it redirects to the server handler above.
 - Middleware handles redirects based on user type (engineer vs company)
 - Engineers table: `engineers` (checked by `auth_user_id` then `email`)
 - Company users table: `profiles` (always created by admin invite)
 
 ### Key Files
 - `middleware.ts` — All routing/redirect logic
-- `app/(auth)/callback/route.ts` — Post-auth routing decisions
+- `app/api/auth/callback/route.ts` — Server-side PKCE code exchange + post-auth routing (magic links)
+- `app/(auth)/callback/page.tsx` — Client-side implicit flow handler (Google OAuth), redirects PKCE codes to server handler
 - `app/engineer/login/page.tsx` — Engineer magic link entry point
 - `lib/api/admin-helpers.ts` — `withAdmin()` wrapper for admin API routes
