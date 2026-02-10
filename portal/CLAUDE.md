@@ -55,6 +55,7 @@ The bug itself creates stale `profiles` rows. When an engineer gets redirected t
    - Claude Sonnet scores each candidate across 5 dimensions (0-100): mission, technical, culture, environment, dna
    - Weighted score computed using engineer's priority_ratings sliders
    - Per-dimension minimum threshold (MIN_DIMENSION_SCORE = 40) rejects poor fits
+   - Technical floor cap: if technical < 50, overall score capped at 50% (prevents domain-irrelevant jobs from inflating via strong culture/environment/dna)
    - Top 10 matches (max 2 per company) stored in `engineer_job_matches`
 
 ### Sparse Questionnaire Data (Feb 2026)
@@ -80,6 +81,8 @@ The bug itself creates stale `profiles` rows. When an engineer gets redirected t
 **If matches break:**
 - Check `MIN_DIMENSION_SCORE` (line ~20) — lowering it = more matches, raising = fewer
 - Check `PREFILTER_TOP_N` (line ~24) — controls how many jobs reach Claude scoring
+- Check `TECHNICAL_SOFT_FLOOR` / `TECHNICAL_FLOOR_CAP` (line ~30) — if technical < 50, overall capped at 50%. Raise the cap to be more lenient, lower to be stricter
+- SYSTEM_PROMPT has a domain-expertise guideline for technical scoring — Claude is told to score below 40 when the core domain is outside the engineer's experience regardless of language overlap
 - Sparse detection threshold is `filled < 3` in `getQuestionnaireCompleteness()`
 - Questionnaire-dependent dimensions list: culture, environment, dna
 - The SYSTEM_PROMPT "score 50 when no data" guideline affects all scoring, not just sparse profiles
