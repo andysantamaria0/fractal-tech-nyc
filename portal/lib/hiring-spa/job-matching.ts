@@ -173,6 +173,7 @@ Guidelines:
 - Be calibrated: 80+ means genuinely strong, 50-70 is moderate, below 40 is a poor fit
 - Ground scores in specific evidence from both the engineer profile and job description
 - Don't inflate scores — honest calibration is more valuable than optimism
+- For the technical dimension, shared programming languages alone do NOT make a good match. You must consider the actual domain expertise required (e.g. graphics/3D, embedded systems, ML/AI, game engines, compilers vs. web applications, mobile, data engineering). A web app engineer who knows TypeScript is NOT a technical match for a role requiring TypeScript in game engine tooling, lighting systems, or compilers. Score below 40 when the core domain is outside the engineer's experience, regardless of language overlap.
 - When no preference data exists for a dimension (e.g. culture, environment), score 50 (neutral) rather than scoring low. Only score below 50 when there is concrete evidence of a mismatch.
 - The highlight_quote should be specific and memorable, not generic`
 

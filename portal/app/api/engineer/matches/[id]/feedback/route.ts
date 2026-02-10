@@ -79,7 +79,7 @@ export async function POST(
         .from('engineer_job_matches')
         .select('scanned_job_id')
         .eq('id', matchId)
-        .single()
+        .maybeSingle()
 
       let job: { location: string | null; company_name: string | null; company_domain: string | null } | null = null
       if (matchData?.scanned_job_id) {
@@ -97,7 +97,7 @@ export async function POST(
           .from('engineers')
           .select('matching_preferences')
           .eq('id', profile.id)
-          .single()
+          .maybeSingle()
 
         const prefs = (profilePrefs?.matching_preferences || {
           excluded_locations: [],
