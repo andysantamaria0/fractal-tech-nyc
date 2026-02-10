@@ -27,6 +27,11 @@ const PREFILTER_TOP_N = 20 // how many jobs pass to detailed scoring
 const RECENCY_BOOST_MAX = 5 // max points added for brand new jobs
 const RECENCY_BOOST_DAYS = 14 // boost tapers to 0 over this many days
 
+// If technical score is below this, cap the overall score so a bad role fit
+// can't be masked by strong culture/environment/dna dimensions.
+const TECHNICAL_SOFT_FLOOR = 50
+const TECHNICAL_FLOOR_CAP = 50 // max overall score when technical < TECHNICAL_SOFT_FLOOR
+
 /**
  * Calculate recency boost based on job posting date.
  * Returns 0-RECENCY_BOOST_MAX points, tapering linearly over RECENCY_BOOST_DAYS.
@@ -883,7 +888,13 @@ export async function computeMatchesForEngineer(
           learnedAdjustments,
         )
         const recencyBoost = getRecencyBoost(job)
-        const overall_score = Math.max(0, Math.min(100, baseScore + recencyBoost))
+        let overall_score = Math.max(0, Math.min(100, baseScore + recencyBoost))
+
+        // Cap overall score when technical fit is weak — a great company with
+        // the wrong role shouldn't surface as a strong match
+        if (result.scores.technical < TECHNICAL_SOFT_FLOOR) {
+          overall_score = Math.min(overall_score, TECHNICAL_FLOOR_CAP)
+        }
 
         return {
           job,
