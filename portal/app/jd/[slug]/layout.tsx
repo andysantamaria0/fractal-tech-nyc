@@ -1,5 +1,5 @@
 import '../jd-public.css'
-import '../../(portal)/hiring-spa/hiring-spa.css'
+import '../hiring-spa.css'
 
 export default function JDPublicLayout({
   children,

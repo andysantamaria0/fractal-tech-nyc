@@ -115,21 +115,6 @@ export default function CompleteProfilePage() {
       newsletter_optin: newsletterOptin,
     })
 
-    // Auto-trigger hiring spa onboarding
-    try {
-      const onboardRes = await fetch('/api/hiring-spa/onboard', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      const onboardData = await onboardRes.json()
-      if (onboardRes.ok && onboardData.redirectTo) {
-        router.push(onboardData.redirectTo)
-        return
-      }
-    } catch {
-      console.error('Auto-onboard failed, falling back to dashboard')
-    }
-
     router.push('/dashboard')
   }
 

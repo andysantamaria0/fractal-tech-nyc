@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useDarkMode } from '@/components/DarkMode'
 
-export default function Header({ userName, isAdmin, hasHiringSpaAccess }: { userName?: string; isAdmin?: boolean; hasHiringSpaAccess?: boolean }) {
+export default function Header({ userName, isAdmin }: { userName?: string; isAdmin?: boolean }) {
   const supabase = createClient()
   const router = useRouter()
   const { isDark, toggle } = useDarkMode()
@@ -24,7 +24,6 @@ export default function Header({ userName, isAdmin, hasHiringSpaAccess }: { user
             <li><Link href="/dashboard">Dashboard</Link></li>
             <li><Link href="/cycles">Cycles</Link></li>
             <li><Link href="/settings">Settings</Link></li>
-            {hasHiringSpaAccess && <li><Link href="/hiring-spa">Hiring Spa</Link></li>}
             {isAdmin && <li><Link href="/admin/cycles" style={{ color: 'var(--color-accent)' }}>Admin</Link></li>}
             {userName && <li><span style={{ fontWeight: 700, fontSize: 'var(--text-sm)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{userName}</span></li>}
             <li><button onClick={toggle}>{isDark ? 'Light' : 'Dark'}</button></li>

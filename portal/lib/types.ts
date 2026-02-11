@@ -49,9 +49,6 @@ export interface Company {
   newsletter_optin?: boolean
   hubspot_contact_id?: string
   hubspot_company_id?: string
-  has_hiring_spa_access?: boolean
-  website_url?: string
-  github_org?: string
   created_at: string
 }
 

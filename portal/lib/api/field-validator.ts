@@ -29,7 +29,6 @@ export const ENGINEER_FIELDS = [
 
 export const COMPANY_FIELDS = [
   'name', 'company_name', 'company_linkedin', 'company_stage', 'newsletter_optin',
-  'has_hiring_spa_access', 'website_url', 'github_org',
 ] as const
 
 export const SUBMISSION_FIELDS = [

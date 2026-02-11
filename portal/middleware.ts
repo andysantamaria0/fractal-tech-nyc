@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
       url.pathname = '/engineer/login'
       return NextResponse.redirect(url)
     }
-    if (p === '/dashboard' || p.startsWith('/cycles') || p.startsWith('/settings') || p.startsWith('/hiring-spa')) {
+    if (p === '/dashboard' || p.startsWith('/cycles') || p.startsWith('/settings')) {
       const url = request.nextUrl.clone()
       url.pathname = '/engineer/onboard'
       return NextResponse.redirect(url)
@@ -121,8 +121,7 @@ export async function middleware(request: NextRequest) {
         !request.nextUrl.pathname.startsWith('/engineer/apply') &&
         !request.nextUrl.pathname.startsWith('/engineer/login')) ||
       request.nextUrl.pathname.startsWith('/complete-profile') ||
-      request.nextUrl.pathname.startsWith('/admin') ||
-      request.nextUrl.pathname.startsWith('/hiring-spa'))
+      request.nextUrl.pathname.startsWith('/admin'))
   ) {
     const url = request.nextUrl.clone()
     const redirectTo = request.nextUrl.pathname
@@ -145,21 +144,6 @@ export async function middleware(request: NextRequest) {
       .maybeSingle()
 
     if (!profile?.is_admin) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      return redirectWithCookies(url)
-    }
-  }
-
-  // Hiring Spa routes — check has_hiring_spa_access flag
-  if (user && request.nextUrl.pathname.startsWith('/hiring-spa')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('has_hiring_spa_access')
-      .eq('id', user.id)
-      .maybeSingle()
-
-    if (!profile?.has_hiring_spa_access) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
       return redirectWithCookies(url)

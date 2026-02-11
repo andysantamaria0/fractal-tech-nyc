@@ -5,7 +5,7 @@ export async function GET() {
   return withAdmin(async ({ serviceClient }) => {
     const { data: companies, error: fetchError } = await serviceClient
       .from('profiles')
-      .select('id, name, email, company_name, company_linkedin, company_stage, newsletter_optin, hubspot_contact_id, hubspot_company_id, has_hiring_spa_access, website_url, github_org, created_at')
+      .select('id, name, email, company_name, company_linkedin, company_stage, newsletter_optin, hubspot_contact_id, hubspot_company_id, created_at')
       .eq('is_admin', false)
       .order('created_at', { ascending: false })
 
