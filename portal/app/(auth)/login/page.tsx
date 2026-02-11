@@ -82,7 +82,18 @@ export default function LoginPage() {
       document.cookie = `x-login-redirect=${encodeURIComponent(redirectParam)}; path=/${domainAttr}${secureAttr}; samesite=lax; max-age=600`
     }
 
-    const { error } = await supabase.auth.signInWithOAuth({
+    // Use implicit flow to avoid PKCE code_verifier cookie issues.
+    // The @supabase/ssr browser client's cookie adapter silently fails to persist
+    // the PKCE code_verifier cookie in some environments. Implicit flow returns
+    // tokens directly in the URL hash, bypassing PKCE entirely.
+    const { createClient: createPlainClient } = await import('@supabase/supabase-js')
+    const oauthClient = createPlainClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { flowType: 'implicit', persistSession: false, detectSessionInUrl: false } }
+    )
+
+    const { error } = await oauthClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/callback`,
