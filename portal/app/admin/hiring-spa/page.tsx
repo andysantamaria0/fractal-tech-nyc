@@ -15,6 +15,16 @@ interface OverviewData {
     byEngineer: { name: string; email: string; count: number; lastAppliedAt: string }[]
     list: { id: string; engineerName: string; engineerEmail: string; companyName: string; jobTitle: string; location: string; appliedAt: string; feedback: string | null }[]
   }
+  matches: {
+    total: number
+    byStatus: { pending: number; applied: number; notAFit: number }
+    avgScore: number
+    avgScoreApplied: number | null
+    avgScoreDismissed: number | null
+    dismissalReasons: { category: string; count: number }[]
+    byEngineer: { name: string; email: string; engineerId: string; total: number; applied: number; notAFit: number; pending: number; avgScore: number }[]
+    list: { id: string; engineerName: string; engineerEmail: string; companyName: string; jobTitle: string; location: string; overallScore: number; feedback: string | null; feedbackCategory: string | null; appliedAt: string | null; createdAt: string }[]
+  }
 }
 
 function formatDate(dateStr: string) {
@@ -154,7 +164,7 @@ export default function AdminHiringSpaPage() {
     )
   }
 
-  const { engineers, applications } = data
+  const { engineers, applications, matches } = data
 
   // Count engineers per stage for summary
   const stageCounts: Record<string, number> = {}
@@ -267,6 +277,136 @@ export default function AdminHiringSpaPage() {
                           )
                         })()}
                       </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Match Engagement Summary */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 40 }}>
+        {[
+          { value: matches.total, label: 'Total Matches' },
+          { value: matches.byStatus.applied, label: 'Applied', sub: matches.total > 0 ? `${Math.round((matches.byStatus.applied / matches.total) * 100)}%` : undefined },
+          { value: matches.byStatus.notAFit, label: 'Dismissed', sub: matches.total > 0 ? `${Math.round((matches.byStatus.notAFit / matches.total) * 100)}%` : undefined },
+          { value: matches.byStatus.pending, label: 'Pending Review', sub: matches.total > 0 ? `${Math.round((matches.byStatus.pending / matches.total) * 100)}%` : undefined },
+          { value: matches.avgScore, label: 'Avg Match Score' },
+          { value: matches.avgScoreApplied ?? '\u2014', label: 'Avg Applied Score' },
+        ].map((s) => (
+          <div key={s.label} style={{ ...card, padding: '20px 24px', textAlign: 'center' }}>
+            <div style={statValue}>{s.value}</div>
+            <div style={statLabel}>{s.label}</div>
+            {'sub' in s && s.sub && <div style={{ fontFamily: f.mono, fontSize: 10, color: c.graphite, marginTop: 2 }}>{s.sub}</div>}
+          </div>
+        ))}
+      </div>
+
+      {/* Matches by Engineer */}
+      <div style={{ ...card, marginBottom: 40 }}>
+        <div style={cardTitle}>Matches by Engineer ({matches.byEngineer.length})</div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={th}>Engineer</th>
+                <th style={th}>Total Matches</th>
+                <th style={th}>Applied</th>
+                <th style={th}>Not a Fit</th>
+                <th style={th}>Pending</th>
+                <th style={th}>Avg Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {matches.byEngineer.length === 0 ? (
+                <tr><td colSpan={6} style={{ ...td, color: c.mist }}>No matches yet</td></tr>
+              ) : (
+                matches.byEngineer.map((em) => (
+                  <tr key={em.engineerId}>
+                    <td style={td}>
+                      <Link href={`/admin/hiring-spa/engineers/${em.engineerId}/matches`} style={{ color: c.charcoal, textDecoration: 'underline', textUnderlineOffset: 2 }}>
+                        {em.name}
+                      </Link>
+                    </td>
+                    <td style={{ ...tdMono, textAlign: 'center' }}>{em.total}</td>
+                    <td style={{ ...tdMono, textAlign: 'center' }}>{em.applied > 0 ? em.applied : '\u2014'}</td>
+                    <td style={{ ...tdMono, textAlign: 'center' }}>{em.notAFit > 0 ? em.notAFit : '\u2014'}</td>
+                    <td style={{ ...tdMono, textAlign: 'center' }}>{em.pending > 0 ? em.pending : '\u2014'}</td>
+                    <td style={{ ...tdMono, textAlign: 'center' }}>{em.avgScore}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Dismissal Breakdown */}
+      {matches.dismissalReasons.length > 0 && (
+        <div style={{ ...card, marginBottom: 40 }}>
+          <div style={cardTitle}>Dismissal Reasons</div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={th}>Reason</th>
+                  <th style={th}>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {matches.dismissalReasons.map((r) => (
+                  <tr key={r.category}>
+                    <td style={td}>{r.category.replace(/_/g, ' ')}</td>
+                    <td style={{ ...tdMono, textAlign: 'center' }}>{r.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* All Matches */}
+      <div style={{ ...card, marginBottom: 40 }}>
+        <div style={cardTitle}>All Matches ({matches.list.length})</div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={th}>Engineer</th>
+                <th style={th}>Company</th>
+                <th style={th}>Role</th>
+                <th style={th}>Score</th>
+                <th style={th}>Status</th>
+                <th style={th}>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {matches.list.length === 0 ? (
+                <tr><td colSpan={6} style={{ ...td, color: c.mist }}>No matches yet</td></tr>
+              ) : (
+                matches.list.map((m) => {
+                  const scoreColor = m.overallScore >= 70 ? '#5a8a5a' : m.overallScore >= 50 ? c.match : c.mist
+                  return (
+                    <tr key={m.id}>
+                      <td style={td}>{m.engineerName}</td>
+                      <td style={td}>{m.companyName}</td>
+                      <td style={td}>{m.jobTitle}</td>
+                      <td style={{ ...tdMono, textAlign: 'center' }}>
+                        <span style={{ color: scoreColor, fontWeight: 500 }}>{m.overallScore}</span>
+                      </td>
+                      <td style={td}>
+                        {m.feedback === 'applied' ? (
+                          <span style={badge('rgba(122,158,122,0.15)', '#5a8a5a')}>Applied</span>
+                        ) : m.feedback === 'not_a_fit' ? (
+                          <span style={badge(c.stoneLight, c.graphite)}>Not a Fit</span>
+                        ) : (
+                          <span style={{ fontFamily: f.mono, fontSize: 12, color: c.mist }}>{'\u2014'}</span>
+                        )}
+                      </td>
+                      <td style={tdMono}>{formatDate(m.appliedAt || m.createdAt)}</td>
                     </tr>
                   )
                 })

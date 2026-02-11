@@ -7,6 +7,7 @@ export async function GET() {
       { data: engineers, error: engineersErr },
       { data: matchedEngineerIds, error: matchesErr },
       { data: applications, error: applicationsErr },
+      { data: allMatches, error: allMatchesErr },
     ] = await Promise.all([
       serviceClient
         .from('engineers')
@@ -19,6 +20,10 @@ export async function GET() {
         .select('id, applied_at, feedback, engineer:engineers(name, email), scanned_job:scanned_jobs(company_name, job_title, location)')
         .not('applied_at', 'is', null)
         .order('applied_at', { ascending: false }),
+      serviceClient
+        .from('engineer_job_matches')
+        .select('id, engineer_id, overall_score, feedback, feedback_category, applied_at, feedback_at, display_rank, created_at, engineer:engineers(name, email), scanned_job:scanned_jobs(company_name, job_title, location)')
+        .order('created_at', { ascending: false }),
     ])
 
     if (engineersErr || applicationsErr) {
@@ -26,6 +31,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch overview data' }, { status: 500 })
     }
     if (matchesErr) console.warn('engineer_job_matches query failed:', matchesErr.message)
+    if (allMatchesErr) console.warn('all matches query failed:', allMatchesErr.message)
 
     // --- Engineers with funnel stage ---
     const engineerList = engineers || []
@@ -113,6 +119,86 @@ export async function GET() {
       }
     })
 
+    // --- Match aggregation ---
+    const matchList = allMatches || []
+    const totalMatches = matchList.length
+    let appliedCount = 0
+    let notAFitCount = 0
+    let pendingCount = 0
+    let scoreSum = 0
+    let appliedScoreSum = 0
+    let appliedScoreCount = 0
+    let dismissedScoreSum = 0
+    let dismissedScoreCount = 0
+    const dismissalMap: Record<string, number> = {}
+    const engMatchMap: Record<string, { name: string; email: string; engineerId: string; total: number; applied: number; notAFit: number; pending: number; scoreSum: number }> = {}
+
+    for (const m of matchList) {
+      const eng = Array.isArray(m.engineer) ? m.engineer[0] : m.engineer
+      const engName = eng?.name || 'Unknown'
+      const engEmail = eng?.email || ''
+      scoreSum += m.overall_score
+
+      if (m.feedback === 'applied') {
+        appliedCount++
+        appliedScoreSum += m.overall_score
+        appliedScoreCount++
+      } else if (m.feedback === 'not_a_fit') {
+        notAFitCount++
+        dismissedScoreSum += m.overall_score
+        dismissedScoreCount++
+        const cat = m.feedback_category || 'other'
+        dismissalMap[cat] = (dismissalMap[cat] || 0) + 1
+      } else {
+        pendingCount++
+      }
+
+      if (!engMatchMap[m.engineer_id]) {
+        engMatchMap[m.engineer_id] = { name: engName, email: engEmail, engineerId: m.engineer_id, total: 0, applied: 0, notAFit: 0, pending: 0, scoreSum: 0 }
+      }
+      const em = engMatchMap[m.engineer_id]
+      em.total++
+      em.scoreSum += m.overall_score
+      if (m.feedback === 'applied') em.applied++
+      else if (m.feedback === 'not_a_fit') em.notAFit++
+      else em.pending++
+    }
+
+    const dismissalReasons = Object.entries(dismissalMap)
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count)
+
+    const matchesByEngineer = Object.values(engMatchMap)
+      .map((em) => ({
+        name: em.name,
+        email: em.email,
+        engineerId: em.engineerId,
+        total: em.total,
+        applied: em.applied,
+        notAFit: em.notAFit,
+        pending: em.pending,
+        avgScore: Math.round(em.scoreSum / em.total),
+      }))
+      .sort((a, b) => b.total - a.total)
+
+    const matchListMapped = matchList.map((m) => {
+      const eng = Array.isArray(m.engineer) ? m.engineer[0] : m.engineer
+      const job = Array.isArray(m.scanned_job) ? m.scanned_job[0] : m.scanned_job
+      return {
+        id: m.id,
+        engineerName: eng?.name || 'Unknown',
+        engineerEmail: eng?.email || '',
+        companyName: job?.company_name || 'Unknown',
+        jobTitle: job?.job_title || 'Unknown',
+        location: job?.location || '',
+        overallScore: m.overall_score,
+        feedback: m.feedback || null,
+        feedbackCategory: m.feedback_category || null,
+        appliedAt: m.applied_at || null,
+        createdAt: m.created_at,
+      }
+    })
+
     return NextResponse.json({
       engineers: engineerRows,
       applicationCount: appList.length,
@@ -123,6 +209,16 @@ export async function GET() {
         thisMonth,
         byEngineer,
         list,
+      },
+      matches: {
+        total: totalMatches,
+        byStatus: { pending: pendingCount, applied: appliedCount, notAFit: notAFitCount },
+        avgScore: totalMatches > 0 ? Math.round(scoreSum / totalMatches) : 0,
+        avgScoreApplied: appliedScoreCount > 0 ? Math.round(appliedScoreSum / appliedScoreCount) : null,
+        avgScoreDismissed: dismissedScoreCount > 0 ? Math.round(dismissedScoreSum / dismissedScoreCount) : null,
+        dismissalReasons,
+        byEngineer: matchesByEngineer,
+        list: matchListMapped,
       },
     })
   })
