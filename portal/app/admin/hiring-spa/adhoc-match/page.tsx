@@ -197,6 +197,7 @@ export default function AdHocMatchPage() {
           jd_url: jdUrl,
           engineer_ids: Array.from(selectedIds),
           notes: notes || undefined,
+          extracted_jd: extractedJD || undefined,
         }),
       })
       const data = await res.json()

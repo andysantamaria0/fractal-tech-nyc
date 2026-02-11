@@ -214,13 +214,24 @@ export async function scoreEngineerForJD(
   return parsed
 }
 
+const MIN_JD_TEXT_LENGTH = 100
+
 export async function computeAdHocMatches(
   jdUrl: string,
   engineerIds: string[],
   adminUserId: string | undefined,
   serviceClient: SupabaseClient,
+  preExtractedJD?: ExtractedJD,
 ): Promise<AdHocMatch[]> {
-  const extractedJD = await extractFromUrl(jdUrl)
+  const extractedJD = preExtractedJD || await extractFromUrl(jdUrl)
+
+  if (!extractedJD.raw_text || extractedJD.raw_text.length < MIN_JD_TEXT_LENGTH) {
+    throw new Error(
+      `JD extraction returned insufficient content (${extractedJD.raw_text?.length || 0} chars). ` +
+      `The page may be a client-rendered SPA that cannot be scraped server-side. ` +
+      `Try pasting the JD text directly.`
+    )
+  }
 
   const { data: engineers, error: engError } = await serviceClient
     .from('engineers')

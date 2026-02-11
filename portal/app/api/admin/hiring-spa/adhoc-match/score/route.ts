@@ -6,7 +6,7 @@ export const maxDuration = 120
 
 export async function POST(request: Request) {
   return withAdmin(async ({ serviceClient, userId }) => {
-    const { jd_url, engineer_ids, notes } = await request.json()
+    const { jd_url, engineer_ids, notes, extracted_jd } = await request.json()
 
     if (!jd_url || typeof jd_url !== 'string') {
       return NextResponse.json({ error: 'jd_url is required' }, { status: 400 })
@@ -22,8 +22,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'engineer_ids must be a non-empty array' }, { status: 400 })
     }
 
+    // Use pre-extracted JD from the extract step if provided, avoiding redundant re-extraction
+    const preExtractedJD = extracted_jd && typeof extracted_jd.title === 'string' && typeof extracted_jd.raw_text === 'string'
+      ? { title: extracted_jd.title, sections: extracted_jd.sections || [], raw_text: extracted_jd.raw_text, source_platform: extracted_jd.source_platform }
+      : undefined
+
     try {
-      const matches = await computeAdHocMatches(jd_url, engineer_ids, userId, serviceClient)
+      const matches = await computeAdHocMatches(jd_url, engineer_ids, userId, serviceClient, preExtractedJD)
 
       if (notes && typeof notes === 'string') {
         const ids = matches.map((m) => m.id)
