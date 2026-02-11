@@ -55,6 +55,80 @@ export function normalizeLocation(location: string | null | undefined): string {
 }
 
 /**
+ * Canonicalize a location string: collapse known city variants into a standard form.
+ * E.g. "NYC", "Manhattan", "New York City" → "New York, NY"
+ * Unrecognized strings pass through trimmed.
+ */
+export function canonicalizeLocation(location: string | null | undefined): string | null {
+  if (!location) return null
+  const trimmed = location.trim()
+  if (!trimmed) return null
+
+  const lower = trimmed.toLowerCase()
+
+  // Handle compound "Remote + City" patterns like "Remote - New York" or "Remote (SF)"
+  const remoteCompound = lower.match(/^remote\s*[-–—/+(]+\s*(.+?)\s*[)]*$/)
+  if (remoteCompound) {
+    const cityPart = canonicalizeLocation(remoteCompound[1])
+    if (cityPart) return `${cityPart} (Remote)`
+    return 'Remote'
+  }
+  // "City (Remote)" or "City - Remote"
+  const cityRemote = lower.match(/^(.+?)\s*[-–—/+(]+\s*remote\s*[)]*$/)
+  if (cityRemote) {
+    const cityPart = canonicalizeLocation(cityRemote[1])
+    if (cityPart) return `${cityPart} (Remote)`
+    return 'Remote'
+  }
+
+  // Mapping table: patterns → canonical form
+  const CANONICAL_MAP: [RegExp, string][] = [
+    // New York
+    [/\b(new york city|new york,?\s*ny|nyc|manhattan|brooklyn|new york office)\b/, 'New York, NY'],
+    [/^new york$/, 'New York, NY'],
+    // San Francisco
+    [/\b(san francisco,?\s*ca|sf,?\s*ca)\b/, 'San Francisco, CA'],
+    [/^(san francisco|sf|bay area)$/, 'San Francisco, CA'],
+    // Austin
+    [/\b(austin,?\s*tx)\b/, 'Austin, TX'],
+    [/^austin$/, 'Austin, TX'],
+    // Boston
+    [/\b(boston,?\s*ma)\b/, 'Boston, MA'],
+    [/^boston$/, 'Boston, MA'],
+    // Seattle
+    [/\b(seattle,?\s*wa)\b/, 'Seattle, WA'],
+    [/^seattle$/, 'Seattle, WA'],
+    // Chicago
+    [/\b(chicago,?\s*il)\b/, 'Chicago, IL'],
+    [/^chicago$/, 'Chicago, IL'],
+    // Denver
+    [/\b(denver,?\s*co)\b/, 'Denver, CO'],
+    [/^denver$/, 'Denver, CO'],
+    // Miami
+    [/\b(miami,?\s*fl)\b/, 'Miami, FL'],
+    [/^miami$/, 'Miami, FL'],
+    // Washington DC
+    [/\b(washington,?\s*d\.?c\.?|washington dc)\b/, 'Washington, DC'],
+    [/^(dc|d\.c\.)$/, 'Washington, DC'],
+    // Los Angeles
+    [/\b(los angeles,?\s*ca|la,?\s*ca)\b/, 'Los Angeles, CA'],
+    [/^(los angeles|la)$/, 'Los Angeles, CA'],
+    // Palo Alto
+    [/\b(palo alto,?\s*ca)\b/, 'Palo Alto, CA'],
+    [/^palo alto$/, 'Palo Alto, CA'],
+    // Mountain View
+    [/\b(mountain view,?\s*ca)\b/, 'Mountain View, CA'],
+    [/^mountain view$/, 'Mountain View, CA'],
+  ]
+
+  for (const [pattern, canonical] of CANONICAL_MAP) {
+    if (pattern.test(lower)) return canonical
+  }
+
+  return trimmed
+}
+
+/**
  * Generate a fingerprint for deduplication.
  * Jobs with same fingerprint are considered duplicates.
  */
@@ -173,7 +247,7 @@ export async function ingestJob(
         job_title: job.job_title.trim(),
         job_url: job.job_url,
         job_board_source: job.job_board_source || null,
-        location: job.location?.trim() || null,
+        location: canonicalizeLocation(job.location),
         date_posted: job.date_posted || null,
         description: job.description || null,
         fingerprint,

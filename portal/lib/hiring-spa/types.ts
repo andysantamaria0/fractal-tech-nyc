@@ -265,6 +265,7 @@ export interface ExtractedJD {
   sections: { heading: string; content: string }[]
   raw_text: string
   source_platform?: string
+  location?: string
 }
 
 // Engineer profile types

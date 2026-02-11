@@ -109,10 +109,53 @@ function addStructuralWhitespace($: ReturnType<typeof load>, container: ReturnTy
 }
 
 /**
+ * Parse location from a JSON-LD JobPosting `jobLocation` field.
+ * Handles: single Place, array of Places, PostalAddress with addressLocality/addressRegion, strings.
+ */
+export function parseJsonLdLocation(jobLocation: unknown): string | undefined {
+  if (!jobLocation) return undefined
+
+  // Handle array of locations — take the first one
+  const loc = Array.isArray(jobLocation) ? jobLocation[0] : jobLocation
+
+  if (typeof loc === 'string') return loc.trim() || undefined
+
+  if (typeof loc === 'object' && loc !== null) {
+    const place = loc as Record<string, unknown>
+
+    // Check for nested address (PostalAddress)
+    const address = place.address
+    if (address && typeof address === 'object') {
+      const addr = address as Record<string, unknown>
+      const city = addr.addressLocality
+      const region = addr.addressRegion
+      if (typeof city === 'string' && typeof region === 'string') {
+        return `${city.trim()}, ${region.trim()}`
+      }
+      if (typeof city === 'string') return city.trim()
+      if (typeof region === 'string') return region.trim()
+    }
+
+    // Place with name
+    if (typeof place.name === 'string') return place.name.trim() || undefined
+
+    // PostalAddress directly (addressLocality/addressRegion at top level)
+    const city = place.addressLocality
+    const region = place.addressRegion
+    if (typeof city === 'string' && typeof region === 'string') {
+      return `${city.trim()}, ${region.trim()}`
+    }
+    if (typeof city === 'string') return city.trim()
+  }
+
+  return undefined
+}
+
+/**
  * Try to extract job description from JSON-LD structured data (schema.org/JobPosting).
  * Many ATS platforms (especially Ashby) embed the full JD here even when the body is client-rendered.
  */
-function extractFromJsonLd($: ReturnType<typeof load>): { title: string; text: string } | null {
+function extractFromJsonLd($: ReturnType<typeof load>): { title: string; text: string; location?: string } | null {
   for (const el of $('script[type="application/ld+json"]').toArray()) {
     try {
       const data = JSON.parse($(el).html() || '')
@@ -121,18 +164,19 @@ function extractFromJsonLd($: ReturnType<typeof load>): { title: string; text: s
         // description is HTML — parse it to plain text
         const desc$ = load(data.description)
         const text = desc$.root().text().replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n\n').trim()
-        if (text.length > 100) return { title, text }
+        const location = parseJsonLdLocation(data.jobLocation)
+        if (text.length > 100) return { title, text, location }
       }
     } catch { /* ignore malformed JSON-LD */ }
   }
   return null
 }
 
-function extractContent($: ReturnType<typeof load>, ats: ATSConfig | null): { title: string; text: string } {
+function extractContent($: ReturnType<typeof load>, ats: ATSConfig | null): { title: string; text: string; location?: string } {
   // Try JSON-LD first — it's the most reliable source for SPAs like Ashby
   const jsonLd = extractFromJsonLd($)
   if (jsonLd && jsonLd.text) {
-    return { title: jsonLd.title || $('title').first().text().trim(), text: jsonLd.text }
+    return { title: jsonLd.title || $('title').first().text().trim(), text: jsonLd.text, location: jsonLd.location }
   }
 
   // Remove non-content elements
@@ -198,7 +242,7 @@ export async function extractFromUrl(url: string): Promise<ExtractedJD> {
 
   const hostname = new URL(url).hostname
   const ats = detectATS(hostname)
-  const { title, text } = extractContent($, ats)
+  const { title, text, location } = extractContent($, ats)
 
   const sections = extractSections(text)
 
@@ -207,6 +251,7 @@ export async function extractFromUrl(url: string): Promise<ExtractedJD> {
     sections,
     raw_text: text.slice(0, 10000), // cap stored raw text
     source_platform: ats?.platform || 'generic',
+    location,
   }
 }
 

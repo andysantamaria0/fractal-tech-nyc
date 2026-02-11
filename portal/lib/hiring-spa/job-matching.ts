@@ -17,11 +17,11 @@ const DIMENSION_KEYS: (keyof DimensionWeights)[] = [
   'mission', 'technical', 'culture', 'environment', 'dna',
 ]
 
-const MIN_DIMENSION_SCORE = 40
+const MIN_DIMENSION_SCORE = 30
 const TOP_N = 10
 const MAX_JOBS_PER_COMPANY = 2
 const SCORING_CONCURRENCY = 5 // keep under Anthropic 50 RPM rate limit
-const PREFILTER_TOP_N = 20 // how many jobs pass to detailed scoring
+const PREFILTER_TOP_N = 30 // how many jobs pass to detailed scoring
 
 // Recency boost: jobs posted recently get a score bump
 const RECENCY_BOOST_MAX = 5 // max points added for brand new jobs
@@ -185,7 +185,7 @@ Guidelines:
 // Map shorthand location names to patterns for matching
 const LOCATION_PATTERNS: Record<string, string[]> = {
   'nyc': ['new york', 'nyc', 'brooklyn', 'manhattan'],
-  'sf': ['san francisco', 'sf', 'bay area'],
+  'sf': ['san francisco', 'sf', 'bay area', 'palo alto', 'mountain view'],
   'remote': ['remote'],
   'la': ['los angeles', 'la'],
   'austin': ['austin'],
@@ -194,6 +194,7 @@ const LOCATION_PATTERNS: Record<string, string[]> = {
   'chicago': ['chicago'],
   'denver': ['denver'],
   'miami': ['miami'],
+  'dc': ['washington', 'dc', 'd.c.'],
 }
 
 /**
@@ -781,6 +782,9 @@ export async function computeMatchesForEngineer(
   // Filter to jobs that haven't been scored yet
   const newJobs = filteredJobs.filter(j => !existingJobIds.has(j.id))
 
+  // Pipeline visibility logging
+  console.log(`[job-matching] Pipeline for ${typedEngineer.name}: ${typedJobs.length} active → ${afterExclusions.length} after exclusions → ${afterLocations.length} after locations → ${afterDedup.length} after dedup → ${filteredJobs.length} after tech stack → ${newJobs.length} new (${existingJobIds.size} already scored)`)
+
   if (newJobs.length === 0) {
     // Return existing top matches
     const { data: topExisting } = await serviceClient
@@ -872,15 +876,18 @@ export async function computeMatchesForEngineer(
         // For sparse profiles, skip threshold on questionnaire-dependent dimensions
         // that lack source data. Always enforce on technical and mission.
         const completeness = getQuestionnaireCompleteness(typedEngineer)
-        const belowThreshold = DIMENSION_KEYS.some(key => {
+        const failedDimensions = DIMENSION_KEYS.filter(key => {
           if (result.scores[key] >= MIN_DIMENSION_SCORE) return false
-          // For sparse profiles, only enforce threshold on data-backed dimensions
           if (completeness.isSparse && QUESTIONNAIRE_DEPENDENT_DIMENSIONS.includes(key)) {
             return false
           }
           return true
         })
-        if (belowThreshold) return null
+        if (failedDimensions.length > 0) {
+          const scoreStr = DIMENSION_KEYS.map(k => `${k}:${result.scores[k]}`).join(', ')
+          console.log(`[job-matching] REJECTED ${job.company_name} – ${job.job_title} | ${scoreStr} | failed: ${failedDimensions.join(', ')}`)
+          return null
+        }
 
         const baseScore = computeWeightedScore(
           result.scores,
@@ -913,6 +920,8 @@ export async function computeMatchesForEngineer(
 
   // Filter out nulls (failed or below threshold)
   const scored = scoredResults.filter((r): r is NonNullable<ScoredJob> => r !== null)
+  const rejected = candidatesForDetailed.length - scored.length
+  console.log(`[job-matching] Scoring: ${candidatesForDetailed.length} scored → ${scored.length} passed threshold (${rejected} rejected)`)
 
   // Sort by overall score descending
   scored.sort((a, b) => b.overall_score - a.overall_score)
