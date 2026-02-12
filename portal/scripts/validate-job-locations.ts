@@ -148,10 +148,33 @@ async function main() {
           }
 
           const canonJsonLd = canonicalizeLocation(jsonLdLoc)
+
+          // Skip malformed JSON-LD (empty, just a comma, etc.)
+          if (!canonJsonLd || canonJsonLd.length < 3 || canonJsonLd === ',') {
+            noJsonLd++
+            return
+          }
+
           // Refresh: use the (possibly already canonicalized) DB value
           const currentLoc = DRY_RUN ? canonicalizeLocation(job.location) : job.location
 
+          // Skip if DB already has a good canonical form — only update when
+          // JSON-LD provides genuinely new information:
+          //   - DB is vague/generic (e.g. "HQ", "United States", "Europe", country name)
+          //   - DB is null/empty
+          //   - JSON-LD canonicalizes to a different city entirely
           if (canonJsonLd && canonJsonLd !== currentLoc) {
+            // Check if this is just a format variant of the same city
+            // e.g. "San Francisco, CA" vs "San Francisco, California"
+            // Compare by extracting the city name (text before first comma)
+            const dbCity = (currentLoc || '').split(',')[0].trim().toLowerCase()
+            const jsonLdCity = canonJsonLd.split(',')[0].trim().toLowerCase()
+
+            if (dbCity && dbCity === jsonLdCity) {
+              // Same city, just different format — keep the DB canonical form
+              return
+            }
+
             jsonLdChanges++
             console.log(`  [JSON-LD] ${job.company_name} - ${job.job_title}`)
             console.log(`            DB: "${currentLoc}" → JSON-LD: "${canonJsonLd}"`)
