@@ -69,6 +69,7 @@ export async function GET() {
         stage: getStage(e),
         stageIndex: stageOrder.indexOf(getStage(e)),
         questionnaireCompletedAt: e.questionnaire_completed_at,
+        crawlCompletedAt: e.crawl_completed_at,
         createdAt: e.created_at,
       }))
       .sort((a, b) => b.stageIndex - a.stageIndex)
@@ -140,7 +141,7 @@ export async function GET() {
     let dismissedScoreSum = 0
     let dismissedScoreCount = 0
     const dismissalMap: Record<string, number> = {}
-    const engMatchMap: Record<string, { name: string; email: string; engineerId: string; total: number; applied: number; notAFit: number; pending: number; scoreSum: number }> = {}
+    const engMatchMap: Record<string, { name: string; email: string; engineerId: string; total: number; applied: number; notAFit: number; pending: number; scoreSum: number; lastAppliedAt: string | null; matchesComputedAt: string | null }> = {}
 
     for (const m of matchList) {
       const eng = Array.isArray(m.engineer) ? m.engineer[0] : m.engineer
@@ -163,14 +164,17 @@ export async function GET() {
       }
 
       if (!engMatchMap[m.engineer_id]) {
-        engMatchMap[m.engineer_id] = { name: engName, email: engEmail, engineerId: m.engineer_id, total: 0, applied: 0, notAFit: 0, pending: 0, scoreSum: 0 }
+        engMatchMap[m.engineer_id] = { name: engName, email: engEmail, engineerId: m.engineer_id, total: 0, applied: 0, notAFit: 0, pending: 0, scoreSum: 0, lastAppliedAt: null, matchesComputedAt: null }
       }
       const em = engMatchMap[m.engineer_id]
       em.total++
       em.scoreSum += m.overall_score
-      if (m.feedback === 'applied') em.applied++
-      else if (m.feedback === 'not_a_fit') em.notAFit++
+      if (m.feedback === 'applied') {
+        em.applied++
+        if (m.applied_at && (!em.lastAppliedAt || m.applied_at > em.lastAppliedAt)) em.lastAppliedAt = m.applied_at
+      } else if (m.feedback === 'not_a_fit') em.notAFit++
       else em.pending++
+      if (!em.matchesComputedAt || m.created_at > em.matchesComputedAt) em.matchesComputedAt = m.created_at
     }
 
     const dismissalReasons = Object.entries(dismissalMap)
@@ -187,6 +191,8 @@ export async function GET() {
         notAFit: em.notAFit,
         pending: em.pending,
         avgScore: Math.round(em.scoreSum / em.total),
+        lastAppliedAt: em.lastAppliedAt,
+        matchesComputedAt: em.matchesComputedAt,
       }))
       .sort((a, b) => b.total - a.total)
 
@@ -204,6 +210,7 @@ export async function GET() {
         feedback: m.feedback || null,
         feedbackCategory: m.feedback_category || null,
         appliedAt: m.applied_at || null,
+        feedbackAt: m.feedback_at || null,
         createdAt: m.created_at,
       }
     })
