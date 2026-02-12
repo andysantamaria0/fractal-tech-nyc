@@ -263,8 +263,11 @@ export default function AdminHiringSpaPage() {
       isStale,
     }
   }).sort((a, b) => {
-    if (a.isStale !== b.isStale) return a.isStale ? -1 : 1
-    return b.stageIndex - a.stageIndex
+    // Higher stage (Applied > Got Matches > ...) first
+    if (a.stageIndex !== b.stageIndex) return b.stageIndex - a.stageIndex
+    // Within same stage, stale engineers last
+    if (a.isStale !== b.isStale) return a.isStale ? 1 : -1
+    return 0
   })
 
   return (
