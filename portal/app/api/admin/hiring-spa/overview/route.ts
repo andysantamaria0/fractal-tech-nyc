@@ -73,6 +73,15 @@ export async function GET() {
       }))
       .sort((a, b) => b.stageIndex - a.stageIndex)
 
+    // Cumulative funnel counts: how many engineers have reached *at least* each stage
+    const funnelCounts: Record<string, number> = {}
+    for (const e of engineerList) {
+      const idx = stageOrder.indexOf(getStage(e))
+      for (let i = 0; i <= idx; i++) {
+        funnelCounts[stageOrder[i]] = (funnelCounts[stageOrder[i]] || 0) + 1
+      }
+    }
+
     // --- Application aggregation ---
     const now = new Date()
     const startOfWeek = new Date(now)
@@ -201,6 +210,7 @@ export async function GET() {
 
     return NextResponse.json({
       engineers: engineerRows,
+      funnelCounts,
       applicationCount: appList.length,
       applications: {
         total: appList.length,

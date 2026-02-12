@@ -6,6 +6,7 @@ import { colors as c, fonts as f } from '@/lib/engineer-design-tokens'
 
 interface OverviewData {
   engineers: { id: string; name: string; email: string; status: string; stage: string; questionnaireCompletedAt: string | null; createdAt: string }[]
+  funnelCounts: Record<string, number>
   applicationCount: number
   applications: {
     total: number
@@ -164,13 +165,7 @@ export default function AdminHiringSpaPage() {
     )
   }
 
-  const { engineers, applications, matches } = data
-
-  // Count engineers per stage for summary
-  const stageCounts: Record<string, number> = {}
-  for (const eng of engineers) {
-    stageCounts[eng.stage] = (stageCounts[eng.stage] || 0) + 1
-  }
+  const { engineers, funnelCounts, applications, matches } = data
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto', padding: 48, WebkitFontSmoothing: 'antialiased' }}>
@@ -196,7 +191,7 @@ export default function AdminHiringSpaPage() {
       {/* Funnel Summary */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 40, flexWrap: 'wrap' }}>
         {STAGE_ORDER.map((stage) => {
-          const count = stageCounts[stage] || 0
+          const count = funnelCounts[stage] || 0
           const colors = stageBadgeColor(stage)
           return (
             <div key={stage} style={{ ...card, padding: '16px 20px', flex: '1 1 140px', minWidth: 140, textAlign: 'center' }}>
