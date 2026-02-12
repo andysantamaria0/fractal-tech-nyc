@@ -171,8 +171,17 @@ export async function scoreEngineerForJD(
 
   userPrompt += '## Job Description\n\n'
   userPrompt += `Title: ${extractedJD.title}\n`
-  if (extractedJD.raw_text) {
-    userPrompt += `\n${extractedJD.raw_text.slice(0, 6000)}\n`
+  if (extractedJD.location) {
+    userPrompt += `Location: ${extractedJD.location}\n`
+  }
+  if (extractedJD.sections && extractedJD.sections.length > 1) {
+    // Use structured sections for better signal
+    userPrompt += '\n'
+    for (const section of extractedJD.sections) {
+      userPrompt += `### ${section.heading}\n${section.content.slice(0, 1500)}\n\n`
+    }
+  } else if (extractedJD.raw_text) {
+    userPrompt += `\n${extractedJD.raw_text.slice(0, 8000)}\n`
   }
   userPrompt += '\nProduce the JSON match scores now.'
 

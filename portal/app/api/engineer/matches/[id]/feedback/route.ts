@@ -27,7 +27,7 @@ export async function POST(
     // Verify the match belongs to this engineer
     const { data: profile } = await serviceClient
       .from('engineers')
-      .select('id')
+      .select('id, email')
       .eq('auth_user_id', user.id)
       .maybeSingle()
 
@@ -41,8 +41,32 @@ export async function POST(
       .eq('id', matchId)
       .maybeSingle()
 
-    if (!match || match.engineer_id !== profile.id) {
+    if (!match) {
       return NextResponse.json({ error: 'Match not found' }, { status: 404 })
+    }
+
+    // Check ownership — if engineer_id doesn't match (possible after table
+    // migration), fall back to email comparison and auto-heal the data.
+    if (match.engineer_id !== profile.id) {
+      const { data: matchEngineer } = await serviceClient
+        .from('engineers')
+        .select('email')
+        .eq('id', match.engineer_id)
+        .maybeSingle()
+
+      if (!matchEngineer || matchEngineer.email !== profile.email) {
+        console.error('[engineer/matches/feedback] Ownership mismatch:', {
+          matchId, matchEngineerId: match.engineer_id, profileId: profile.id,
+        })
+        return NextResponse.json({ error: 'Match not found' }, { status: 404 })
+      }
+
+      // Auto-heal: fix the stale engineer_id
+      await serviceClient
+        .from('engineer_job_matches')
+        .update({ engineer_id: profile.id })
+        .eq('id', matchId)
+      console.log(`[engineer/matches/feedback] Auto-healed engineer_id on match ${matchId}: ${match.engineer_id} → ${profile.id}`)
     }
 
     const now = new Date().toISOString()

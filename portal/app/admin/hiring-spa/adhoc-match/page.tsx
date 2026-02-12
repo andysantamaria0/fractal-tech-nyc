@@ -106,7 +106,10 @@ function scoreColor(score: number): string {
 
 export default function AdHocMatchPage() {
   // Extract state
+  const [inputMode, setInputMode] = useState<'url' | 'paste'>('url')
   const [jdUrl, setJdUrl] = useState('')
+  const [pastedTitle, setPastedTitle] = useState('')
+  const [pastedText, setPastedText] = useState('')
   const [extracting, setExtracting] = useState(false)
   const [extractedJD, setExtractedJD] = useState<ExtractedJD | null>(null)
   const [extractError, setExtractError] = useState<string | null>(null)
@@ -184,6 +187,44 @@ export default function AdHocMatchPage() {
     }
   }
 
+  // Use pasted text directly (no server round-trip needed)
+  function handlePasteExtract() {
+    setExtractError(null)
+    setExtractedJD(null)
+    const trimmed = pastedText.trim()
+    if (!trimmed || trimmed.length < 50) {
+      setExtractError('Please paste at least 50 characters of JD text')
+      return
+    }
+    const title = pastedTitle.trim() || 'Untitled Role'
+    // Simple section detection (same logic as server-side extractSections)
+    const lines = trimmed.split('\n')
+    const sections: { heading: string; content: string }[] = []
+    let currentHeading = 'Overview'
+    let currentContent: string[] = []
+    for (const line of lines) {
+      const t = line.trim()
+      if (!t) continue
+      // Detect headings: short lines (<60 chars) that look like section titles
+      if (t.length < 60 && /^[A-Z]/.test(t) && !t.endsWith('.') && currentContent.length > 0) {
+        sections.push({ heading: currentHeading, content: currentContent.join('\n').trim() })
+        currentHeading = t
+        currentContent = []
+      } else {
+        currentContent.push(t)
+      }
+    }
+    if (currentContent.length > 0) {
+      sections.push({ heading: currentHeading, content: currentContent.join('\n').trim() })
+    }
+    setExtractedJD({
+      title,
+      sections,
+      raw_text: trimmed.slice(0, 10000),
+      source_platform: 'pasted',
+    })
+  }
+
   // Score
   async function handleScore() {
     setScoring(true)
@@ -194,7 +235,7 @@ export default function AdHocMatchPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          jd_url: jdUrl,
+          jd_url: jdUrl || `pasted://${(extractedJD?.title || 'untitled').replace(/\s+/g, '-').toLowerCase()}`,
           engineer_ids: Array.from(selectedIds),
           notes: notes || undefined,
           extracted_jd: extractedJD || undefined,
@@ -241,7 +282,7 @@ export default function AdHocMatchPage() {
     return acc
   }, {})
 
-  const canScore = extractedJD && selectedIds.size > 0 && !scoring
+  const canScore = extractedJD && selectedIds.size > 0 && !scoring && (jdUrl || inputMode === 'paste')
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: 48, WebkitFontSmoothing: 'antialiased' }}>
@@ -259,25 +300,69 @@ export default function AdHocMatchPage() {
         Paste a JD URL, pick engineers, and see full 5-dimension scores
       </p>
 
-      {/* ── 1. URL Input ──────────────────────────────────── */}
+      {/* ── 1. JD Input ──────────────────────────────────── */}
       <div style={{ ...card, padding: 24, marginBottom: 24 }}>
-        <div style={cardTitle}>Job Description URL</div>
-        <div style={{ padding: '16px 24px', display: 'flex', gap: 12, alignItems: 'center' }}>
-          <input
-            type="url"
-            placeholder="https://boards.greenhouse.io/..."
-            value={jdUrl}
-            onChange={(e) => setJdUrl(e.target.value)}
-            style={{ ...inputStyle, flex: 1 }}
-          />
-          <button
-            onClick={handleExtract}
-            disabled={!jdUrl || extracting}
-            style={!jdUrl || extracting ? btnDisabled : btnPrimary}
-          >
-            {extracting ? 'Extracting...' : 'Extract'}
-          </button>
+        <div style={{ ...cardTitle, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>Job Description</span>
+          <span style={{ display: 'flex', gap: 12 }}>
+            <button
+              onClick={() => { setInputMode('url'); setExtractedJD(null); setExtractError(null) }}
+              style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.06em', color: inputMode === 'url' ? c.match : c.mist, background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase', textDecoration: inputMode === 'url' ? 'underline' : 'none', textUnderlineOffset: 2 }}
+            >
+              From URL
+            </button>
+            <button
+              onClick={() => { setInputMode('paste'); setExtractedJD(null); setExtractError(null) }}
+              style={{ fontFamily: f.mono, fontSize: 9, letterSpacing: '0.06em', color: inputMode === 'paste' ? c.match : c.mist, background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase', textDecoration: inputMode === 'paste' ? 'underline' : 'none', textUnderlineOffset: 2 }}
+            >
+              Paste Text
+            </button>
+          </span>
         </div>
+
+        {inputMode === 'url' ? (
+          <div style={{ padding: '16px 24px', display: 'flex', gap: 12, alignItems: 'center' }}>
+            <input
+              type="url"
+              placeholder="https://boards.greenhouse.io/..."
+              value={jdUrl}
+              onChange={(e) => setJdUrl(e.target.value)}
+              style={{ ...inputStyle, flex: 1 }}
+            />
+            <button
+              onClick={handleExtract}
+              disabled={!jdUrl || extracting}
+              style={!jdUrl || extracting ? btnDisabled : btnPrimary}
+            >
+              {extracting ? 'Extracting...' : 'Extract'}
+            </button>
+          </div>
+        ) : (
+          <div style={{ padding: '16px 24px' }}>
+            <input
+              type="text"
+              placeholder="Job title (e.g. Senior Frontend Engineer)"
+              value={pastedTitle}
+              onChange={(e) => setPastedTitle(e.target.value)}
+              style={{ ...inputStyle, marginBottom: 12 }}
+            />
+            <textarea
+              placeholder="Paste the full job description text here..."
+              value={pastedText}
+              onChange={(e) => setPastedText(e.target.value)}
+              rows={8}
+              style={{ ...inputStyle, resize: 'vertical', marginBottom: 12 }}
+            />
+            <button
+              onClick={handlePasteExtract}
+              disabled={!pastedText.trim()}
+              style={!pastedText.trim() ? btnDisabled : btnPrimary}
+            >
+              Use This JD
+            </button>
+          </div>
+        )}
+
         {extractError && (
           <p style={{ fontFamily: f.mono, fontSize: 11, color: '#b44', padding: '0 24px 16px' }}>{extractError}</p>
         )}

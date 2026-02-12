@@ -12,10 +12,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'jd_url is required' }, { status: 400 })
     }
 
-    try {
-      new URL(jd_url)
-    } catch {
-      return NextResponse.json({ error: 'Invalid jd_url' }, { status: 400 })
+    // Allow pasted:// scheme for manually pasted JD text
+    if (!jd_url.startsWith('pasted://')) {
+      try {
+        new URL(jd_url)
+      } catch {
+        return NextResponse.json({ error: 'Invalid jd_url' }, { status: 400 })
+      }
     }
 
     if (!Array.isArray(engineer_ids) || engineer_ids.length === 0) {
