@@ -32,6 +32,11 @@ const RECENCY_BOOST_DAYS = 14 // boost tapers to 0 over this many days
 const TECHNICAL_SOFT_FLOOR = 50
 const TECHNICAL_FLOOR_CAP = 50 // max overall score when technical < TECHNICAL_SOFT_FLOOR
 
+// Staleness: matches shown for too long without feedback get a ranking penalty
+const STALENESS_GRACE_WEEKS = 2 // no penalty for first 2 weeks
+const STALENESS_PENALTY_PER_WEEK = 2 // -2 points per week after grace period
+const STALENESS_PENALTY_MAX = 10 // cap at -10 points
+
 /**
  * Calculate recency boost based on job posting date.
  * Returns 0-RECENCY_BOOST_MAX points, tapering linearly over RECENCY_BOOST_DAYS.
@@ -49,6 +54,21 @@ function getRecencyBoost(job: ScannedJob): number {
 
   // Linear taper
   return Math.round(RECENCY_BOOST_MAX * (1 - daysOld / RECENCY_BOOST_DAYS))
+}
+
+/**
+ * Calculate staleness penalty for matches shown without feedback.
+ * Returns 0-STALENESS_PENALTY_MAX points to subtract from effective score.
+ */
+function computeStalenessPenalty(createdAt: string): number {
+  const created = new Date(createdAt)
+  const now = new Date()
+  const weeksOld = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24 * 7)
+
+  if (weeksOld <= STALENESS_GRACE_WEEKS) return 0
+
+  const penaltyWeeks = weeksOld - STALENESS_GRACE_WEEKS
+  return Math.min(STALENESS_PENALTY_MAX, Math.round(penaltyWeeks * STALENESS_PENALTY_PER_WEEK))
 }
 
 /**
@@ -785,24 +805,7 @@ export async function computeMatchesForEngineer(
   // Pipeline visibility logging
   console.log(`[job-matching] Pipeline for ${typedEngineer.name}: ${typedJobs.length} active → ${afterExclusions.length} after exclusions → ${afterLocations.length} after locations → ${afterDedup.length} after dedup → ${filteredJobs.length} after tech stack → ${newJobs.length} new (${existingJobIds.size} already scored)`)
 
-  if (newJobs.length === 0) {
-    // Return existing top matches
-    const { data: topExisting } = await serviceClient
-      .from('engineer_job_matches')
-      .select('scanned_job_id, overall_score, display_rank')
-      .eq('engineer_id', engineerProfileId)
-      .is('feedback', null)
-      .order('display_rank', { ascending: true })
-      .limit(TOP_N)
-
-    return {
-      matches: (topExisting || []).map(m => ({
-        scanned_job_id: m.scanned_job_id,
-        overall_score: m.overall_score,
-        display_rank: m.display_rank,
-      })),
-    }
-  }
+  if (newJobs.length > 0) {
 
   // Fetch past "not a fit" feedback reasons for context
   const { data: notAFitMatches } = await serviceClient
@@ -923,38 +926,20 @@ export async function computeMatchesForEngineer(
   const rejected = candidatesForDetailed.length - scored.length
   console.log(`[job-matching] Scoring: ${candidatesForDetailed.length} scored → ${scored.length} passed threshold (${rejected} rejected)`)
 
-  // Sort by overall score descending
-  scored.sort((a, b) => b.overall_score - a.overall_score)
-
-  // Limit to MAX_JOBS_PER_COMPANY per company (by domain) to ensure variety
-  const companyCount = new Map<string, number>()
-  const diversifiedMatches = scored.filter(m => {
-    const domain = m.job.company_domain.toLowerCase()
-    const count = companyCount.get(domain) || 0
-    if (count >= MAX_JOBS_PER_COMPANY) return false
-    companyCount.set(domain, count + 1)
-    return true
-  })
-
-  // Take top N from diversified list
-  const topMatches = diversifiedMatches.slice(0, TOP_N)
-
-  // Generate a batch ID for this computation
+  // Persist ALL scored matches (not just top 10) so they enter the re-ranking pool
   const batchId = `eng_${engineerProfileId.slice(0, 8)}_${Date.now()}`
 
-  // Upsert new matches
-  const insertData = topMatches.map((m, i) => ({
-    engineer_id: engineerProfileId,
-    scanned_job_id: m.job.id,
-    overall_score: m.overall_score,
-    dimension_scores: m.scores,
-    reasoning: m.reasoning,
-    highlight_quote: m.highlight_quote,
-    display_rank: i + 1,
-    batch_id: batchId,
-  }))
+  if (scored.length > 0) {
+    const insertData = scored.map(m => ({
+      engineer_id: engineerProfileId,
+      scanned_job_id: m.job.id,
+      overall_score: m.overall_score,
+      dimension_scores: m.scores,
+      reasoning: m.reasoning,
+      highlight_quote: m.highlight_quote,
+      batch_id: batchId,
+    }))
 
-  if (insertData.length > 0) {
     const { error: insertError } = await serviceClient
       .from('engineer_job_matches')
       .upsert(insertData, {
@@ -964,11 +949,75 @@ export async function computeMatchesForEngineer(
     if (insertError) {
       throw new Error(`Failed to insert matches: ${insertError.message}`)
     }
+    console.log(`[job-matching] Stored ${scored.length} new matches for re-ranking pool`)
   }
 
+  } // end if (newJobs.length > 0)
+
+  // === COMBINED RE-RANKING ===
+  // Re-rank ALL unfeedback'd matches (old + new) with staleness penalty.
+  // New high-scoring jobs displace older ones; stale matches gradually give way.
+
+  const { data: allUnfeedbackd } = await serviceClient
+    .from('engineer_job_matches')
+    .select('id, scanned_job_id, overall_score, created_at, scanned_jobs(company_domain)')
+    .eq('engineer_id', engineerProfileId)
+    .is('feedback', null)
+
+  if (!allUnfeedbackd || allUnfeedbackd.length === 0) {
+    return { matches: [] }
+  }
+
+  // Compute effective score (original score minus staleness penalty for ranking)
+  const ranked = allUnfeedbackd
+    .map(m => {
+      const penalty = computeStalenessPenalty(m.created_at)
+      return {
+        id: m.id,
+        scanned_job_id: m.scanned_job_id,
+        overall_score: m.overall_score,
+        effective_score: m.overall_score - penalty,
+        company_domain: ((m.scanned_jobs as any)?.company_domain || '').toLowerCase(),
+        staleness_penalty: penalty,
+      }
+    })
+    .sort((a, b) => b.effective_score - a.effective_score)
+
+  // Diversity: max N jobs per company
+  const companyCount = new Map<string, number>()
+  const diversified = ranked.filter(m => {
+    if (!m.company_domain) return true
+    const count = companyCount.get(m.company_domain) || 0
+    if (count >= MAX_JOBS_PER_COMPANY) return false
+    companyCount.set(m.company_domain, count + 1)
+    return true
+  })
+
+  const top10 = diversified.slice(0, TOP_N)
+
+  // Clear all display_rank for this engineer's unfeedback'd matches
+  await serviceClient
+    .from('engineer_job_matches')
+    .update({ display_rank: null })
+    .eq('engineer_id', engineerProfileId)
+    .is('feedback', null)
+
+  // Set display_rank 1-N for the top matches
+  await Promise.all(
+    top10.map((m, i) =>
+      serviceClient
+        .from('engineer_job_matches')
+        .update({ display_rank: i + 1 })
+        .eq('id', m.id)
+    ),
+  )
+
+  const staleCount = top10.filter(m => m.staleness_penalty > 0).length
+  console.log(`[job-matching] Re-ranked ${allUnfeedbackd.length} unfeedback'd matches → top ${top10.length} (${staleCount} with staleness penalty)`)
+
   return {
-    matches: topMatches.map((m, i) => ({
-      scanned_job_id: m.job.id,
+    matches: top10.map((m, i) => ({
+      scanned_job_id: m.scanned_job_id,
       overall_score: m.overall_score,
       display_rank: i + 1,
     })),
