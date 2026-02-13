@@ -71,9 +71,9 @@ export async function POST(request: Request) {
       })
     }
 
-    if (jobs.length > 500) {
+    if (jobs.length > 1000) {
       return NextResponse.json(
-        { error: 'Maximum 500 jobs per request' },
+        { error: 'Maximum 1000 jobs per request' },
         { status: 400 },
       )
     }
@@ -171,7 +171,7 @@ export async function GET(request: Request) {
         jobs: '[{ company_name, company_domain, job_title, job_url, job_board_source?, location?, date_posted?, description? }]',
         deactivate_stale: 'boolean (optional)',
       },
-      max_jobs_per_request: 500,
+      max_jobs_per_request: 1000,
     },
   })
 }
