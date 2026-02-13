@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-02-13
+
+### Bug Fixes
+
+- **Fix Discord notification spam** (`1841c29` in job-jr) — The Monday-only gate for scan Discord notifications was commented out for testing and never restored. Scan summaries were posting daily (7x/week) instead of Mondays only. Uncommented the weekday check. (`job-jr/src/main.py`)
+
+- **Bump portal ingestion batch limit** (`a6ab809`) — job-jr now finds 600+ jobs per scan, exceeding the old 500-job limit on `/api/jobs/ingest`. Portal push was silently failing with a 400 error. Bumped to 1000. (`portal/app/api/jobs/ingest/route.ts`)
+
+### Matching Quality
+
+- **Combined re-ranking with staleness penalty** (`ce9af89`) — Previously, each weekly batch scored new jobs independently and assigned display_rank 1-10 in isolation. Old matches kept stale ranks, causing non-deterministic ordering in the engineer's match list. Now after scoring new jobs, ALL unfeedback'd matches (old + new) are combined, sorted by effective score, and assigned clean display_rank 1-10. Also stores all scored matches (not just top 10) so the re-ranking pool deepens over time. (`lib/hiring-spa/job-matching.ts`)
+
+- **Staleness penalty for stale matches** (`ce9af89`) — Matches shown for 2+ weeks without engineer feedback now receive a gentle ranking penalty (-2 pts/week, capped at -10). Fresh high-quality jobs gradually displace ignored ones without aggressive rotation. (`lib/hiring-spa/job-matching.ts`)
+
+### Monday Pipeline Timing (verified)
+
+- **8:00 AM UTC** — job-jr HubSpot scan starts (finishes ~9:00 AM, pushes to portal + Discord)
+- **12:00 PM UTC** — job-jr BuiltIn scrape (Monday only, pushes to portal)
+- **5:00 PM UTC** — Portal match recompute cron (scores new jobs for all engineers, sends email notifications)
+
 ## 2026-02-10
 
 ### Bug Fixes
