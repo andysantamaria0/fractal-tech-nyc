@@ -35,6 +35,7 @@ export async function PATCH(
       'name', 'email', 'github_url', 'linkedin_url', 'portfolio_url', 'resume_url',
       'work_preferences', 'career_growth', 'strengths',
       'growth_areas', 'deal_breakers', 'status',
+      'engineer_dna', 'matching_preferences', 'preferred_locations', 'priority_ratings',
     ]
 
     const updates: Record<string, unknown> = {}

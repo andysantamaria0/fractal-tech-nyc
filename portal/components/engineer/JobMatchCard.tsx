@@ -156,14 +156,13 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
           )}
         </div>
         <motion.div
-          animate={{ scale: expanded ? 1.05 : 1 }}
+          animate={{ rotate: expanded ? 180 : 0 }}
           transition={{ duration: duration.hover }}
           style={{
-            fontFamily: f.mono, fontSize: 22, fontWeight: 500, color: c.match,
-            minWidth: 60, textAlign: 'right',
+            color: c.mist, fontSize: 18, minWidth: 24, textAlign: 'center',
           }}
         >
-          {match.overall_score ?? 0}%
+          &#x25BE;
         </motion.div>
       </motion.button>
 
@@ -193,12 +192,9 @@ export default function JobMatchCard({ match, onFeedback, onAddPreference }: Pro
                   const matchReasoning = (match.reasoning as MatchReasoning | null)?.[key]
                   return (
                     <div key={key} style={{ marginBottom: 16 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                      <div style={{ marginBottom: 4 }}>
                         <span style={{ fontFamily: f.mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.charcoal }}>
                           {DIMENSION_LABELS[key]}
-                        </span>
-                        <span style={{ fontFamily: f.mono, fontSize: 11, color: c.match }}>
-                          {score}
                         </span>
                       </div>
                       <div style={{
