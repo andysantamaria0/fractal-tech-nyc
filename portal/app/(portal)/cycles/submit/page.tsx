@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { trackEvent } from '@/lib/posthog'
 import { useSearchParams } from 'next/navigation'
@@ -9,6 +9,12 @@ import Link from 'next/link'
 interface Engineer {
   id: string
   name: string
+}
+
+interface UploadedFile {
+  name: string
+  url: string
+  size: number
 }
 
 const TIMELINE_OPTIONS = [
@@ -25,22 +31,38 @@ const HIRING_OPTIONS = [
   { value: 'no', label: 'No' },
 ]
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_FILES = 5
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export default function SubmitFeaturePage() {
   const searchParams = useSearchParams()
   const preselectedEngineer = searchParams.get('engineer')
+  const emailFromUrl = searchParams.get('email')
 
   const [engineers, setEngineers] = useState<Engineer[]>([])
+  const [email, setEmail] = useState(emailFromUrl || '')
+  const [companyName, setCompanyName] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [timeline, setTimeline] = useState('')
   const [techStack, setTechStack] = useState('')
   const [preferredEngineerId, setPreferredEngineerId] = useState(preselectedEngineer || '')
   const [hiringSelections, setHiringSelections] = useState<string[]>([])
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+  const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -48,24 +70,38 @@ export default function SubmitFeaturePage() {
       engineer_id: preselectedEngineer || undefined,
     })
 
-    async function loadEngineers() {
-      const { data } = await supabase
+    async function loadData() {
+      // Load engineers
+      const { data: engData } = await supabase
         .from('engineers')
         .select('id, name')
         .eq('is_available_for_cycles', true)
         .order('name')
 
-      if (data) setEngineers(data)
+      if (engData) setEngineers(engData)
+
+      // Load user profile to pre-fill email and company name
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('email, company_name')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        if (profile) {
+          if (!emailFromUrl && profile.email) setEmail(profile.email)
+          if (profile.company_name) setCompanyName(profile.company_name)
+        }
+      }
     }
-    loadEngineers()
+    loadData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleHiringToggle(value: string) {
     if (value === 'no') {
-      // "No" deselects everything else
       setHiringSelections((prev) => prev.includes('no') ? [] : ['no'])
     } else {
-      // Any "Yes" option deselects "No"
       setHiringSelections((prev) => {
         const without = prev.filter((v) => v !== 'no')
         return without.includes(value)
@@ -75,9 +111,86 @@ export default function SubmitFeaturePage() {
     }
   }
 
-  // Derived values for submission
   const isHiring = hiringSelections.length > 0 && !hiringSelections.includes('no')
   const hiringTypes = hiringSelections.filter((v) => v !== 'no')
+
+  const uploadFiles = useCallback(async (files: FileList | File[]) => {
+    const fileArray = Array.from(files)
+
+    if (uploadedFiles.length + fileArray.length > MAX_FILES) {
+      setFieldErrors((prev) => ({ ...prev, files: `Maximum ${MAX_FILES} files allowed` }))
+      return
+    }
+
+    const oversized = fileArray.find((f) => f.size > MAX_FILE_SIZE)
+    if (oversized) {
+      setFieldErrors((prev) => ({ ...prev, files: `${oversized.name} exceeds 10MB limit` }))
+      return
+    }
+
+    setUploading(true)
+    setFieldErrors((prev) => ({ ...prev, files: '' }))
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const newFiles: UploadedFile[] = []
+
+      for (const file of fileArray) {
+        const timestamp = Date.now()
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+        const path = `${user.id}/${timestamp}_${safeName}`
+
+        const { error: uploadError } = await supabase.storage
+          .from('submission-attachments')
+          .upload(path, file)
+
+        if (uploadError) throw uploadError
+
+        const { data: urlData } = supabase.storage
+          .from('submission-attachments')
+          .getPublicUrl(path)
+
+        newFiles.push({
+          name: file.name,
+          url: urlData.publicUrl,
+          size: file.size,
+        })
+      }
+
+      setUploadedFiles((prev) => [...prev, ...newFiles])
+    } catch (err) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        files: err instanceof Error ? err.message : 'Upload failed',
+      }))
+    } finally {
+      setUploading(false)
+    }
+  }, [uploadedFiles.length, supabase])
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setDragOver(false)
+    if (e.dataTransfer.files.length > 0) {
+      uploadFiles(e.dataTransfer.files)
+    }
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault()
+    setDragOver(true)
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault()
+    setDragOver(false)
+  }
+
+  function removeFile(index: number) {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
+  }
 
   function validate(): boolean {
     const errors: Record<string, string> = {}
@@ -109,6 +222,8 @@ export default function SubmitFeaturePage() {
           preferred_engineer_id: preferredEngineerId || null,
           is_hiring: isHiring,
           hiring_types: hiringTypes,
+          company_name: companyName || null,
+          attachment_urls: uploadedFiles.map((f) => f.url),
         }),
       })
 
@@ -121,6 +236,7 @@ export default function SubmitFeaturePage() {
         engineer_id: preferredEngineerId || undefined,
         timeline,
         hiring_status: isHiring,
+        attachment_count: uploadedFiles.length,
       })
       setSubmitted(true)
     } catch (err) {
@@ -156,6 +272,7 @@ export default function SubmitFeaturePage() {
                   setTechStack('')
                   setPreferredEngineerId('')
                   setHiringSelections([])
+                  setUploadedFiles([])
                 }}
               >
                 Submit Another
@@ -179,6 +296,33 @@ export default function SubmitFeaturePage() {
           {error && <div className="alert alert-error">{error}</div>}
 
           <form onSubmit={handleSubmit}>
+            {/* Email (pre-populated) */}
+            <div className="form-group">
+              <label htmlFor="email">Your Email</label>
+              <input
+                id="email"
+                type="email"
+                className="form-input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ opacity: 0.7 }}
+                readOnly
+              />
+            </div>
+
+            {/* Company Name */}
+            <div className="form-group">
+              <label htmlFor="companyName">Company Name</label>
+              <input
+                id="companyName"
+                type="text"
+                className="form-input"
+                placeholder="e.g. Acme Inc."
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
+            </div>
+
             <div className={`form-group ${fieldErrors.title ? 'error' : ''}`}>
               <label htmlFor="title">Feature Title *</label>
               <input
@@ -273,10 +417,93 @@ export default function SubmitFeaturePage() {
               {fieldErrors.hiring && <div className="form-error">{fieldErrors.hiring}</div>}
             </div>
 
+            {/* File Upload Drop Zone */}
+            <div className={`form-group ${fieldErrors.files ? 'error' : ''}`}>
+              <label>Attachments</label>
+              <p style={{ color: 'var(--color-slate)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-3)' }}>
+                Drop files here or click to upload (specs, mockups, docs — max {MAX_FILES} files, 10MB each)
+              </p>
+              <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  border: `2px dashed ${dragOver ? 'var(--color-charcoal)' : 'var(--color-border, #ccc)'}`,
+                  borderRadius: 8,
+                  padding: 'var(--space-6)',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  backgroundColor: dragOver ? 'rgba(0,0,0,0.03)' : 'transparent',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      uploadFiles(e.target.files)
+                      e.target.value = ''
+                    }
+                  }}
+                />
+                {uploading ? (
+                  <span style={{ color: 'var(--color-slate)' }}>Uploading...</span>
+                ) : (
+                  <span style={{ color: 'var(--color-slate)' }}>
+                    Drop files here or click to browse
+                  </span>
+                )}
+              </div>
+
+              {/* Uploaded files list */}
+              {uploadedFiles.length > 0 && (
+                <div style={{ marginTop: 'var(--space-3)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                  {uploadedFiles.map((file, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: 'var(--space-2) var(--space-3)',
+                        backgroundColor: 'var(--color-surface, #f9f9f9)',
+                        borderRadius: 4,
+                        fontSize: 'var(--text-sm)',
+                      }}
+                    >
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 'var(--space-3)' }}>
+                        {file.name} <span style={{ color: 'var(--color-slate)' }}>({formatFileSize(file.size)})</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); removeFile(i) }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: 'var(--color-slate)',
+                          fontSize: 'var(--text-base)',
+                          padding: '0 4px',
+                          flexShrink: 0,
+                        }}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {fieldErrors.files && <div className="form-error">{fieldErrors.files}</div>}
+            </div>
+
             <button
               type="submit"
               className="btn-primary btn-full"
-              disabled={loading}
+              disabled={loading || uploading}
             >
               {loading ? 'Submitting...' : 'Submit Feature Request'}
             </button>

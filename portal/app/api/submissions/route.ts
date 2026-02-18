@@ -23,6 +23,8 @@ export async function POST(request: Request) {
       preferred_engineer_id,
       is_hiring,
       hiring_types,
+      company_name,
+      attachment_urls,
     } = body
 
     if (!title || !description || !timeline) {
@@ -43,6 +45,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Tech stack must be 500 characters or less' }, { status: 400 })
     }
 
+    // Validate attachment_urls if provided
+    if (attachment_urls && (!Array.isArray(attachment_urls) || attachment_urls.length > 5)) {
+      return NextResponse.json({ error: 'Maximum 5 attachments allowed' }, { status: 400 })
+    }
+
     // Insert feature submission
     const serviceClient = await createServiceClient()
     const { data: submission, error: insertError } = await serviceClient
@@ -57,6 +64,8 @@ export async function POST(request: Request) {
         is_hiring: is_hiring || false,
         hiring_types: hiring_types || [],
         hiring_status: is_hiring ? 'interested' : 'no',
+        company_name: company_name || null,
+        attachment_urls: attachment_urls || [],
         status: 'submitted',
       })
       .select()
@@ -81,11 +90,13 @@ export async function POST(request: Request) {
       if (profile) {
         const noteContent = [
           `<strong>Feature Submission: ${escapeHtml(title)}</strong>`,
+          company_name ? `<br/><strong>Company:</strong> ${escapeHtml(company_name)}` : '',
           `<br/><br/><strong>Description:</strong> ${escapeHtml(description)}`,
           `<br/><strong>Timeline:</strong> ${escapeHtml(timeline)}`,
           tech_stack ? `<br/><strong>Tech Stack:</strong> ${escapeHtml(tech_stack)}` : '',
           `<br/><strong>Hiring Interest:</strong> ${is_hiring ? `Yes (${(hiring_types || []).map((t: string) => escapeHtml(t)).join(', ')})` : 'No'}`,
           `<br/><strong>Submitted by:</strong> ${escapeHtml(profile.name || '')}`,
+          attachment_urls && attachment_urls.length > 0 ? `<br/><strong>Attachments:</strong> ${attachment_urls.length} file(s)` : '',
         ].filter(Boolean).join('')
 
         const noteId = await createNote({
