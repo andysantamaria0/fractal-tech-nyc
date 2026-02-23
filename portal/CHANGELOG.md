@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-02-23
+
+### Bug Fixes
+
+- **Fix stale match notification emails** (`a9e3471`) — `computeMatchesForEngineer()` returned the top 10 re-ranked unfeedback'd matches, but all callers treated `matches.length > 0` as "new matches exist." This caused weekly "your matches are ready" emails even when no new jobs were scored — engineers saw the same stale matches re-announced every Monday. Added `newScoredCount` to the return type so callers distinguish truly new scores from re-ranked old ones. Notifications now only fire when there are genuinely new matches. (`lib/hiring-spa/job-matching.ts`, `app/api/cron/recompute-matches/route.ts`, `app/api/admin/hiring-spa/engineers/[id]/matches/route.ts`, `app/api/engineer/questionnaire/route.ts`, `lib/hiring-spa/engineer-crawl.ts`)
+
 ## 2026-02-13
 
 ### Bug Fixes
