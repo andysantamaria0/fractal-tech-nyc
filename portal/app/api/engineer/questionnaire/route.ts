@@ -157,7 +157,7 @@ export async function POST(request: Request) {
         }
 
         const result = await computeMatchesForEngineer(profile.id, serviceClient)
-        if (result.matches.length > 0) {
+        if (result.newScoredCount > 0) {
           notifyDiscordMatchesComputed({
             engineerName: profile.name || 'Unknown',
             matchCount: result.matches.length,

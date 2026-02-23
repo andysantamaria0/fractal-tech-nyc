@@ -131,14 +131,15 @@ export async function POST(
     computingSet.add(id)
     try {
       const result = await computeMatchesForEngineer(id, serviceClient)
-      if (result.matches.length > 0) {
+      if (result.newScoredCount > 0) {
         await notifyEngineerMatchesReady(id, result.matches.length, serviceClient)
       }
-      console.log(`[admin/matches] Computed ${result.matches.length} matches for ${engineer.name}`)
+      console.log(`[admin/matches] Computed ${result.newScoredCount} new scores, ${result.matches.length} displayed for ${engineer.name}`)
       return NextResponse.json({
         engineer: engineer.name,
         status: 'done',
         matchCount: result.matches.length,
+        newScoredCount: result.newScoredCount,
       })
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error'

@@ -104,7 +104,7 @@ export async function runEngineerCrawlPipeline(
 
       computeMatchesForEngineer(engineerProfileId, serviceClient)
         .then(result => {
-          if (result.matches.length > 0) {
+          if (result.newScoredCount > 0) {
             notifyDiscordMatchesComputed({
               engineerName: currentProfile.name || 'Unknown',
               matchCount: result.matches.length,

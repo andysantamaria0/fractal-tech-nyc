@@ -43,14 +43,15 @@ export async function GET(request: Request) {
     for (const eng of engineers) {
       try {
         const result = await computeMatchesForEngineer(eng.id, serviceClient)
-        const newMatches = result.matches.length
-        console.log(`[cron/recompute-matches] ${eng.name}: ${newMatches} matches`)
-        if (newMatches > 0) {
-          await notifyEngineerMatchesReady(eng.id, newMatches, serviceClient).catch(
+        const newScored = result.newScoredCount
+        const displayCount = result.matches.length
+        console.log(`[cron/recompute-matches] ${eng.name}: ${newScored} new scores, ${displayCount} displayed`)
+        if (newScored > 0) {
+          await notifyEngineerMatchesReady(eng.id, displayCount, serviceClient).catch(
             err => console.error(`[cron/recompute-matches] Email failed for ${eng.name}:`, err),
           )
         }
-        results.push({ id: eng.id, name: eng.name, newMatches })
+        results.push({ id: eng.id, name: eng.name, newMatches: newScored })
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Unknown error'
         console.error(`[cron/recompute-matches] ${eng.name} failed:`, msg)

@@ -737,7 +737,10 @@ function computeLearnedAdjustments(feedbackHistory: FeedbackMatch[]): DimensionW
 export async function computeMatchesForEngineer(
   engineerProfileId: string,
   serviceClient: SupabaseClient,
-): Promise<{ matches: Array<{ scanned_job_id: string; overall_score: number; display_rank: number }> }> {
+): Promise<{
+  matches: Array<{ scanned_job_id: string; overall_score: number; display_rank: number }>
+  newScoredCount: number
+}> {
   // Fetch engineer profile
   const { data: engineer, error: engineerError } = await serviceClient
     .from('engineers')
@@ -766,7 +769,7 @@ export async function computeMatchesForEngineer(
   }
 
   if (!jobs || jobs.length === 0) {
-    return { matches: [] }
+    return { matches: [], newScoredCount: 0 }
   }
 
   const typedJobs = jobs as ScannedJob[]
@@ -804,6 +807,8 @@ export async function computeMatchesForEngineer(
 
   // Pipeline visibility logging
   console.log(`[job-matching] Pipeline for ${typedEngineer.name}: ${typedJobs.length} active → ${afterExclusions.length} after exclusions → ${afterLocations.length} after locations → ${afterDedup.length} after dedup → ${filteredJobs.length} after tech stack → ${newJobs.length} new (${existingJobIds.size} already scored)`)
+
+  let newScoredCount = 0
 
   if (newJobs.length > 0) {
 
@@ -950,6 +955,7 @@ export async function computeMatchesForEngineer(
       throw new Error(`Failed to insert matches: ${insertError.message}`)
     }
     console.log(`[job-matching] Stored ${scored.length} new matches for re-ranking pool`)
+    newScoredCount = scored.length
   }
 
   } // end if (newJobs.length > 0)
@@ -965,7 +971,7 @@ export async function computeMatchesForEngineer(
     .is('feedback', null)
 
   if (!allUnfeedbackd || allUnfeedbackd.length === 0) {
-    return { matches: [] }
+    return { matches: [], newScoredCount }
   }
 
   // Compute effective score (original score minus staleness penalty for ranking)
@@ -1021,5 +1027,6 @@ export async function computeMatchesForEngineer(
       overall_score: m.overall_score,
       display_rank: i + 1,
     })),
+    newScoredCount,
   }
 }
